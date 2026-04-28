@@ -4,6 +4,7 @@ import { requireSession } from "@/server/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { formatJpDate } from "@/lib/format";
 import { ApproveButton } from "./ApproveButton";
+import { RejectButton } from "./RejectButton";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +12,6 @@ export default async function SpApprovalsPage() {
   const session = await requireSession();
 
   if (!["leader", "office", "ceo"].includes(session.role)) {
-    // 作業員ロールは承認権限がないので自分のホームへ
     redirect("/sp/home");
   }
 
@@ -24,6 +24,7 @@ export default async function SpApprovalsPage() {
     )
     .eq("requires_leader_approval", true)
     .is("approved_at", null)
+    .is("rejected_at", null)
     .order("submitted_at", { ascending: true })
     .limit(50);
 
@@ -72,6 +73,7 @@ export default async function SpApprovalsPage() {
                   >
                     詳細
                   </Link>
+                  <RejectButton entryId={r.id} className="flex-1 text-center" />
                   <div className="flex-1">
                     <ApproveButton entryId={r.id} />
                   </div>

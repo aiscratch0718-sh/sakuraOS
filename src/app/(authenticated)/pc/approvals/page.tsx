@@ -4,6 +4,7 @@ import { requireSession } from "@/server/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { formatJpDate } from "@/lib/format";
 import { ApproveButton } from "./ApproveButton";
+import { RejectButton } from "./RejectButton";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +24,7 @@ export default async function PcApprovalsPage() {
     )
     .eq("requires_leader_approval", true)
     .is("approved_at", null)
+    .is("rejected_at", null)
     .order("submitted_at", { ascending: true })
     .limit(100);
 
@@ -31,7 +33,7 @@ export default async function PcApprovalsPage() {
       <div className="mb-5">
         <h1 className="text-xl font-extrabold text-navy">承認待ち日報</h1>
         <p className="text-[12px] text-ink-2 mt-0.5">
-          8時間超の作業日報を一覧表示しています
+          8時間超の作業日報を一覧表示しています。差戻しの場合は理由を入力してください。
         </p>
       </div>
 
@@ -49,7 +51,7 @@ export default async function PcApprovalsPage() {
                   <th className="py-2 px-3 font-bold">作業日</th>
                   <th className="py-2 px-3 font-bold">作業員</th>
                   <th className="py-2 px-3 font-bold">現場</th>
-                  <th className="py-2 px-3 font-bold">操作</th>
+                  <th className="py-2 px-3 font-bold text-right">操作</th>
                 </tr>
               </thead>
               <tbody>
@@ -77,13 +79,16 @@ export default async function PcApprovalsPage() {
                       </td>
                       <td className="py-2 px-3 font-bold">{userName}</td>
                       <td className="py-2 px-3">{projectName}</td>
-                      <td className="py-2 px-3 text-right whitespace-nowrap">
+                      <td className="py-2 px-3 text-right whitespace-nowrap relative">
                         <Link
                           href={`/sp/report3/${r.id}`}
                           className="text-[11px] text-blue underline mr-3"
                         >
                           詳細
                         </Link>
+                        <span className="inline-block mr-3 align-middle">
+                          <RejectButton entryId={r.id} />
+                        </span>
                         <ApproveButton entryId={r.id} />
                       </td>
                     </tr>

@@ -11,13 +11,20 @@ export default async function SpHomePage() {
 
   const { data: recentReports } = await supabase
     .from("report3_entries")
-    .select("id, work_date, submitted_at, requires_leader_approval, project_id, projects(name)")
+    .select(
+      "id, work_date, submitted_at, requires_leader_approval, approved_at, rejected_at, rejection_reason, project_id, projects(name)",
+    )
     .eq("user_id", session.userId)
     .order("submitted_at", { ascending: false })
-    .limit(7);
+    .limit(10);
 
   const todaySubmitted = recentReports?.some(
     (r) => r.work_date === todayInTokyo(),
+  );
+
+  // 自分の日報のうち、未承認のうちに差戻されたものは「対応待ち」として目立たせる
+  const rejectedReports = (recentReports ?? []).filter(
+    (r) => !!r.rejected_at && !r.approved_at,
   );
 
   return (
@@ -34,9 +41,43 @@ export default async function SpHomePage() {
               {formatJpFullDate(new Date())}
             </div>
           </div>
-          <span className="pill-amber">作業員</span>
+          <span className="pill-amber">
+            {session.role === "leader" ? "現場リーダー" : "作業員"}
+          </span>
         </div>
       </div>
+
+      {/* 差戻しアラート */}
+      {rejectedReports.length > 0 && (
+        <div className="panel-pad mb-3 bg-red-bg/40 border-red/30">
+          <div className="flex items-center gap-1 text-[10px] text-red font-bold tracking-wider mb-1">
+            <span aria-hidden>⚠</span> 差戻し
+          </div>
+          <div className="text-[14px] font-bold text-red mb-1">
+            {rejectedReports.length}件の日報が差戻されています
+          </div>
+          <p className="text-[11px] text-ink-2 mb-2">
+            理由を確認のうえ、修正して再提出してください。
+          </p>
+          <ul className="space-y-1 text-[12px]">
+            {rejectedReports.slice(0, 3).map((r) => (
+              <li key={r.id}>
+                <Link
+                  href={`/sp/report3/${r.id}`}
+                  className="block bg-white border border-red/30 rounded-btn px-2 py-1.5 hover:bg-red-bg/30 transition-colors"
+                >
+                  <div className="font-bold text-navy text-[12px]">
+                    {(r.projects as { name?: string } | null)?.name ?? "—"}
+                  </div>
+                  <div className="text-[10px] text-ink-3">
+                    {formatJpDate(r.work_date)} の日報 →
+                  </div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* 今日の状態カード */}
       <div className="panel-pad mb-3 bg-blue-bg/50 border-blue-2/40">
@@ -77,25 +118,25 @@ export default async function SpHomePage() {
           <ul className="space-y-2">
             {recentReports.map((r) => {
               const projectName =
-                (r.projects as { name?: string } | null)?.name ?? "(現場名未設定)";
+                (r.projects as { name?: string } | null)?.name ??
+                "(現場名未設定)";
+              const status = pickStatus(r);
               return (
-                <li
-                  key={r.id}
-                  className="panel p-3 flex items-center justify-between"
-                >
-                  <div className="min-w-0">
-                    <div className="text-[13px] font-bold truncate">
-                      {projectName}
+                <li key={r.id}>
+                  <Link
+                    href={`/sp/report3/${r.id}`}
+                    className="panel p-3 flex items-center justify-between hover:bg-blue-bg/20 transition-colors"
+                  >
+                    <div className="min-w-0">
+                      <div className="text-[13px] font-bold truncate">
+                        {projectName}
+                      </div>
+                      <div className="text-[11px] text-ink-3 mt-0.5">
+                        {formatJpDate(r.work_date)} 提出
+                      </div>
                     </div>
-                    <div className="text-[11px] text-ink-3 mt-0.5">
-                      {formatJpDate(r.work_date)} 提出
-                    </div>
-                  </div>
-                  {r.requires_leader_approval ? (
-                    <span className="pill-amber">要承認</span>
-                  ) : (
-                    <span className="pill-teal">提出済</span>
-                  )}
+                    {status}
+                  </Link>
                 </li>
               );
             })}
@@ -108,6 +149,17 @@ export default async function SpHomePage() {
       </p>
     </div>
   );
+}
+
+function pickStatus(r: {
+  approved_at: string | null;
+  rejected_at: string | null;
+  requires_leader_approval: boolean;
+}) {
+  if (r.rejected_at) return <span className="pill-red">差戻し</span>;
+  if (r.approved_at) return <span className="pill-teal">承認済</span>;
+  if (r.requires_leader_approval) return <span className="pill-amber">要承認</span>;
+  return <span className="pill-teal">提出済</span>;
 }
 
 function todayInTokyo(): string {

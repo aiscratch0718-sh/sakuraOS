@@ -4,6 +4,7 @@ import { requireSession } from "@/server/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { formatJpFullDate } from "@/lib/format";
 import { ApproveButton } from "../../approvals/ApproveButton";
+import { RejectButton } from "../../approvals/RejectButton";
 
 export const dynamic = "force-dynamic";
 
@@ -20,9 +21,12 @@ export default async function Report3DetailPage({
     .from("report3_entries")
     .select(
       `
-      id, work_date, submitted_at, requires_leader_approval, approved_at, approved_by,
+      id, work_date, submitted_at, requires_leader_approval,
+      approved_at, approved_by,
+      rejected_at, rejected_by, rejection_reason,
       project_id, projects(name),
       submitter:profiles!report3_entries_user_id_fkey(display_name),
+      rejecter:profiles!report3_entries_rejected_by_fkey(display_name),
       report3_rows(l1, l2, l3, hours, memo)
       `,
     )
@@ -37,6 +41,8 @@ export default async function Report3DetailPage({
     (entry.projects as { name?: string } | null)?.name ?? "(現場名未設定)";
   const submitterName =
     (entry.submitter as { display_name?: string } | null)?.display_name ?? "—";
+  const rejecterName =
+    (entry.rejecter as { display_name?: string } | null)?.display_name ?? "—";
   const rows =
     (entry.report3_rows as Array<{
       l1: string;
@@ -48,7 +54,10 @@ export default async function Report3DetailPage({
   const totalHours = rows.reduce((s, r) => s + Number(r.hours), 0);
 
   const isApproved = !!entry.approved_at;
-  const needsApproval = entry.requires_leader_approval && !isApproved;
+  const isRejected = !!entry.rejected_at;
+  const needsApproval =
+    entry.requires_leader_approval && !isApproved && !isRejected;
+  const canManage = ["leader", "office", "ceo"].includes(session.role);
 
   return (
     <div className="px-4 py-4 max-w-md mx-auto">
@@ -59,11 +68,38 @@ export default async function Report3DetailPage({
         ← ホームへ戻る
       </Link>
 
+      {isRejected && (
+        <div className="panel-pad mb-3 bg-red-bg/50 border-red/30">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="pill-red">差戻し</span>
+            <span className="text-[11px] text-ink-3">
+              {new Date(entry.rejected_at!).toLocaleString("ja-JP", {
+                month: "numeric",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </span>
+          </div>
+          <div className="text-[13px] font-bold text-red mb-1">
+            この日報は {rejecterName} によって差戻されました
+          </div>
+          <div className="text-[12px] text-ink-2 whitespace-pre-wrap">
+            理由: {entry.rejection_reason ?? "(理由なし)"}
+          </div>
+          <p className="text-[11px] text-ink-3 mt-2">
+            ※ 内容を確認し、必要があれば新しい日報として再提出してください。
+          </p>
+        </div>
+      )}
+
       <div className="panel-pad mb-3">
         <div className="flex items-center justify-between mb-2">
           <h1 className="text-base font-extrabold text-navy">作業日報</h1>
           {isApproved ? (
             <span className="pill-teal">承認済</span>
+          ) : isRejected ? (
+            <span className="pill-red">差戻し</span>
           ) : needsApproval ? (
             <span className="pill-amber">要承認</span>
           ) : (
@@ -144,15 +180,17 @@ export default async function Report3DetailPage({
         </div>
       )}
 
-      {needsApproval &&
-        ["leader", "office", "ceo"].includes(session.role) && (
-          <div className="mt-4 panel-pad bg-amber-bg/40 border-amber/30">
-            <div className="text-[12px] text-amber font-bold mb-2">
-              ⚠ この日報は承認待ちです
-            </div>
-            <ApproveButton entryId={entry.id} />
+      {needsApproval && canManage && (
+        <div className="mt-4 panel-pad bg-amber-bg/40 border-amber/30">
+          <div className="text-[12px] text-amber font-bold mb-2">
+            ⚠ この日報は承認待ちです
           </div>
-        )}
+          <div className="space-y-2">
+            <ApproveButton entryId={entry.id} />
+            <RejectButton entryId={entry.id} className="w-full" />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

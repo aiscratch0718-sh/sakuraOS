@@ -19,6 +19,12 @@ const ITEMS: NavItem[] = [
     match: (p) => p === "/pc/home",
   },
   {
+    href: "/pc/reports",
+    label: "日報一覧",
+    icon: "📋",
+    match: (p) => p.startsWith("/pc/reports"),
+  },
+  {
     href: "/pc/approvals",
     label: "承認待ち",
     icon: "✓",
@@ -26,9 +32,15 @@ const ITEMS: NavItem[] = [
   },
   {
     href: "/pc/projects",
-    label: "現場一覧",
+    label: "現場マスタ",
     icon: "🏗️",
     match: (p) => p.startsWith("/pc/projects"),
+  },
+  {
+    href: "/pc/customers",
+    label: "客先マスタ",
+    icon: "🤝",
+    match: (p) => p.startsWith("/pc/customers"),
   },
   {
     href: "/pc/profile",
