@@ -1,0 +1,170 @@
+# Domain Entity Registry
+#
+# PURPOSE: Single source of truth for all named domain facts that appear
+# in more than one document. Skills check this before writing new content to
+# detect cross-doc inconsistencies at authoring time.
+#
+# RULES:
+#   - Only register facts that cross system boundaries. Internal-only facts
+#     (a calculation used in one PRD only) do NOT need to be registered.
+#   - Never delete entries — set status: deprecated instead.
+#   - When a value changes: update the value, set revised: to today's date,
+#     and add a comment with the old value and which PRD changed it.
+#   - source: is the authoritative PRD — the one that "owns" this fact.
+#     Other PRDs that reference it list themselves in referenced_by.
+#   - When a new PRD references an existing entry, append its path to
+#     referenced_by. Do not create a duplicate entry.
+#
+# WRITTEN BY: /design-system (Phase 5 — after PRD sections are approved)
+#             /consistency-check (when resolving conflicts)
+#             systems-analyst agent (primary owner)
+# READ BY:    /design-system (Phase 2 — before authoring begins)
+#             /consistency-check (primary input — grep-first, PRD-second)
+#             /review-all-prds (Phase 1 — baseline for Phase 2 checks)
+#             /architecture-review (data structure and interface validation)
+#
+# SEARCH PATTERNS (for skills using Grep):
+#   All entity names:        Grep pattern="^  - name:" path="design/registry/entities.yaml"
+#   Specific entity:         Grep pattern="  - name: organization" path="design/registry/entities.yaml"
+#   What auth.md owns:       Grep pattern="source: design/prd/auth.md"
+#   What billing.md uses:    Grep pattern="referenced_by.*billing"
+#   Deprecated entries:      Grep pattern="status: deprecated"
+#
+# FORMAT: YAML. Consistent indentation is critical for grep reliability.
+#   Sections: entities | events | calculations | constants
+#   Each entry: name, status, source, referenced_by[], attributes{}, added, revised
+
+version: 1
+last_updated: ""
+
+# ─── ENTITIES ────────────────────────────────────────────────────────────────
+# Named domain objects: organizations, users, accounts, contracts, projects,
+# resources. Register an entity here when it appears in more than one PRD —
+# e.g., an organization defined in auth.md that also owns billing line items
+# in billing.md.
+#
+# Required fields: name, status, source, referenced_by, added
+# Attribute fields: key fields that could be referenced from another PRD
+#   (id-shape, primary key, lifecycle states, ownership)
+
+entities: []
+
+# Example (remove when first real entry is added):
+#
+# entities:
+#   - name: organization
+#     status: active              # active | deprecated
+#     source: design/prd/auth.md
+#     referenced_by:
+#       - design/prd/auth.md
+#       - design/prd/billing.md
+#       - design/prd/projects.md
+#     primary_key: id (uuid)
+#     fields:
+#       - name: text required
+#       - plan: enum [free, team, enterprise]
+#       - billing_email: text
+#     lifecycle_states: [active, suspended, deleted]
+#     added: 2026-03-26
+#     revised: ""
+
+
+# ─── EVENTS ──────────────────────────────────────────────────────────────────
+# Named domain events emitted by the system. Register an event when more than
+# one consumer cares (analytics, billing, notifications, audit log).
+#
+# Required fields: name, status, source, referenced_by, added
+# Attribute fields: payload schema, when emitted, ordering guarantees
+
+events: []
+
+# Example:
+#
+# events:
+#   - name: project_created
+#     status: active
+#     source: design/prd/projects.md       # projects PRD owns the emit point
+#     referenced_by:
+#       - design/prd/projects.md
+#       - design/prd/billing.md            # increments seat count
+#       - design/prd/notifications.md      # triggers welcome email
+#       - design/prd/audit-log.md          # logged for SOC 2
+#     payload:
+#       - org_id: uuid
+#       - project_id: uuid
+#       - created_by: uuid (user_id)
+#       - created_at: timestamp
+#     ordering: at-least-once, no global ordering
+#     added: 2026-03-26
+#     revised: ""
+
+
+# ─── CALCULATIONS ────────────────────────────────────────────────────────────
+# Named computations with defined inputs and output ranges. Register a
+# calculation when its output feeds into another system's input or when another
+# PRD references it by name (usage limits, price computation, score formulas).
+#
+# Required fields: name, status, source, referenced_by, variables[],
+#   output_range[min, max], added
+# Optional: expression (the actual formula), notes
+
+calculations: []
+
+# Example:
+#
+# calculations:
+#   - name: monthly_invoice_total
+#     status: active
+#     source: design/prd/billing.md
+#     referenced_by:
+#       - design/prd/billing.md
+#       - design/prd/usage-limits.md       # input: usage events
+#       - design/prd/admin-dashboard.md    # displayed to org admin
+#     variables:
+#       - base_plan_fee
+#       - seat_count
+#       - per_seat_price
+#       - usage_overage
+#     output_range: [0, "unbounded"]
+#     expression: "base_plan_fee + (seat_count * per_seat_price) + usage_overage"
+#     notes: "Output is the line-total for the monthly invoice. Currency: JPY.
+#       Rounded to integer JPY at the final step. Usage_overage is computed by
+#       the usage-limit calculation in usage-limits.md."
+#     added: 2026-03-26
+#     revised: ""
+
+
+# ─── CONSTANTS ───────────────────────────────────────────────────────────────
+# Named numerical values referenced across multiple systems. Register a
+# constant when it is defined in one PRD but another PRD must agree with it
+# (e.g., max seats per plan defined in billing but enforced in invitations).
+#
+# Required fields: name, status, source, referenced_by, value, unit, added
+
+constants: []
+
+# Example:
+#
+# constants:
+#   - name: max_seats_per_team_plan
+#     status: active
+#     source: design/prd/billing.md
+#     referenced_by:
+#       - design/prd/billing.md
+#       - design/prd/invitations.md       # blocks invite if at limit
+#       - design/prd/admin-dashboard.md   # surfaces seats remaining
+#     value: 25
+#     unit: seats
+#     added: 2026-03-26
+#     revised: ""
+#
+#   - name: api_rate_limit_default_per_min
+#     status: active
+#     source: design/prd/api-gateway.md
+#     referenced_by:
+#       - design/prd/api-gateway.md
+#       - design/prd/api-quickstart-docs.md
+#     value: 60
+#     unit: requests-per-minute
+#     added: 2026-03-26
+#     revised: ""
