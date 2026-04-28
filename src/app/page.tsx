@@ -5,11 +5,13 @@ import type { UserRole } from "@/server/auth/session";
 
 export default async function RootPage() {
   const supabase = await createClient();
+  // Middleware already verified the session this request; use cheap getSession()
+  // to avoid a second Supabase Auth round-trip.
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
 
-  if (!user) {
+  if (!session?.user) {
     redirect("/sign-in");
   }
 
@@ -17,7 +19,7 @@ export default async function RootPage() {
   const { data: profile } = await supabase
     .from("profiles")
     .select("role")
-    .eq("id", user.id)
+    .eq("id", session.user.id)
     .single();
 
   if (!profile) {
