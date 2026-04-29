@@ -27,7 +27,7 @@ export default async function Report3DetailPage({
       project_id, projects(name),
       submitter:profiles!report3_entries_user_id_fkey(display_name),
       rejecter:profiles!report3_entries_rejected_by_fkey(display_name),
-      report3_rows(l1, l2, l3, hours, memo)
+      report3_rows(l1, l2, l3, hours, memo, photo_url, photo_lat, photo_lng, photo_taken_at)
       `,
     )
     .eq("id", id)
@@ -50,6 +50,10 @@ export default async function Report3DetailPage({
       l3: string;
       hours: number;
       memo: string | null;
+      photo_url: string | null;
+      photo_lat: number | null;
+      photo_lng: number | null;
+      photo_taken_at: string | null;
     }> | null) ?? [];
   const totalHours = rows.reduce((s, r) => s + Number(r.hours), 0);
 
@@ -151,6 +155,27 @@ export default async function Report3DetailPage({
             {r.memo && (
               <div className="text-[11px] text-ink-3 mt-1.5 whitespace-pre-wrap">
                 {r.memo}
+              </div>
+            )}
+            {r.photo_url && (
+              <div className="mt-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={r.photo_url}
+                  alt={`行 ${idx + 1} の現場写真`}
+                  className="w-full rounded-btn border border-line"
+                  loading="lazy"
+                />
+                {r.photo_lat !== null && r.photo_lng !== null && (
+                  <a
+                    href={`https://maps.google.com/?q=${r.photo_lat},${r.photo_lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 mt-1 text-[11px] text-blue underline font-bold"
+                  >
+                    📍 GPS: {r.photo_lat.toFixed(5)}, {r.photo_lng.toFixed(5)}
+                  </a>
+                )}
               </div>
             )}
           </li>

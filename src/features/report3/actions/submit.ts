@@ -6,20 +6,18 @@ import { requireSession } from "@/server/auth/session";
 import { Report3InputSchema, type Report3Result } from "../schemas";
 
 /**
- * REPORT3 submission Server Action.
+ * REPORT3 投稿 Server Action(原子的 fanout 版).
  *
- * Phase B (current): saves to report3_entries + report3_rows + idempotency_log
- * + audit_log inside Postgres via the Supabase client. Multi-row inserts use
- * the same client, so they share connection but NOT a single transaction —
- * see ADR-0001 for the full atomic-fanout design that adds:
- *   - user_career_totals
- *   - project_cost_aggregates
- *   - gamification_events
- * which require a Postgres function (RPC) to wrap all 5 streams in a single
- * transaction. Phase B uses sequential inserts and accepts the (small)
- * race window — ADR-0001 will be implemented before Phase C.
+ * Phase 3 拡張(ADR-0001): 単一の Postgres RPC `submit_report3_atomic` で
+ * 以下 5 系統の更新を 1 トランザクション内で実行する:
+ *   1. report3_entries
+ *   2. report3_rows(GPS / 写真URL を含む)
+ *   3. project_cost_aggregates(時給 × 時間で人件費を加算)
+ *   4. user_career_totals(累計時間 / 提出回数 / 最終提出日)
+ *   5. gamification_events(提出ボーナス +10 XP)
+ * + idempotency_log と audit_log への書き込みも RPC 内で完結。
  *
- * For now: idempotency check + sequential insert + audit log.
+ * RPC 失敗時は Postgres 側でロールバックされ、二重反映は起こらない。
  */
 export async function submitReport3(
   prev: Report3Result,
@@ -30,7 +28,6 @@ export async function submitReport3(
   const session = await requireSession();
   const supabase = await createClient();
 
-  // Parse the form
   let rowsParsed: unknown;
   try {
     rowsParsed = JSON.parse(String(formData.get("rows") ?? "[]"));
@@ -52,79 +49,34 @@ export async function submitReport3(
     };
   }
 
-  // Idempotency check
-  const { data: existing } = await supabase
-    .from("report3_idempotency_log")
-    .select("entry_id")
-    .eq("idempotency_key", parsed.data.idempotencyKey)
-    .maybeSingle();
-
-  if (existing) {
-    return { ok: true, reportId: existing.entry_id, deduped: true };
-  }
-
   const totalHours = parsed.data.rows.reduce((s, r) => s + r.hours, 0);
-  const requiresLeaderApproval = totalHours > 8;
+  const requiresApproval = totalHours > 8;
 
-  // Insert REPORT3 entry
-  const { data: entry, error: entryError } = await supabase
-    .from("report3_entries")
-    .insert({
-      tenant_id: session.tenantId,
-      user_id: session.userId,
-      project_id: parsed.data.projectId,
-      work_date: parsed.data.workDate,
-      requires_leader_approval: requiresLeaderApproval,
-    })
-    .select("id")
-    .single();
-
-  if (entryError || !entry) {
-    return {
-      ok: false,
-      formError: "保存に失敗しました。もう一度お試しください。",
-    };
-  }
-
-  // Insert rows
-  const { error: rowsError } = await supabase.from("report3_rows").insert(
-    parsed.data.rows.map((r) => ({
-      entry_id: entry.id,
-      l1: r.l1,
-      l2: r.l2,
-      l3: r.l3,
-      hours: r.hours,
-      memo: r.memo || null,
-    })),
+  const { data: entryId, error } = await supabase.rpc(
+    "submit_report3_atomic",
+    {
+      p_user_id: session.userId,
+      p_tenant_id: session.tenantId,
+      p_project_id: parsed.data.projectId,
+      p_work_date: parsed.data.workDate,
+      p_rows: parsed.data.rows,
+      p_idempotency_key: parsed.data.idempotencyKey,
+      p_total_hours: totalHours,
+      p_requires_approval: requiresApproval,
+    },
   );
 
-  if (rowsError) {
-    // Rollback the entry to avoid orphan rows.
-    await supabase.from("report3_entries").delete().eq("id", entry.id);
+  if (error || !entryId) {
     return {
       ok: false,
-      formError: "明細の保存に失敗しました。もう一度お試しください。",
+      formError:
+        error?.message ?? "保存に失敗しました。もう一度お試しください。",
     };
   }
 
-  // Idempotency record
-  await supabase.from("report3_idempotency_log").insert({
-    idempotency_key: parsed.data.idempotencyKey,
-    entry_id: entry.id,
-    user_id: session.userId,
-  });
-
-  // Audit log
-  await supabase.from("audit_log").insert({
-    tenant_id: session.tenantId,
-    actor_id: session.userId,
-    action: "report3.submitted",
-    target_type: "report3_entry",
-    target_id: entry.id,
-    diff: { rows: parsed.data.rows, totalHours },
-  });
-
   revalidatePath("/sp/home");
+  revalidatePath("/pc/home");
+  revalidatePath("/pc/reports");
 
-  return { ok: true, reportId: entry.id, deduped: false };
+  return { ok: true, reportId: entryId as string, deduped: false };
 }

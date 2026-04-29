@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState, useMemo, useState, useEffect } from "react";
+import { useActionState, useMemo, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { submitReport3 } from "@/features/report3/actions/submit";
+import { createClient } from "@/lib/supabase/client";
 import type { Report3Result } from "@/features/report3/schemas";
 
 type Project = { id: string; name: string };
@@ -20,6 +21,12 @@ type RowDraft = {
   l3: string;
   hours: number;
   memo: string;
+  photo_url: string;
+  photo_lat: number | "";
+  photo_lng: number | "";
+  photo_taken_at: string;
+  isUploading?: boolean;
+  uploadError?: string;
 };
 
 const initialResult: Report3Result = { ok: false };
@@ -27,9 +34,11 @@ const initialResult: Report3Result = { ok: false };
 export function Report3Form({
   projects,
   classifications,
+  tenantId,
 }: {
   projects: Project[];
   classifications: Classification[];
+  tenantId: string;
 }) {
   const router = useRouter();
   const [state, formAction, isPending] = useActionState(submitReport3, initialResult);
@@ -92,8 +101,10 @@ export function Report3Form({
     formData.set(
       "rows",
       JSON.stringify(
-        rows.map(({ id, ...rest }) => {
+        rows.map(({ id, isUploading, uploadError, ...rest }) => {
           void id;
+          void isUploading;
+          void uploadError;
           return rest;
         }),
       ),
@@ -108,6 +119,8 @@ export function Report3Form({
       </div>
     );
   }
+
+  const anyUploading = rows.some((r) => r.isUploading);
 
   return (
     <form action={handleSubmit} className="space-y-4">
@@ -254,6 +267,12 @@ export function Report3Form({
               />
             </div>
 
+            <PhotoGpsField
+              row={row}
+              tenantId={tenantId}
+              onChange={(patch) => updateRow(row.id, patch)}
+            />
+
             {rows.length > 1 && (
               <button
                 type="button"
@@ -291,10 +310,154 @@ export function Report3Form({
         )}
       </div>
 
-      <button type="submit" disabled={isPending} className="btn-primary w-full py-3 text-[15px]">
-        {isPending ? "保存中..." : "提出する"}
+      <button
+        type="submit"
+        disabled={isPending || anyUploading}
+        className="btn-primary w-full py-3 text-[15px]"
+      >
+        {isPending ? "保存中..." : anyUploading ? "写真アップロード中..." : "提出する"}
       </button>
     </form>
+  );
+}
+
+/**
+ * 写真 + GPS 添付。スマホ実機ならカメラ起動 → ファイル選択 → 自動で GPS 取得 →
+ * Supabase Storage(`report3-photos` バケット)へアップロード → URL を行に保存。
+ */
+function PhotoGpsField({
+  row,
+  tenantId,
+  onChange,
+}: {
+  row: RowDraft;
+  tenantId: string;
+  onChange: (patch: Partial<RowDraft>) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    onChange({ isUploading: true, uploadError: undefined });
+
+    try {
+      // GPS 取得(失敗してもアップロードは続行)
+      let lat: number | "" = "";
+      let lng: number | "" = "";
+      try {
+        const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+          if (!navigator.geolocation) {
+            reject(new Error("位置情報が利用できません"));
+            return;
+          }
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true,
+            timeout: 8000,
+          });
+        });
+        lat = pos.coords.latitude;
+        lng = pos.coords.longitude;
+      } catch {
+        // GPS 取れなくてもアップロードは続行
+      }
+
+      // アップロード(tenant_id でディレクトリを区切ることで Storage RLS が効く)
+      const supabase = createClient();
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const path = `${tenantId}/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage
+        .from("report3-photos")
+        .upload(path, file, {
+          cacheControl: "3600",
+          upsert: false,
+          contentType: file.type || "image/jpeg",
+        });
+
+      if (error) {
+        onChange({ isUploading: false, uploadError: error.message });
+        return;
+      }
+
+      const { data: signed } = await supabase.storage
+        .from("report3-photos")
+        .createSignedUrl(path, 60 * 60 * 24 * 365); // 1 年
+
+      onChange({
+        isUploading: false,
+        uploadError: undefined,
+        photo_url: signed?.signedUrl ?? "",
+        photo_lat: lat,
+        photo_lng: lng,
+        photo_taken_at: new Date().toISOString(),
+      });
+    } catch (err) {
+      onChange({
+        isUploading: false,
+        uploadError: err instanceof Error ? err.message : String(err),
+      });
+    }
+  }
+
+  return (
+    <div>
+      <label className="block text-[11px] font-bold text-ink-2 mb-1">
+        現場の写真 + GPS(任意)
+      </label>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        onChange={handleFile}
+        className="hidden"
+      />
+
+      {row.photo_url ? (
+        <div className="flex items-center gap-2 p-2 bg-teal-bg/40 border border-teal/30 rounded-btn">
+          <span className="text-teal text-[16px]" aria-hidden>📷</span>
+          <div className="flex-1 min-w-0">
+            <div className="text-[11px] font-bold text-teal">添付済み</div>
+            {row.photo_lat !== "" && row.photo_lng !== "" && (
+              <div className="text-[10px] text-ink-3 truncate">
+                GPS: {Number(row.photo_lat).toFixed(5)},{" "}
+                {Number(row.photo_lng).toFixed(5)}
+              </div>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() =>
+              onChange({
+                photo_url: "",
+                photo_lat: "",
+                photo_lng: "",
+                photo_taken_at: "",
+              })
+            }
+            className="text-[10px] text-red underline font-bold"
+          >
+            削除
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          disabled={row.isUploading}
+          className="w-full py-2 border-2 border-dashed border-line rounded-btn text-[11px] font-bold text-ink-2 hover:border-blue hover:text-blue transition-colors disabled:opacity-50"
+        >
+          {row.isUploading ? "アップロード中..." : "📷 写真を撮る / 選ぶ"}
+        </button>
+      )}
+
+      {row.uploadError && (
+        <p role="alert" className="mt-1 text-[11px] text-red font-bold">
+          {row.uploadError}
+        </p>
+      )}
+    </div>
   );
 }
 
@@ -306,6 +469,10 @@ function newRow(): RowDraft {
     l3: "",
     hours: 4,
     memo: "",
+    photo_url: "",
+    photo_lat: "",
+    photo_lng: "",
+    photo_taken_at: "",
   };
 }
 

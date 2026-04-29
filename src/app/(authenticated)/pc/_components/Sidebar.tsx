@@ -43,6 +43,24 @@ const ITEMS: NavItem[] = [
     match: (p) => p.startsWith("/pc/customers"),
   },
   {
+    href: "/pc/users",
+    label: "ユーザー管理",
+    icon: "👥",
+    match: (p) => p.startsWith("/pc/users"),
+  },
+  {
+    href: "/pc/estimates",
+    label: "見積",
+    icon: "📝",
+    match: (p) => p.startsWith("/pc/estimates"),
+  },
+  {
+    href: "/pc/invoices",
+    label: "請求書",
+    icon: "🧾",
+    match: (p) => p.startsWith("/pc/invoices"),
+  },
+  {
     href: "/pc/profile",
     label: "プロフィール",
     icon: "👤",

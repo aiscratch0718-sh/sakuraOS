@@ -6,7 +6,7 @@ import { Report3Form } from "./Report3Form";
 export const dynamic = "force-dynamic";
 
 export default async function Report3NewPage() {
-  await requireSession();
+  const session = await requireSession();
   const supabase = await createClient();
 
   const { data: projects } = await supabase
@@ -37,6 +37,7 @@ export default async function Report3NewPage() {
       <Report3Form
         projects={projects ?? []}
         classifications={classifications ?? []}
+        tenantId={session.tenantId}
       />
     </div>
   );

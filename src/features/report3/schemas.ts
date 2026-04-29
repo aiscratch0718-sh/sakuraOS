@@ -6,6 +6,21 @@ export const Report3RowSchema = z.object({
   l3: z.string().min(1),
   hours: z.number().min(0.5).max(24).step(0.5),
   memo: z.string().max(500).optional().or(z.literal("")),
+  // GPS / 写真(任意)
+  photo_url: z.string().url().optional().or(z.literal("")),
+  photo_lat: z
+    .number()
+    .min(-90)
+    .max(90)
+    .optional()
+    .or(z.literal("")),
+  photo_lng: z
+    .number()
+    .min(-180)
+    .max(180)
+    .optional()
+    .or(z.literal("")),
+  photo_taken_at: z.string().datetime().optional().or(z.literal("")),
 });
 export type Report3Row = z.infer<typeof Report3RowSchema>;
 
