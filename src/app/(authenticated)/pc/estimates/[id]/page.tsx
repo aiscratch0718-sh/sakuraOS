@@ -29,11 +29,12 @@ export default async function EditEstimatePage({
     { data: items },
     { data: customers },
     { data: projects },
+    { data: stamps },
   ] = await Promise.all([
     supabase
       .from("estimates")
       .select(
-        "id, customer_id, project_id, estimate_no, title, status, issue_date, expiry_date, tax_rate, note",
+        "id, customer_id, project_id, estimate_no, title, status, issue_date, expiry_date, tax_rate, note, stamps, print_company_stamp, print_staff_info, print_company_contact",
       )
       .eq("id", id)
       .maybeSingle(),
@@ -53,6 +54,13 @@ export default async function EditEstimatePage({
       .from("projects")
       .select("id, name")
       .order("name", { ascending: true }),
+    supabase
+      .from("approval_stamps")
+      .select(
+        "stamp_key, display_name, role_name, image_path, is_company_stamp",
+      )
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true }),
   ]);
 
   if (!estimate) {
@@ -93,13 +101,24 @@ export default async function EditEstimatePage({
             状態を「送付済」「受注」などに進めて管理してください。
           </p>
         </div>
-        <ConvertToInvoiceButton estimateId={id} />
+        <div className="flex gap-2">
+          <a
+            href={`/api/estimates/${id}/pdf`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-primary py-2 px-4 text-[12px]"
+          >
+            📄 PDF を開く
+          </a>
+          <ConvertToInvoiceButton estimateId={id} />
+        </div>
       </div>
 
       <EstimateForm
         initial={{ ...estimate, items: initialItems }}
         customers={customers ?? []}
         projects={projects ?? []}
+        stamps={stamps ?? []}
         action={action}
         submitLabel="更新する"
       />

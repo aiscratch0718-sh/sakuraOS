@@ -29,11 +29,12 @@ export default async function EditInvoicePage({
     { data: items },
     { data: customers },
     { data: projects },
+    { data: stamps },
   ] = await Promise.all([
     supabase
       .from("invoices")
       .select(
-        "id, customer_id, project_id, estimate_id, invoice_no, title, status, issue_date, due_date, tax_rate, note",
+        "id, customer_id, project_id, estimate_id, invoice_no, title, status, issue_date, due_date, tax_rate, note, stamps, print_company_stamp, print_staff_info, print_company_contact",
       )
       .eq("id", id)
       .maybeSingle(),
@@ -51,6 +52,13 @@ export default async function EditInvoicePage({
       .from("projects")
       .select("id, name")
       .order("name", { ascending: true }),
+    supabase
+      .from("approval_stamps")
+      .select(
+        "stamp_key, display_name, role_name, image_path, is_company_stamp",
+      )
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true }),
   ]);
 
   if (!invoice) {
@@ -91,13 +99,24 @@ export default async function EditInvoicePage({
             入金が確認できたら「入金確認」ボタンで「支払済」に変更してください。
           </p>
         </div>
-        <MarkPaidButton invoiceId={id} currentStatus={invoice.status} />
+        <div className="flex gap-2">
+          <a
+            href={`/api/invoices/${id}/pdf`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-primary py-2 px-4 text-[12px]"
+          >
+            📄 PDF を開く
+          </a>
+          <MarkPaidButton invoiceId={id} currentStatus={invoice.status} />
+        </div>
       </div>
 
       <InvoiceForm
         initial={{ ...invoice, items: initialItems }}
         customers={customers ?? []}
         projects={projects ?? []}
+        stamps={stamps ?? []}
         action={action}
         submitLabel="更新する"
       />

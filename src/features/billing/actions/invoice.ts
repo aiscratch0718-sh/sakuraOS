@@ -24,6 +24,12 @@ function parseFormData(formData: FormData) {
   } catch {
     itemsParsed = [];
   }
+  let stampsParsed: unknown;
+  try {
+    stampsParsed = JSON.parse(String(formData.get("stamps") ?? "{}"));
+  } catch {
+    stampsParsed = {};
+  }
   return InvoiceInputSchema.safeParse({
     customerId: formData.get("customerId") ?? "",
     projectId: formData.get("projectId") ?? "",
@@ -36,6 +42,10 @@ function parseFormData(formData: FormData) {
     taxRate: formData.get("taxRate") ?? "0.1",
     note: formData.get("note") ?? "",
     items: itemsParsed,
+    stamps: stampsParsed,
+    printCompanyStamp: formData.get("printCompanyStamp") === "on",
+    printStaffInfo: formData.get("printStaffInfo") === "on",
+    printCompanyContact: formData.get("printCompanyContact") === "on",
   });
 }
 
@@ -59,6 +69,24 @@ export async function createInvoice(
   );
 
   const supabase = await createClient();
+
+  let invoiceNo = parsed.data.invoiceNo || null;
+  if (!invoiceNo) {
+    const ym = new Date()
+      .toLocaleDateString("ja-JP", {
+        timeZone: "Asia/Tokyo",
+        year: "numeric",
+        month: "2-digit",
+      })
+      .replace(/[^\d]/g, "");
+    const { data: nextNo } = await supabase.rpc("next_doc_number", {
+      p_tenant_id: session.tenantId,
+      p_doc_type: "invoice",
+      p_year_month: ym,
+    });
+    if (nextNo) invoiceNo = nextNo as string;
+  }
+
   const { data: invoice, error } = await supabase
     .from("invoices")
     .insert({
@@ -66,7 +94,7 @@ export async function createInvoice(
       customer_id: parsed.data.customerId,
       project_id: parsed.data.projectId || null,
       estimate_id: parsed.data.estimateId || null,
-      invoice_no: parsed.data.invoiceNo || null,
+      invoice_no: invoiceNo,
       title: parsed.data.title,
       status: parsed.data.status,
       issue_date: parsed.data.issueDate,
@@ -76,6 +104,10 @@ export async function createInvoice(
       tax_cents: taxCents,
       total_cents: totalCents,
       note: parsed.data.note || null,
+      stamps: parsed.data.stamps,
+      print_company_stamp: parsed.data.printCompanyStamp,
+      print_staff_info: parsed.data.printStaffInfo,
+      print_company_contact: parsed.data.printCompanyContact,
       created_by: session.userId,
     })
     .select("id")
@@ -163,6 +195,10 @@ export async function updateInvoice(
       tax_cents: taxCents,
       total_cents: totalCents,
       note: parsed.data.note || null,
+      stamps: parsed.data.stamps,
+      print_company_stamp: parsed.data.printCompanyStamp,
+      print_staff_info: parsed.data.printStaffInfo,
+      print_company_contact: parsed.data.printCompanyContact,
     })
     .eq("id", invoiceId);
 

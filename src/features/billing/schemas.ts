@@ -17,6 +17,17 @@ export const EstimateStatusValues = [
   "expired",
 ] as const;
 
+// 印鑑選択(stamp_key → boolean のマップ。例: { company: true, president: false })
+export const StampsSchema = z.record(z.string(), z.boolean()).default({});
+export type StampsSelection = z.infer<typeof StampsSchema>;
+
+export const PrintOptionsSchema = z.object({
+  printCompanyStamp: z.coerce.boolean().default(true),
+  printStaffInfo: z.coerce.boolean().default(true),
+  printCompanyContact: z.coerce.boolean().default(true),
+});
+export type PrintOptions = z.infer<typeof PrintOptionsSchema>;
+
 export const EstimateInputSchema = z.object({
   customerId: z.string().uuid("客先を選択してください。"),
   projectId: z.string().uuid().optional().or(z.literal("")),
@@ -32,6 +43,10 @@ export const EstimateInputSchema = z.object({
   taxRate: z.coerce.number().min(0).max(1).default(0.1),
   note: z.string().trim().max(2000).optional().or(z.literal("")),
   items: z.array(ItemInputSchema).min(1, "明細を1行以上入力してください。").max(50),
+  stamps: StampsSchema,
+  printCompanyStamp: z.coerce.boolean().default(true),
+  printStaffInfo: z.coerce.boolean().default(true),
+  printCompanyContact: z.coerce.boolean().default(true),
 });
 export type EstimateInput = z.infer<typeof EstimateInputSchema>;
 
@@ -59,6 +74,10 @@ export const InvoiceInputSchema = z.object({
   taxRate: z.coerce.number().min(0).max(1).default(0.1),
   note: z.string().trim().max(2000).optional().or(z.literal("")),
   items: z.array(ItemInputSchema).min(1, "明細を1行以上入力してください。").max(50),
+  stamps: StampsSchema,
+  printCompanyStamp: z.coerce.boolean().default(true),
+  printStaffInfo: z.coerce.boolean().default(true),
+  printCompanyContact: z.coerce.boolean().default(true),
 });
 export type InvoiceInput = z.infer<typeof InvoiceInputSchema>;
 

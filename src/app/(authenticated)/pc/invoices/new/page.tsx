@@ -14,17 +14,25 @@ export default async function NewInvoicePage() {
   }
 
   const supabase = await createClient();
-  const [{ data: customers }, { data: projects }] = await Promise.all([
-    supabase
-      .from("customers")
-      .select("id, name")
-      .eq("is_active", true)
-      .order("name", { ascending: true }),
-    supabase
-      .from("projects")
-      .select("id, name")
-      .order("name", { ascending: true }),
-  ]);
+  const [{ data: customers }, { data: projects }, { data: stamps }] =
+    await Promise.all([
+      supabase
+        .from("customers")
+        .select("id, name")
+        .eq("is_active", true)
+        .order("name", { ascending: true }),
+      supabase
+        .from("projects")
+        .select("id, name")
+        .order("name", { ascending: true }),
+      supabase
+        .from("approval_stamps")
+        .select(
+          "stamp_key, display_name, role_name, image_path, is_company_stamp",
+        )
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true }),
+    ]);
 
   return (
     <div className="px-6 py-6 max-w-4xl mx-auto">
@@ -43,6 +51,7 @@ export default async function NewInvoicePage() {
       <InvoiceForm
         customers={customers ?? []}
         projects={projects ?? []}
+        stamps={stamps ?? []}
         action={createInvoice}
         submitLabel="作成する"
       />

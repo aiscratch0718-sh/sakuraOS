@@ -24,6 +24,12 @@ function parseFormData(formData: FormData) {
   } catch {
     itemsParsed = [];
   }
+  let stampsParsed: unknown;
+  try {
+    stampsParsed = JSON.parse(String(formData.get("stamps") ?? "{}"));
+  } catch {
+    stampsParsed = {};
+  }
   return EstimateInputSchema.safeParse({
     customerId: formData.get("customerId") ?? "",
     projectId: formData.get("projectId") ?? "",
@@ -35,6 +41,10 @@ function parseFormData(formData: FormData) {
     taxRate: formData.get("taxRate") ?? "0.1",
     note: formData.get("note") ?? "",
     items: itemsParsed,
+    stamps: stampsParsed,
+    printCompanyStamp: formData.get("printCompanyStamp") === "on",
+    printStaffInfo: formData.get("printStaffInfo") === "on",
+    printCompanyContact: formData.get("printCompanyContact") === "on",
   });
 }
 
@@ -58,13 +68,32 @@ export async function createEstimate(
   );
 
   const supabase = await createClient();
+
+  // 番号未指定なら自動採番(SKR_M_YYYYMM_NNNN)
+  let estimateNo = parsed.data.estimateNo || null;
+  if (!estimateNo) {
+    const ym = new Date()
+      .toLocaleDateString("ja-JP", {
+        timeZone: "Asia/Tokyo",
+        year: "numeric",
+        month: "2-digit",
+      })
+      .replace(/[^\d]/g, "");
+    const { data: nextNo } = await supabase.rpc("next_doc_number", {
+      p_tenant_id: session.tenantId,
+      p_doc_type: "estimate",
+      p_year_month: ym,
+    });
+    if (nextNo) estimateNo = nextNo as string;
+  }
+
   const { data: estimate, error } = await supabase
     .from("estimates")
     .insert({
       tenant_id: session.tenantId,
       customer_id: parsed.data.customerId,
       project_id: parsed.data.projectId || null,
-      estimate_no: parsed.data.estimateNo || null,
+      estimate_no: estimateNo,
       title: parsed.data.title,
       status: parsed.data.status,
       issue_date: parsed.data.issueDate,
@@ -74,6 +103,10 @@ export async function createEstimate(
       tax_cents: taxCents,
       total_cents: totalCents,
       note: parsed.data.note || null,
+      stamps: parsed.data.stamps,
+      print_company_stamp: parsed.data.printCompanyStamp,
+      print_staff_info: parsed.data.printStaffInfo,
+      print_company_contact: parsed.data.printCompanyContact,
       created_by: session.userId,
     })
     .select("id")
@@ -160,6 +193,10 @@ export async function updateEstimate(
       tax_cents: taxCents,
       total_cents: totalCents,
       note: parsed.data.note || null,
+      stamps: parsed.data.stamps,
+      print_company_stamp: parsed.data.printCompanyStamp,
+      print_staff_info: parsed.data.printStaffInfo,
+      print_company_contact: parsed.data.printCompanyContact,
     })
     .eq("id", estimateId);
 
@@ -210,7 +247,7 @@ export async function convertEstimateToInvoice(
   const { data: est } = await supabase
     .from("estimates")
     .select(
-      "id, tenant_id, customer_id, project_id, title, subtotal_cents, tax_rate, tax_cents, total_cents, note",
+      "id, tenant_id, customer_id, project_id, title, subtotal_cents, tax_rate, tax_cents, total_cents, note, stamps, print_company_stamp, print_staff_info, print_company_contact",
     )
     .eq("id", estimateId)
     .maybeSingle();
@@ -227,6 +264,21 @@ export async function convertEstimateToInvoice(
     .eq("estimate_id", estimateId);
 
   const today = new Date().toISOString().slice(0, 10);
+
+  // 請求番号を自動採番
+  const ym = new Date()
+    .toLocaleDateString("ja-JP", {
+      timeZone: "Asia/Tokyo",
+      year: "numeric",
+      month: "2-digit",
+    })
+    .replace(/[^\d]/g, "");
+  const { data: nextNo } = await supabase.rpc("next_doc_number", {
+    p_tenant_id: session.tenantId,
+    p_doc_type: "invoice",
+    p_year_month: ym,
+  });
+
   const { data: invoice, error } = await supabase
     .from("invoices")
     .insert({
@@ -234,6 +286,7 @@ export async function convertEstimateToInvoice(
       customer_id: est.customer_id,
       project_id: est.project_id,
       estimate_id: estimateId,
+      invoice_no: nextNo ?? null,
       title: est.title,
       status: "draft",
       issue_date: today,
@@ -242,6 +295,11 @@ export async function convertEstimateToInvoice(
       tax_cents: est.tax_cents,
       total_cents: est.total_cents,
       note: est.note,
+      // 印鑑状態を引き継ぐ
+      stamps: est.stamps ?? {},
+      print_company_stamp: est.print_company_stamp ?? true,
+      print_staff_info: est.print_staff_info ?? true,
+      print_company_contact: est.print_company_contact ?? true,
       created_by: session.userId,
     })
     .select("id")

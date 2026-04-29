@@ -14,18 +14,26 @@ export default async function NewEstimatePage() {
   }
 
   const supabase = await createClient();
-  const [{ data: customers }, { data: projects }] = await Promise.all([
-    supabase
-      .from("customers")
-      .select("id, name")
-      .eq("is_active", true)
-      .order("name", { ascending: true }),
-    supabase
-      .from("projects")
-      .select("id, name")
-      .eq("status", "active")
-      .order("name", { ascending: true }),
-  ]);
+  const [{ data: customers }, { data: projects }, { data: stamps }] =
+    await Promise.all([
+      supabase
+        .from("customers")
+        .select("id, name")
+        .eq("is_active", true)
+        .order("name", { ascending: true }),
+      supabase
+        .from("projects")
+        .select("id, name")
+        .eq("status", "active")
+        .order("name", { ascending: true }),
+      supabase
+        .from("approval_stamps")
+        .select(
+          "stamp_key, display_name, role_name, image_path, is_company_stamp",
+        )
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true }),
+    ]);
 
   return (
     <div className="px-6 py-6 max-w-4xl mx-auto">
@@ -44,6 +52,7 @@ export default async function NewEstimatePage() {
       <EstimateForm
         customers={customers ?? []}
         projects={projects ?? []}
+        stamps={stamps ?? []}
         action={createEstimate}
         submitLabel="作成する"
       />

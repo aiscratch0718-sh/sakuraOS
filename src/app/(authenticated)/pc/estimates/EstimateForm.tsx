@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import Link from "next/link";
 import { LineItemsEditor } from "../_components/LineItemsEditor";
+import { StampSelector, type StampMaster } from "../_components/StampSelector";
 import type {
   BillingActionResult,
   ItemInput,
@@ -22,6 +23,10 @@ type EstimateInitial = {
   tax_rate: number;
   note: string | null;
   items: ItemInput[];
+  stamps?: Record<string, boolean>;
+  print_company_stamp?: boolean;
+  print_staff_info?: boolean;
+  print_company_contact?: boolean;
 };
 
 const STATUS_OPTIONS = [
@@ -38,12 +43,14 @@ export function EstimateForm({
   initial,
   customers,
   projects,
+  stamps,
   action,
   submitLabel,
 }: {
   initial?: Partial<EstimateInitial>;
   customers: Customer[];
   projects: Project[];
+  stamps: StampMaster[];
   action: (
     prev: BillingActionResult,
     formData: FormData,
@@ -55,6 +62,14 @@ export function EstimateForm({
   const [itemsJson, setItemsJson] = useState<string>(
     JSON.stringify(initial?.items ?? []),
   );
+  const [stampsJson, setStampsJson] = useState<string>(
+    JSON.stringify(initial?.stamps ?? {}),
+  );
+  const [printOpts, setPrintOpts] = useState({
+    printCompanyStamp: initial?.print_company_stamp ?? true,
+    printStaffInfo: initial?.print_staff_info ?? true,
+    printCompanyContact: initial?.print_company_contact ?? true,
+  });
 
   const fieldError = (name: string): string | undefined =>
     !state.ok ? state.fieldErrors?.[name]?.[0] : undefined;
@@ -186,6 +201,48 @@ export function EstimateForm({
           onChangeJson={setItemsJson}
         />
         <input type="hidden" name="items" value={itemsJson} />
+      </div>
+
+      <div className="panel-pad space-y-3">
+        <h3 className="text-[13px] font-bold text-navy">印鑑・印刷設定</h3>
+        <StampSelector
+          stamps={stamps}
+          initialSelection={initial?.stamps ?? {}}
+          initialPrintOptions={{
+            printCompanyStamp: initial?.print_company_stamp ?? true,
+            printStaffInfo: initial?.print_staff_info ?? true,
+            printCompanyContact: initial?.print_company_contact ?? true,
+          }}
+          onChangeJson={setStampsJson}
+          onChangePrintOptions={setPrintOpts}
+        />
+        <input type="hidden" name="stamps" value={stampsJson} />
+        {/* checkbox の checked 状態を Server Action 側で 'on'/null 判定したいので
+            個別の hidden field を出す代わりに、JS 経由で状態同期する小技 */}
+        <input
+          type="checkbox"
+          name="printCompanyStamp"
+          checked={printOpts.printCompanyStamp}
+          onChange={() => {}}
+          className="hidden"
+          aria-hidden
+        />
+        <input
+          type="checkbox"
+          name="printStaffInfo"
+          checked={printOpts.printStaffInfo}
+          onChange={() => {}}
+          className="hidden"
+          aria-hidden
+        />
+        <input
+          type="checkbox"
+          name="printCompanyContact"
+          checked={printOpts.printCompanyContact}
+          onChange={() => {}}
+          className="hidden"
+          aria-hidden
+        />
       </div>
 
       <div className="panel-pad">
