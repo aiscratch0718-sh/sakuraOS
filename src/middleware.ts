@@ -44,14 +44,18 @@ export async function middleware(request: NextRequest) {
   return response;
 }
 
+/**
+ * Performance: middleware は毎リクエストで Supabase Auth API に往復するため、
+ * matcher を最小化して認証必須のルートだけに絞る。
+ *
+ * - 認証必須: `/`, `/pc/*`, `/sp/*`(全部 Server Component で requireSession を呼ぶ)
+ * - 認証スキップ: `/sign-in`, `/sign-out`, `/_next/*`, 静的ファイル, 画像, robots, favicon
+ *
+ * これで:
+ * - サインイン画面の表示が速い(無駄な Auth 往復なし)
+ * - CSS/JS/フォント などの静的アセットがリフレッシュ処理を経由しない
+ * - 認証画面の体感が顕著に改善する
+ */
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static, _next/image, favicon.ico
-     * - api routes (handle their own auth)
-     * - public files
-     */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
-  ],
+  matcher: ["/", "/pc/:path*", "/sp/:path*"],
 };

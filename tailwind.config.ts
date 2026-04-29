@@ -7,6 +7,7 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: [
+          "var(--font-mplus-rounded)",
           "M PLUS Rounded 1c",
           "Hiragino Maru Gothic Pro",
           "Meiryo",

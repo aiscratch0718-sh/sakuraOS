@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800;900&display=swap");
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -10,9 +8,7 @@
   }
 
   body {
-    font-family:
-      "M PLUS Rounded 1c", "Hiragino Maru Gothic Pro", "Meiryo", system-ui,
-      sans-serif;
+    /* font-family は Tailwind の font-sans 経由で next/font の CSS 変数を参照 */
     background: #e8f0f8;
     color: #1a2a3a;
     line-height: 1.5;
