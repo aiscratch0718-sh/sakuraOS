@@ -106,7 +106,13 @@ export default async function EditInvoicePage({
             rel="noopener noreferrer"
             className="btn-primary py-2 px-4 text-[12px]"
           >
-            📄 PDF を開く
+            📄 PDF
+          </a>
+          <a
+            href={`/api/invoices/${id}/excel`}
+            className="btn-ghost py-2 px-4 text-[12px]"
+          >
+            📊 Excel
           </a>
           <MarkPaidButton invoiceId={id} currentStatus={invoice.status} />
         </div>

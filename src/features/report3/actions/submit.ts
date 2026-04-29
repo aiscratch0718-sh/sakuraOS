@@ -74,9 +74,18 @@ export async function submitReport3(
     };
   }
 
+  // バッジ判定(失敗しても本処理は成功とする)
+  try {
+    await supabase.rpc("evaluate_badges_for_user", { p_user_id: session.userId });
+  } catch {
+    // バッジ判定失敗は致命的でない
+  }
+
   revalidatePath("/sp/home");
   revalidatePath("/pc/home");
   revalidatePath("/pc/reports");
+  revalidatePath("/pc/gamification");
+  revalidatePath("/sp/gamification");
 
   return { ok: true, reportId: entryId as string, deduped: false };
 }

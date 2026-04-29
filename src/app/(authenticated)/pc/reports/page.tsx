@@ -84,13 +84,30 @@ export default async function PcReportsPage({
 
   const { data: reports } = await query;
 
+  // 現在の絞り込みパラメータをそのまま CSV API に渡す
+  const csvQs = new URLSearchParams();
+  if (params.from) csvQs.set("from", params.from);
+  if (params.to) csvQs.set("to", params.to);
+  if (params.project) csvQs.set("project", params.project);
+  if (params.user) csvQs.set("user", params.user);
+  if (params.status) csvQs.set("status", params.status);
+  const csvHref = `/api/reports/csv${csvQs.toString() ? `?${csvQs.toString()}` : ""}`;
+
   return (
     <div className="px-6 py-6 max-w-6xl mx-auto">
-      <div className="mb-5">
-        <h1 className="text-xl font-extrabold text-navy">日報一覧</h1>
-        <p className="text-[12px] text-ink-2 mt-0.5">
-          全社の日報を期間・現場・作業員・ステータスで絞り込みできます。
-        </p>
+      <div className="flex items-start justify-between mb-5">
+        <div>
+          <h1 className="text-xl font-extrabold text-navy">日報一覧</h1>
+          <p className="text-[12px] text-ink-2 mt-0.5">
+            全社の日報を期間・現場・作業員・ステータスで絞り込みできます。
+          </p>
+        </div>
+        <a
+          href={csvHref}
+          className="btn-teal py-2 px-4 text-[12px] font-bold whitespace-nowrap"
+        >
+          📥 CSV ダウンロード
+        </a>
       </div>
 
       <ReportFilters projects={projects ?? []} workers={workers ?? []} />

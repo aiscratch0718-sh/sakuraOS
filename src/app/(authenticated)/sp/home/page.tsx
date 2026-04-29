@@ -97,10 +97,41 @@ export default async function SpHomePage() {
       {/* メインアクション */}
       <Link
         href="/sp/report3/new"
-        className="block w-full bg-pink hover:bg-pink-2 transition-colors text-white text-center py-4 rounded-panel text-[16px] font-bold shadow-card mb-5"
+        className="block w-full bg-pink hover:bg-pink-2 transition-colors text-white text-center py-4 rounded-panel text-[16px] font-bold shadow-card mb-3"
       >
         📝 今日の作業日報を書く
       </Link>
+
+      {/* サブナビ(クイックアクセス) */}
+      <div className="grid grid-cols-3 gap-2 mb-5">
+        <Link
+          href="/sp/vehicle-runs"
+          className="panel p-3 flex flex-col items-center justify-center text-center hover:bg-blue-bg/30 transition-colors"
+        >
+          <span className="text-[22px] leading-none mb-1" aria-hidden>
+            🚗
+          </span>
+          <span className="text-[11px] font-bold text-ink-2">車両運行</span>
+        </Link>
+        <Link
+          href="/sp/tools"
+          className="panel p-3 flex flex-col items-center justify-center text-center hover:bg-blue-bg/30 transition-colors"
+        >
+          <span className="text-[22px] leading-none mb-1" aria-hidden>
+            🛠️
+          </span>
+          <span className="text-[11px] font-bold text-ink-2">工具</span>
+        </Link>
+        <Link
+          href="/sp/gamification"
+          className="panel p-3 flex flex-col items-center justify-center text-center hover:bg-blue-bg/30 transition-colors"
+        >
+          <span className="text-[22px] leading-none mb-1" aria-hidden>
+            🏆
+          </span>
+          <span className="text-[11px] font-bold text-ink-2">マイランク</span>
+        </Link>
+      </div>
 
       {/* 直近の提出履歴 */}
       <section>

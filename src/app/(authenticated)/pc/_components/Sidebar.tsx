@@ -61,6 +61,24 @@ const ITEMS: NavItem[] = [
     match: (p) => p.startsWith("/pc/invoices"),
   },
   {
+    href: "/pc/tools",
+    label: "工具管理",
+    icon: "🛠️",
+    match: (p) => p.startsWith("/pc/tools"),
+  },
+  {
+    href: "/pc/vehicles",
+    label: "車両管理",
+    icon: "🚗",
+    match: (p) => p.startsWith("/pc/vehicles") || p.startsWith("/pc/vehicle-runs"),
+  },
+  {
+    href: "/pc/gamification",
+    label: "ランキング",
+    icon: "🏆",
+    match: (p) => p.startsWith("/pc/gamification"),
+  },
+  {
     href: "/pc/profile",
     label: "プロフィール",
     icon: "👤",
@@ -87,6 +105,24 @@ const DEV_ITEMS: NavItem[] = [
     label: "SP 承認待ち",
     icon: "✓",
     match: (p) => p.startsWith("/sp/approvals"),
+  },
+  {
+    href: "/sp/gamification",
+    label: "SP ランク",
+    icon: "🏆",
+    match: (p) => p.startsWith("/sp/gamification"),
+  },
+  {
+    href: "/sp/tools",
+    label: "SP 工具",
+    icon: "🛠️",
+    match: (p) => p.startsWith("/sp/tools"),
+  },
+  {
+    href: "/sp/vehicle-runs",
+    label: "SP 車両運行",
+    icon: "🚗",
+    match: (p) => p.startsWith("/sp/vehicle-runs"),
   },
   {
     href: "/sp/profile",

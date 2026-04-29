@@ -108,7 +108,13 @@ export default async function EditEstimatePage({
             rel="noopener noreferrer"
             className="btn-primary py-2 px-4 text-[12px]"
           >
-            📄 PDF を開く
+            📄 PDF
+          </a>
+          <a
+            href={`/api/estimates/${id}/excel`}
+            className="btn-ghost py-2 px-4 text-[12px]"
+          >
+            📊 Excel
           </a>
           <ConvertToInvoiceButton estimateId={id} />
         </div>

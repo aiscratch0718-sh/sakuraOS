@@ -48,14 +48,25 @@ export default async function InvoicesListPage() {
             発行した請求書。会計はマネーフォワードで処理してください(本システムは記録のみ)。
           </p>
         </div>
-        {canEdit && (
-          <Link
-            href="/pc/invoices/new"
-            className="btn-primary py-2 px-4 text-[13px]"
-          >
-            + 新規請求書
-          </Link>
-        )}
+        <div className="flex gap-2">
+          {canEdit && (
+            <a
+              href="/api/invoices/mf-csv"
+              className="btn-teal py-2 px-3 text-[12px] font-bold whitespace-nowrap"
+              title="マネーフォワード会計取込用 CSV"
+            >
+              📥 MF CSV
+            </a>
+          )}
+          {canEdit && (
+            <Link
+              href="/pc/invoices/new"
+              className="btn-primary py-2 px-4 text-[13px]"
+            >
+              + 新規請求書
+            </Link>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
