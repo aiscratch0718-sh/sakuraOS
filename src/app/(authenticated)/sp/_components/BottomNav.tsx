@@ -29,7 +29,14 @@ const ITEMS: NavItem[] = [
     label: "承認",
     icon: "✓",
     match: (p) => p.startsWith("/sp/approvals"),
-    show: (role) => ["leader", "office", "ceo"].includes(role),
+    show: (role) => ["leader", "office", "ceo", "system"].includes(role),
+  },
+  {
+    href: "/pc/home",
+    label: "PCへ",
+    icon: "🖥️",
+    match: () => false,
+    show: (role) => role === "system",
   },
   {
     href: "/sp/profile",
@@ -43,13 +50,16 @@ export function BottomNav({ role }: { role: string }) {
   const pathname = usePathname();
   const visible = ITEMS.filter((item) => !item.show || item.show(role));
 
+  // 列数は表示項目数に応じて動的に(4 or 5)
+  const cols = visible.length >= 5 ? "grid-cols-5" : "grid-cols-4";
+
   return (
     <nav
       aria-label="メインナビゲーション"
       className="fixed bottom-0 left-0 right-0 bg-white border-t border-line z-30"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <ul className="grid grid-cols-4 max-w-md mx-auto">
+      <ul className={`grid ${cols} max-w-md mx-auto`}>
         {visible.map((item) => {
           const active = item.match(pathname);
           return (
@@ -70,7 +80,7 @@ export function BottomNav({ role }: { role: string }) {
             </li>
           );
         })}
-        {/* 4 列を埋めるためのパディング */}
+        {/* 不足分を埋めるためのパディング */}
         {visible.length < 4 &&
           Array.from({ length: 4 - visible.length }).map((_, i) => (
             <li key={`pad-${i}`} aria-hidden />

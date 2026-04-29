@@ -68,9 +68,38 @@ const ITEMS: NavItem[] = [
   },
 ];
 
+// 開発者(system ロール)専用: モバイル UI への直行リンク
+const DEV_ITEMS: NavItem[] = [
+  {
+    href: "/sp/home",
+    label: "SP ホーム",
+    icon: "📱",
+    match: (p) => p === "/sp/home",
+  },
+  {
+    href: "/sp/report3/new",
+    label: "SP 日報入力",
+    icon: "📝",
+    match: (p) => p.startsWith("/sp/report3/new"),
+  },
+  {
+    href: "/sp/approvals",
+    label: "SP 承認待ち",
+    icon: "✓",
+    match: (p) => p.startsWith("/sp/approvals"),
+  },
+  {
+    href: "/sp/profile",
+    label: "SP プロフィール",
+    icon: "👤",
+    match: (p) => p === "/sp/profile",
+  },
+];
+
 export function Sidebar({ role }: { role: string }) {
   const pathname = usePathname();
   const visible = ITEMS.filter((item) => !item.show || item.show(role));
+  const isDev = role === "system";
 
   return (
     <aside
@@ -99,6 +128,39 @@ export function Sidebar({ role }: { role: string }) {
           );
         })}
       </ul>
+
+      {/* 開発者専用: モバイル UI への直行リンク */}
+      {isDev && (
+        <>
+          <div className="mt-6 px-6">
+            <p className="text-[10px] text-purple font-bold tracking-wider mb-2 flex items-center gap-1">
+              <span aria-hidden>🔧</span> 開発者メニュー
+            </p>
+          </div>
+          <ul className="space-y-1 px-3">
+            {DEV_ITEMS.map((item) => {
+              const active = item.match(pathname);
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-btn text-[12px] font-bold transition-colors ${
+                      active
+                        ? "bg-purple-bg text-purple"
+                        : "text-ink-2 hover:bg-purple-bg/50"
+                    }`}
+                  >
+                    <span aria-hidden className="text-[14px]">
+                      {item.icon}
+                    </span>
+                    <span>{item.label}</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      )}
 
       <div className="mt-8 px-6">
         <p className="text-[10px] text-ink-3 leading-relaxed">

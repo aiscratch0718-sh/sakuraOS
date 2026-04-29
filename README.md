@@ -48,6 +48,9 @@
 | office | `office@sakura-os.local` | `Sakura2026!` | 佐藤 花子 | `/pc/home` |
 | leader | `leader@sakura-os.local` | `Sakura2026!` | 鈴木 一郎 | `/sp/home` |
 | worker | `worker@sakura-os.local` | `Sakura2026!` | 山田 太郎 | `/sp/home` |
+| **system**(開発者) | `dev@sakura-os.local` | `Sakura2026!` | 開発者 | `/pc/home`(全画面 + SP リンク) |
+
+> **system ロールについて**: 開発者用の全権アカウント。PC サイドバーに「🔧 開発者メニュー」セクションが表示され、モバイル UI(SP)への直行リンクが並びます。SP 画面のボトムナビにも「🖥️ PC へ」が出るので、worker/leader として日報を書きながら、すぐに経営ダッシュボードへ戻ることができます。動作確認・デモ用途以外では使用しないでください。
 
 > 本番リリース前に必ず変更してください。これらは MVP 確認用のシード値です。
 
