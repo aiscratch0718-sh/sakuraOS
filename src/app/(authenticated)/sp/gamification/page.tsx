@@ -2,6 +2,8 @@ import Link from "next/link";
 import { requireSession } from "@/server/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { rankFor } from "@/features/gamification/rank";
+import { SkillRadar } from "./SkillRadar";
+import { XpTimeline } from "./XpTimeline";
 
 export const dynamic = "force-dynamic";
 
@@ -71,6 +73,44 @@ export default async function SpGamificationPage() {
     }),
   );
 
+  // 得意分野マップ用: 自分の report3_rows を l1 で集計
+  const { data: skillRows } = await supabase
+    .from("report3_rows")
+    .select(
+      "l1, hours, entry:report3_entries!inner(user_id)",
+    )
+    .eq("entry.user_id", session.userId);
+
+  const skillMap = new Map<string, number>();
+  for (const r of skillRows ?? []) {
+    skillMap.set(r.l1, (skillMap.get(r.l1) ?? 0) + Number(r.hours));
+  }
+  const skillData = Array.from(skillMap.entries())
+    .map(([label, value]) => ({ label, value }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 6); // レーダーは6方向まで
+
+  // 直近 14 日の XP タイムライン
+  const since14 = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
+  const sinceIso = since14.toISOString();
+  const { data: timelineEvents } = await supabase
+    .from("gamification_events")
+    .select("xp_delta, created_at")
+    .eq("user_id", session.userId)
+    .gte("created_at", sinceIso);
+
+  const dailyXp: { date: string; xp: number }[] = [];
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+    const ymd = d.toISOString().slice(0, 10);
+    dailyXp.push({ date: ymd, xp: 0 });
+  }
+  for (const e of timelineEvents ?? []) {
+    const ymd = e.created_at.slice(0, 10);
+    const day = dailyXp.find((d) => d.date === ymd);
+    if (day) day.xp += Number(e.xp_delta);
+  }
+
   return (
     <div className="px-4 py-5 max-w-md mx-auto">
       <h1 className="text-lg font-extrabold text-navy mb-3">マイランク</h1>
@@ -123,6 +163,29 @@ export default async function SpGamificationPage() {
           <Stat label="バッジ" value={myBadges?.length ?? 0} />
         </div>
       </div>
+
+      {/* 得意分野マップ */}
+      <section className="panel-pad mb-3">
+        <h2 className="panel-title">
+          <span aria-hidden>🧭</span>
+          <span>得意分野マップ</span>
+        </h2>
+        <SkillRadar data={skillData} />
+        {skillData.length > 0 && (
+          <p className="text-[10px] text-ink-3 text-center mt-1">
+            日報の大分類別 累計時間
+          </p>
+        )}
+      </section>
+
+      {/* 成長グラフ */}
+      <section className="panel-pad mb-3">
+        <h2 className="panel-title">
+          <span aria-hidden>📈</span>
+          <span>直近 14 日の XP 獲得</span>
+        </h2>
+        <XpTimeline series={dailyXp} />
+      </section>
 
       {/* バッジ */}
       <section className="panel-pad mb-3">

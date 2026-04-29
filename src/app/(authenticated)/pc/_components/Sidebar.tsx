@@ -19,6 +19,12 @@ const ITEMS: NavItem[] = [
     match: (p) => p === "/pc/home",
   },
   {
+    href: "/pc/notifications",
+    label: "通知",
+    icon: "🔔",
+    match: (p) => p.startsWith("/pc/notifications"),
+  },
+  {
     href: "/pc/reports",
     label: "日報一覧",
     icon: "📋",
@@ -29,6 +35,12 @@ const ITEMS: NavItem[] = [
     label: "承認待ち",
     icon: "✓",
     match: (p) => p.startsWith("/pc/approvals"),
+  },
+  {
+    href: "/pc/incidents",
+    label: "ヒヤリハット",
+    icon: "⚠",
+    match: (p) => p.startsWith("/pc/incidents"),
   },
   {
     href: "/pc/projects",
@@ -59,6 +71,36 @@ const ITEMS: NavItem[] = [
     label: "請求書",
     icon: "🧾",
     match: (p) => p.startsWith("/pc/invoices"),
+  },
+  {
+    href: "/pc/payments",
+    label: "入金管理",
+    icon: "💴",
+    match: (p) => p.startsWith("/pc/payments"),
+  },
+  {
+    href: "/pc/customer-sales",
+    label: "客先別売上",
+    icon: "📈",
+    match: (p) => p.startsWith("/pc/customer-sales"),
+  },
+  {
+    href: "/pc/price-items",
+    label: "単価マスタ",
+    icon: "💰",
+    match: (p) => p.startsWith("/pc/price-items"),
+  },
+  {
+    href: "/pc/qualifications",
+    label: "資格マスタ",
+    icon: "🎓",
+    match: (p) => p.startsWith("/pc/qualifications"),
+  },
+  {
+    href: "/pc/work-classifications",
+    label: "工種マスタ",
+    icon: "🏷️",
+    match: (p) => p.startsWith("/pc/work-classifications"),
   },
   {
     href: "/pc/tools",

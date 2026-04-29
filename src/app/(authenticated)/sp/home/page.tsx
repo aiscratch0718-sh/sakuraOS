@@ -104,33 +104,12 @@ export default async function SpHomePage() {
 
       {/* サブナビ(クイックアクセス) */}
       <div className="grid grid-cols-3 gap-2 mb-5">
-        <Link
-          href="/sp/vehicle-runs"
-          className="panel p-3 flex flex-col items-center justify-center text-center hover:bg-blue-bg/30 transition-colors"
-        >
-          <span className="text-[22px] leading-none mb-1" aria-hidden>
-            🚗
-          </span>
-          <span className="text-[11px] font-bold text-ink-2">車両運行</span>
-        </Link>
-        <Link
-          href="/sp/tools"
-          className="panel p-3 flex flex-col items-center justify-center text-center hover:bg-blue-bg/30 transition-colors"
-        >
-          <span className="text-[22px] leading-none mb-1" aria-hidden>
-            🛠️
-          </span>
-          <span className="text-[11px] font-bold text-ink-2">工具</span>
-        </Link>
-        <Link
-          href="/sp/gamification"
-          className="panel p-3 flex flex-col items-center justify-center text-center hover:bg-blue-bg/30 transition-colors"
-        >
-          <span className="text-[22px] leading-none mb-1" aria-hidden>
-            🏆
-          </span>
-          <span className="text-[11px] font-bold text-ink-2">マイランク</span>
-        </Link>
+        <QuickCard href="/sp/vehicle-runs" icon="🚗" label="車両運行" />
+        <QuickCard href="/sp/tools" icon="🛠️" label="工具" />
+        <QuickCard href="/sp/gamification" icon="🏆" label="マイランク" />
+        <QuickCard href="/sp/incidents" icon="⚠" label="ヒヤリハット" />
+        <QuickCard href="/sp/notifications" icon="🔔" label="通知" />
+        <QuickCard href="/sp/profile" icon="👤" label="プロフィール" />
       </div>
 
       {/* 直近の提出履歴 */}
@@ -179,6 +158,28 @@ export default async function SpHomePage() {
         Phase B(MVP骨格)— GPS打刻・ゲーミフィ・ナビは順次追加予定
       </p>
     </div>
+  );
+}
+
+function QuickCard({
+  href,
+  icon,
+  label,
+}: {
+  href: string;
+  icon: string;
+  label: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="panel p-3 flex flex-col items-center justify-center text-center hover:bg-blue-bg/30 transition-colors"
+    >
+      <span className="text-[22px] leading-none mb-1" aria-hidden>
+        {icon}
+      </span>
+      <span className="text-[11px] font-bold text-ink-2">{label}</span>
+    </Link>
   );
 }
 
