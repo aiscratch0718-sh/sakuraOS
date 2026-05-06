@@ -8,38 +8,58 @@ type CookieToSet = {
 };
 
 /**
- * Middleware: refreshes the Supabase auth cookie on every request.
- * Required by @supabase/ssr to keep sessions alive across server-rendered pages.
+ * 5秒ソフトタイムアウト付き Promise.race。タイムアウト時は null を返す。
+ */
+async function withTimeout<T>(p: Promise<T>, ms: number): Promise<T | null> {
+  return await Promise.race([
+    p,
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), ms)),
+  ]);
+}
+
+/**
+ * Middleware: refreshes the Supabase auth cookie on every protected route.
+ *
+ * 設計判断:
+ * - getUser() は Supabase Auth API へ往復するため、コールドスタート + ネットワーク
+ *   揺らぎが重なると Vercel ミドルウェアの 25 秒上限を超え 504 になる場合がある。
+ * - 認証必須判定そのものは各ページの Server Component の requireSession() が責任を
+ *   持つため、ミドルウェアで getUser() が失敗 / タイムアウトしても安全にスルーできる。
+ * - 5 秒のソフトタイムアウト + try/catch で堅牢性を担保する。
  */
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
     request,
   });
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet: CookieToSet[]) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value),
-          );
-          response = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options),
-          );
+  try {
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet: CookieToSet[]) {
+            cookiesToSet.forEach(({ name, value }) =>
+              request.cookies.set(name, value),
+            );
+            response = NextResponse.next({ request });
+            cookiesToSet.forEach(({ name, value, options }) =>
+              response.cookies.set(name, value, options),
+            );
+          },
         },
       },
-    },
-  );
+    );
 
-  // Refresh session — IMPORTANT: do not run any other logic between this call
-  // and the response.
-  await supabase.auth.getUser();
+    // Refresh session(5秒タイムアウト)
+    await withTimeout(supabase.auth.getUser(), 5000);
+  } catch {
+    // ミドルウェアでエラーになってもページ側 requireSession() が再チェックするため
+    // 安全にスルー
+  }
 
   return response;
 }
