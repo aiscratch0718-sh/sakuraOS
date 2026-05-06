@@ -12,6 +12,18 @@ export default async function RootPage() {
   } = await supabase.auth.getSession();
 
   if (!session?.user) {
+    // テスト/デモ運用中: 未ログインなら dev ユーザーで自動サインイン。
+    // 本番リリース前に AUTO_LOGIN を false に変更して通常の /sign-in へ戻す。
+    const AUTO_LOGIN = true;
+    if (AUTO_LOGIN) {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: "dev@sakura-os.local",
+        password: "Sakura2026!",
+      });
+      if (!error) {
+        redirect("/");
+      }
+    }
     redirect("/sign-in");
   }
 
