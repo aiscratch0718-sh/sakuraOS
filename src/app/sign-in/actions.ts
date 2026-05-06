@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { homeForRole, type UserRole } from "@/server/auth/session";
 
 export async function signIn(formData: FormData) {
   const email = String(formData.get("email") ?? "");
@@ -78,5 +79,9 @@ export async function quickSignIn(formData: FormData) {
     redirect("/sign-in?error=invalid_credentials");
   }
 
-  redirect("/");
+  // ロール別ホームへ直接遷移する。
+  // 一度 / を経由すると、Server Component と Server Action の cookie ライフ
+  // サイクルの差で session が拾えず redirect loop になるケースがあるため、
+  // ここで homeForRole の結果へ直接 redirect する。
+  redirect(homeForRole(role as UserRole));
 }
