@@ -12,18 +12,13 @@ export default async function RootPage() {
   } = await supabase.auth.getSession();
 
   if (!session?.user) {
-    // テスト/デモ運用中: 未ログインなら dev ユーザーで自動サインイン。
-    // 本番リリース前に AUTO_LOGIN を false に変更して通常の /sign-in へ戻す。
-    const AUTO_LOGIN = true;
-    if (AUTO_LOGIN) {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: "dev@sakura-os.local",
-        password: "Sakura2026!",
-      });
-      if (!error) {
-        redirect("/");
-      }
-    }
+    // 未ログインは /sign-in へ。1 クリックでロール別ログインできる
+    // クイックログインボタンが用意されている。
+    //
+    // Note: Server Component(本ファイル)から signInWithPassword を呼んでも
+    // Next.js 15 では cookies() が読み取り中心になっており auth cookie の
+    // persist が安定しない(redirect loop の原因になる)ため、ログイン処理は
+    // Server Action(quickSignIn)経由でのみ行う。
     redirect("/sign-in");
   }
 
