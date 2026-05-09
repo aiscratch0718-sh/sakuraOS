@@ -156,6 +156,13 @@ const ITEMS: NavItem[] = [
     icon: "👤",
     match: (p) => p.startsWith("/pc/profile"),
   },
+  {
+    href: "/pc/settings/branding",
+    label: "外観設定",
+    icon: "🎨",
+    match: (p) => p.startsWith("/pc/settings/branding"),
+    show: (role) => ["office", "ceo", "system"].includes(role),
+  },
 ];
 
 // 開発者(system ロール)専用: モバイル UI への直行リンク
@@ -212,7 +219,8 @@ export function Sidebar({ role }: { role: string }) {
   return (
     <aside
       aria-label="サイドナビゲーション"
-      className="w-52 shrink-0 bg-white border-r border-line min-h-[calc(100vh-56px)] py-5 hidden md:block"
+      className="w-52 shrink-0 border-r border-line min-h-[calc(100vh-56px)] py-5 hidden md:block"
+      style={{ background: "var(--brand-sidebar, #ffffff)" }}
     >
       <ul className="space-y-1 px-3">
         {visible.map((item) => {
