@@ -103,6 +103,36 @@ const ITEMS: NavItem[] = [
     match: (p) => p.startsWith("/pc/work-classifications"),
   },
   {
+    href: "/pc/org-departments",
+    label: "部署マスタ",
+    icon: "🏢",
+    match: (p) => p.startsWith("/pc/org-departments"),
+  },
+  {
+    href: "/pc/org-positions",
+    label: "役職マスタ",
+    icon: "🎖️",
+    match: (p) => p.startsWith("/pc/org-positions"),
+  },
+  {
+    href: "/pc/receipts",
+    label: "領収書管理",
+    icon: "🧾",
+    match: (p) => p.startsWith("/pc/receipts"),
+  },
+  {
+    href: "/pc/supplier-invoices",
+    label: "仕入先請求書",
+    icon: "📄",
+    match: (p) => p.startsWith("/pc/supplier-invoices"),
+  },
+  {
+    href: "/pc/expense",
+    label: "経費管理表",
+    icon: "💼",
+    match: (p) => p.startsWith("/pc/expense"),
+  },
+  {
     href: "/pc/tools",
     label: "工具管理",
     icon: "🛠️",

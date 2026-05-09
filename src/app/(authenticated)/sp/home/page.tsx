@@ -108,6 +108,7 @@ export default async function SpHomePage() {
         <QuickCard href="/sp/tools" icon="🛠️" label="工具" />
         <QuickCard href="/sp/gamification" icon="🏆" label="マイランク" />
         <QuickCard href="/sp/incidents" icon="⚠" label="ヒヤリハット" />
+        <QuickCard href="/sp/receipts" icon="🧾" label="領収書" />
         <QuickCard href="/sp/notifications" icon="🔔" label="通知" />
         <QuickCard href="/sp/profile" icon="👤" label="プロフィール" />
       </div>
