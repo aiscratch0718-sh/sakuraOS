@@ -124,7 +124,7 @@ export default async function SafetyDocsPage({
               </thead>
               <tbody>
                 {docs.map((d) => {
-                  const meta = STATUS_LABEL[d.status] ?? STATUS_LABEL.draft;
+                  const meta = STATUS_LABEL[d.status] ?? { label: d.status, cls: "pill-blue" };
                   const projectName = (d.project as { name?: string } | null)?.name ?? "—";
                   return (
                     <tr key={d.id} className="border-b border-line hover:bg-blue-bg/30">

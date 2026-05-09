@@ -133,6 +133,20 @@ const ITEMS: NavItem[] = [
     match: (p) => p.startsWith("/pc/expense"),
   },
   {
+    href: "/pc/safety-documents",
+    label: "安全書類",
+    icon: "📑",
+    match: (p) => p.startsWith("/pc/safety-documents"),
+    show: (role) => ["leader", "office", "ceo", "system"].includes(role),
+  },
+  {
+    href: "/pc/contractor-templates",
+    label: "元請テンプレート",
+    icon: "📁",
+    match: (p) => p.startsWith("/pc/contractor-templates"),
+    show: (role) => ["office", "ceo", "system"].includes(role),
+  },
+  {
     href: "/pc/tools",
     label: "工具管理",
     icon: "🛠️",
