@@ -1,11 +1,25 @@
-# Claude Code Web Studio -- B2B Web/SaaS Agent Architecture
+# 🌸 SAKURA OS — さくら株式会社 業務管理システム
 
-B2B web/SaaS development managed through 49 coordinated Claude Code subagents.
-Each agent owns a specific domain, enforcing separation of concerns and quality.
+> **このリポジトリは「さくら株式会社」(配管工事業)向けの統合業務管理 SaaS
+> = SAKURA OS の本番開発リポジトリです。** B2B Web/SaaS テンプレートを
+> ベースにしていますが、既にさくら株式会社向けにカスタマイズ・本番運用前提
+> で開発されています。
+>
+> - **クライアント**: さくら株式会社(配管工事業)
+> - **開発主**: 株式会社 AIscratch(板澤様 担当)
+> - **GitHub**: `aiscratch0718-sh/sakuraOS`
+> - **デプロイ先**: Vercel(Tokyo region / hnd1)
+> - **DB**: Supabase Postgres
+> - **本番ドメイン名フォルダ推奨**: `sakura-os/`(GitHub repo 名と一致)
+>
+> プロジェクト概要は `README.md`、設計詳細は `design/prd/`、ADR は
+> `docs/architecture/` を参照。
+
+---
 
 ## ⚠️ SAKURA OS リビルド作業継続時の必読手順
 
-**このリポジトリでは SAKURA OS の v4.0 デモを参考にした全面リビルドが進行中です。**
+**現在、SAKURA OS の v4.0 デモを参考にした全面リビルドが進行中です。**
 
 ユーザーから「リビルドの続き」「次のタスク」「P1-XX を進めて」「ステータス画面を作って」など、
 リビルドに関する指示があった場合、**コードを書き始める前に** 必ず以下の順で読むこと:
@@ -21,6 +35,10 @@ Each agent owns a specific domain, enforcing separation of concerns and quality.
 4. git commit + push
 
 これを怠るとコンテキスト切れで進捗を失う。スキップ厳禁。
+
+---
+
+## ベーステンプレート由来の説明(参考情報)
 
 > **Revenue model assumption**: B2B contract-based — monthly invoicing, bank
 > transfer, no subscription/auto-billing. There is no Stripe scaffolding in

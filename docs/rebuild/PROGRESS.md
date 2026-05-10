@@ -180,7 +180,13 @@
 
 ## 🚨 ブロッカー / 未解決事項
 
-(現在なし)
+- [ ] **フォルダリネーム未実施** — 現在のローカルフォルダ名は `Claude-Code-Game-Studios`
+  (テンプレート由来の汎用名)のまま。`sakura-os` にリネームすべき。手順は
+  `docs/rebuild/FOLDER-RENAME.md`。Claude セッションをいったん終了する必要があるため、
+  ユーザー側で実施してもらう。次セッション開始時に完了を確認。
+- [ ] **GitHub PAT のローテーション** — `git remote -v` で確認した remote URL に
+  Personal Access Token が埋め込まれていた。漏洩リスクがあるため、GitHub > Settings >
+  Developer settings から該当 PAT を revoke + 再生成 + remote 更新を推奨。
 
 ---
 

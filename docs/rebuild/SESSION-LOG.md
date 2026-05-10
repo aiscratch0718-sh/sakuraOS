@@ -4,6 +4,40 @@
 
 ---
 
+## S1.5 — プロジェクト識別性の改善 / 2026-05-10
+
+### コンテキスト
+- 板澤様より「現在のフォルダ名 `Claude-Code-Game-Studios` だと、後から見て
+  さくら株式会社の SAKURA OS 開発内容だと分からない。フォルダ名で識別できるように
+  整理してほしい」との指示
+- 確認の結果、`package.json` の name は既に `sakura-os`、GitHub repo 名も既に
+  `sakuraOS`、README も既に SAKURA OS ブランディング済み。**ローカルフォルダ名だけが
+  齟齬の原因**だった
+
+### このセッションで完了
+- `CLAUDE.md` 冒頭をプロジェクト識別優先で書き直し(SAKURA OS / さくら株式会社 / AIscratch を明記)
+- `PROJECT.md` 新規作成(トップレベルの識別カード、ディレクトリの読み方、関連リソース等)
+- `docs/rebuild/FOLDER-RENAME.md` 新規作成(リネーム手順書 + ロールバック手順)
+- `PROGRESS.md` のブロッカー欄に「フォルダリネーム未実施」と「PAT 漏洩リスク」を追記
+
+### 検出した課題
+- **🚨 セキュリティ**: `git remote -v` の URL に Personal Access Token
+  (`ghp_...`)が埋め込まれていた。漏洩リスクがあるため、ユーザーに PAT の
+  revoke + 再生成を強く推奨済み。今回のコミット内容では一切触れていない。
+
+### 次の作業(ユーザー側で実施)
+1. PAT のローテーション(GitHub Settings)
+2. Claude セッションを終了
+3. `Rename-Item Claude-Code-Game-Studios sakura-os`(PowerShell)
+4. 新パスで VS Code / Cursor を開く
+5. 新パスで Claude セッションを起動
+6. 次セッション(S2)で `PROGRESS.md` のブロッカー欄をチェック完了に更新
+
+### コミット
+- 後述の Final commit にて
+
+---
+
 ## S1 — Phase 1 ビジュアル基盤 / 2026-05-10
 
 ### コンテキスト
