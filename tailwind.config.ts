@@ -36,7 +36,8 @@ const config: Config = {
         line: "#c8d8e8",
         graybg: "#eef2f7",
         // === Gamification palette (demo v4.0) ===
-        // p1=赤(警告/重要) p2=金茶(注意/称賛) p3=緑(順調) p4=紫(称号/特殊)
+        // 注: ゲーミフィケーション(クエスト・バッジ・パワプロ風ステータス)専用に温存
+        // 業務画面では status.* / red / teal / amber / blue / purple を優先使用
         p1: { DEFAULT: "#D9415A", light: "#FDEEF1" },
         p2: { DEFAULT: "#C47A00", light: "#FEF5E4" },
         p3: { DEFAULT: "#0A8F6E", light: "#E4F7F2" },
@@ -44,9 +45,22 @@ const config: Config = {
         gold: "#FFD700",
         silver: "#C0C0C0",
         bronze: "#CD7F32",
+        // === REPORT3 ロゴ用赤橙グラデ(参照データ S5 由来) ===
+        report3: { from: "#E8516A", to: "#F5A45A" },
+        // === 状態セマンティック色(参照データ S5 由来) ===
+        // 業務画面で意味的に使う(active=進行中, done=完了, warn=注意, urgent=緊急)
+        status: {
+          active: "#E03030",   // = red.DEFAULT
+          done: "#0DA870",     // = teal.DEFAULT
+          warn: "#D88000",     // = amber.DEFAULT
+          urgent: "#B91C1C",
+        },
       },
       borderRadius: {
         panel: "10px",
+        // 参照データ S5: カード 12px / 大カード 16px / pill 20px に統一
+        card: "12px",
+        cardLg: "16px",
         btn: "6px",
         pill: "20px",
       },

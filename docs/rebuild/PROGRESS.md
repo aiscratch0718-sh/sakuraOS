@@ -8,20 +8,19 @@
 
 ## 🎯 現在のステータス
 
-- **進行中フェーズ**: Phase 3-B(完了)→ 次の優先順位は再検討推奨
-  ※ S5(参照データ監査)で **Phase 11 / 12 が大規模追加**、既存 Phase も詳細化された
-- **次に着手するタスク候補**(板澤様判断推奨):
-  - **A 案**: P11-01〜P11-07(共通基盤先行 — Stepper / LineItemTable / DocumentPreview /
-    PhotoGrid / SidebarFooterWidget / デザイントークン拡張)
-    → 後続の P12 全画面で使う共通部品が揃うので合理的
-  - **B 案**: 当初予定通り P3-C-01(現場マップ migration 0014)から着手
-    → 現場マップ完成を優先
-  - **C 案**: P12-01(ダッシュボード再構成)を先行
-    → クライアントへの見栄えインパクト最大
-- **完了タスク**: 26 / 約 147(S5 参照画像監査で 120 → 147 に拡張)
+- **進行中フェーズ**: 🔥 **Phase 11 着手中**(参照画像準拠への全面リワーク)
+- **次に着手するタスク**: **P11-01 デザイントークン拡張** → 並列で P11-02〜P11-07 を specialist 化
+- **着手予定順序**:
+  1. 🔥 S6 = Phase 11 共通基盤(P11-01〜P11-07 → P11-08〜P11-15)
+  2. S7〜S15 = Phase 12 各画面準拠化
+  3. S16〜 = Phase 5/6/9/10/7/3-E/8(参照画像に直接対応しない補強)
+- **廃止確定**: ~~Phase 3-C(マリオ風 STAGE マップ)~~ / ~~Phase 3-D(ボスHPモニター)~~
+- **保持確定**: Phase 3-E(幹部育成スキルツリー)
+- **既存ページ取扱い**: B 案 = 直接書換え(本番に随時反映、並走実装はしない)
+- **完了タスク**: 34 / 約 138(P11-01〜07 + P11-14 部分 で +8、廃止 9 タスク差引)
 - **最終更新**: 2026-05-11
-- **最終セッション ID**: S5(参照データ画像 12 枚監査 + 4 specialist 並列起動 172k tokens)
-- **🔥 specialist フル稼働実績**: S4 で 4 並列、S5 で 4 並列(brand-director / interaction-designer / screen-designer / systems-analyst)
+- **最終セッション ID**: S6(着手開始)
+- **🔥 specialist フル稼働実績**: S4 で 4 並列、S5 で 4 並列。S6 でも並列起動予定
 - **📑 監査レポート**: `docs/rebuild/audit-reports/2026-05-11_S5_reference-data-audit.md`
 
 ---
@@ -74,23 +73,17 @@
 - ✅ **P3-B-07** 称号獲得演出オーバーレイ(css-animation-specialist 起動)
 - ⬜ **P3-B-08** 全社員一覧ページ強化 → S5 に持ち越し
 
-### Phase 3-C: 現場マップ(マリオ風 + 従業員配置)
+### ~~Phase 3-C: 現場マップ(マリオ風)~~ — **廃止(2026-05-11、板澤様判断)**
 
-- ⬜ **P3-C-01** マイグレーション 0014(world_number / stage_number / map 座標 等)
-- ⬜ **P3-C-02** `/pc/projects/map` マリオ風ステージマップ(1-1, 1-2 表記)
-- ⬜ **P3-C-03** 🔥 **従業員配置レイヤー**(誰がどの現場にいるか地図上で確認、3 モード切替)
-- ⬜ **P3-C-04** ししまるキャラマーカー(自分の現在地)
-- ⬜ **P3-C-05** 現場詳細ポップアップ(配置メンバー一覧含む)
-- ⬜ **P3-C-06** マップエディタ(ドラッグ&ドロップ位置設定 + ステージ番号設定)
-- ⬜ **P3-C-07** ステージ番号自動採番ヘルパー
-- ⬜ **P3-C-08** モバイル `/sp/map` 縦スクロール版
+参照画像に存在しないため廃止。配車マップは Phase 12-04(実地理 Google Maps)で代替。
 
-### Phase 3-D: ボスHPモニター
+- ⏭️ ~~P3-C-01〜08~~ 廃止
 
-- ⬜ **P3-D-01** `/display/site/[id]` ルート
-- ⬜ **P3-D-02** BOSS HP メガゲージ
-- ⬜ **P3-D-03** TOP3 + 安全コンボ + ししまる
-- ⬜ **P3-D-04** ティッカー
+### ~~Phase 3-D: ボスHPモニター~~ — **廃止(2026-05-11、板澤様判断)**
+
+参照画像に存在しないため廃止。
+
+- ⏭️ ~~P3-D-01〜04~~ 廃止
 
 ### Phase 3-E: 幹部育成
 
@@ -195,21 +188,22 @@
 
 ### Phase 11: REPORT3 ステップウィザード化 + 共通レイアウトパターン整備(S5 参照画像監査由来)
 
-- ⬜ **P11-01** デザイントークン拡張(brand.report3 グラデ + status セマンティック + radius card/cardLg)
-- ⬜ **P11-02** 共通 `<Stepper>` `<StepIndicator>` `<StepFooter>` コンポーネント
-- ⬜ **P11-03** 共通 `<LineItemTable>` (見積/請求 共通利用)
-- ⬜ **P11-04** 共通 `<DocumentPreview type="estimate|invoice">` (HTML プレビュー + PDF 1ソース化)
-- ⬜ **P11-05** `<PhotoGrid>` (4枚 grid + カメラ直結)
-- ⬜ **P11-06** `<SiteInfoPanel>` `<QuickTips>` (REPORT3 入力右パネル)
-- ⬜ **P11-07** `<SidebarFooterWidget>` (チームレベルゲージ + アバター、全画面常駐)
-- ⬜ **P11-08** REPORT3 入力 6 ステップウィザード化(/sp/report3/new 全面改修 + /pc/report3/new 新規)
-- ⬜ **P11-09** REPORT3 下書き保存機能 + 一覧画面
-- ⬜ **P11-10** ステップ間バリデーション + エラー表示の精緻化
+- ✅ **P11-01** デザイントークン拡張(brand.report3 グラデ + status セマンティック + radius card/cardLg + pill-active/done/warn/urgent)
+- ✅ **P11-02** 共通 `<Stepper>` `<StepFooter>` コンポーネント(react-specialist a4b0、約 280 行)
+- ✅ **P11-03** 共通 `<LineItemTable>` (react-specialist ae46、約 430 行、decimal.js)
+- ✅ **P11-04** 共通 `<DocumentPreview type="estimate|invoice">` (react-specialist a5ac、約 280 行、A4 縦比率、印影 SVG fallback)
+- ✅ **P11-05** `<PhotoGrid>` (component-library-specialist a30f、約 240 行、camera capture)
+- ✅ **P11-06** `<SiteInfoPanel>` `<QuickTips>` (react-specialist a5ac、175 + 75 行、details 折りたたみ)
+- ✅ **P11-07** `<SidebarFooterWidget>` (component-library-specialist a30f、約 130 行、ダーク用)
+- ✅ **P11-14**(部分実施) KpiCard / AlertCard リファイン(数値 32px / 左バー 6px / status セマンティック使用)
+- 🔄 **P11-08** REPORT3 入力 6 ステップウィザード化(/sp/report3/new 全面改修 + /pc/report3/new 新規)
+- 🔄 **P11-09** REPORT3 下書き保存機能 + 一覧画面
+- ⬜ **P11-10** ステップ間バリデーション + エラー表示の精緻化(P11-08/09 と統合)
 - ⬜ **P11-11** REPORT3 クイック入力 RPC + モバイル簡易入力 UI
 - ⬜ **P11-12** REPORT3 ロゴ運用統一(全 PC 画面サイドバー上部固定)
 - ⬜ **P11-13** アイコン体系の Lucide 統一
-- ⬜ **P11-14** 既存 KpiCard / AlertCard / Tag のリファイン
-- ⬜ **P11-15** 角丸 / シャドウのトーン揃え
+- ⬜ **P11-14**(残作業) Tag セマンティック追加 + 既存ページの新コンポーネント差し替え
+- ⬜ **P11-15** 角丸 / シャドウのトーン揃え(各既存ページ)
 
 ### Phase 12: 画面密度の参照画像準拠化(9 画面の大幅改修 + 補助タスク)
 
@@ -377,6 +371,7 @@ supabase db push
 | 2026-05-11 | **見積書 / 請求書を 2-pane + 4 ステッパー + ライブプレビューに大改修**。共通の `<DocumentPreview>` `<LineItemTable>` を抽出して 1 ソース化(HTML プレビュー + PDF テンプレ統一)。 | Phase 12-06/07 |
 | 2026-05-11 | **車両 + 工具を統合した /pc/fleet 新画面**(既存の /pc/vehicles + /pc/tools は redirect で残す)。alcohol_checks(道交法準拠)/ vehicle_inspections / disaster_response_kits / vehicle_radio_logs の 4 法令テーブルを新設。 | Phase 12-10 |
 | 2026-05-11 | **migration 0017 計画**: 11 新規テーブル + 4 既存拡張 + 5 ビュー + 5 関数。Phase 5 既存計画の tasks / attendance_punches / work_assignments を 0017 で先行投入する方針。 | Phase 12-12 |
+| 2026-05-11 | **🔥 重大方針確定: 参照画像 12 枚への完全準拠を最優先方針とする**。<br>**廃止: Phase 3-C(マリオ風 STAGE マップ)/ Phase 3-D(ボスHPモニター TV 画面)** — 参照画像にないため。<br>**保持: Phase 3-E(幹部育成スキルツリー)** — 板澤様判断で残す。<br>**実装戦略**: 既存ページを直接書換え(B 案、本番に随時反映)、並走実装は不要。<br>**着手順序**: Phase 11 共通基盤先行(P11-01〜07 を最初のセッションで)→ Phase 11 後半 → Phase 12 各画面 → Phase 7/9/10/8。<br>**クライアント報告**: 方針変更通知は一旦不要(進捗良ければ次回打ち合わせで自然に説明)。<br>**実装方針**: エージェントフル活用、トークン惜しまず、specialist 並列起動。 | 全タスク |
 | 2026-05-10 | **さくらししまるの口調を「現代口語(〜だよ / 〜してね)」に統一**。旧 じゃ口調(おる/じゃ/ぞ)を全面廃止。**機能と乖離した文言は使わない**(例:「現場が動き出したら教えてくれるかの」は削除 — システムは日報提出を自動検知するため、ユーザーに「教える」アクションは不要だった誤解誘発フレーズ)。**さくらししまるは現状ルールベースのみで Claude API 未統合**であることも CLAUDE.md / コメントに明記。 | Phase 2 / 4 / 8 |
 | 2026-05-10 | **Claude API 統合の設計のみ確定(ADR-0002 策定)**。実装は有料 API 系統合フェーズ(全 110 タスクの最後)で行う。板澤様の確認:①AI 個人評価 OK、②横展開差別化に強い意志あり、③秘匿性担保設計で社内ポリシークリア可能。**ハイブリッド設計**(ルールベース層 + Claude API 層)を採用、PII 匿名化レイヤー必須、フォールバック必須、月予算上限あり。**P8-09 着手直前にクライアント説明資料を Claude が再提示する義務**(P8-09h)。詳細は `docs/architecture/adr-0002-shishimaru-ai-integration.md`。 | Phase 8 P8-09 |
 

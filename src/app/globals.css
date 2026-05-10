@@ -23,6 +23,17 @@
     --silver: #c0c0c0;
     --bronze: #cd7f32;
 
+    /* === REPORT3 ロゴ用赤橙グラデ(参照データ S5 由来) === */
+    --report3-from: #e8516a;
+    --report3-to: #f5a45a;
+
+    /* === 状態セマンティック色(業務画面用) === */
+    /* active=進行中, done=完了, warn=注意, urgent=緊急 */
+    --status-active: #e03030;
+    --status-done: #0da870;
+    --status-warn: #d88000;
+    --status-urgent: #b91c1c;
+
     /* Surfaces */
     --ink: #1a2a3a;
     --ink-rich: #1a2740;
@@ -178,6 +189,21 @@
   .pill-bronze {
     @apply pill text-[#7a4f1f];
     background: rgba(205, 127, 50, 0.15);
+  }
+
+  /* === セマンティック状態 pill(業務画面用、参照データ S5 由来) === */
+  .pill-active {
+    @apply pill bg-red-bg text-red;
+  }
+  .pill-done {
+    @apply pill bg-teal-bg text-teal;
+  }
+  .pill-warn {
+    @apply pill bg-amber-bg text-amber;
+  }
+  .pill-urgent {
+    @apply pill text-white;
+    background: var(--status-urgent);
   }
 
   /* === データテーブル (デモ準拠) === */

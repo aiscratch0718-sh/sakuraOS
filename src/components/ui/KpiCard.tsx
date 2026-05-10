@@ -97,35 +97,46 @@ export function KpiCard({
 
   return (
     <Wrap {...wrapProps}>
-      <div className="relative overflow-hidden bg-panel border border-line rounded-panel pl-5 pr-4 py-4 shadow-card transition-all hover:shadow-cardHover hover:-translate-y-0.5">
+      <div className="relative overflow-hidden bg-panel border border-line rounded-cardLg pl-5 pr-4 py-4 shadow-card transition-all hover:shadow-cardHover hover:-translate-y-0.5">
+        {/* 左 4px の accent バー */}
         <span
           aria-hidden
           className={`absolute top-0 left-0 w-1 h-full ${a.bar}`}
         />
-        {icon && (
-          <div
-            className={`w-9 h-9 rounded-[10px] flex items-center justify-center text-[18px] mb-2.5 ${a.iconBg} ${a.iconColor}`}
-            aria-hidden
-          >
-            {icon}
+
+        {/* アイコン + ラベル を横並び(参照画像 S5 準拠) */}
+        <div className="flex items-center gap-2 mb-2">
+          {icon && (
+            <div
+              className={`w-9 h-9 rounded-card flex items-center justify-center text-[18px] flex-shrink-0 ${a.iconBg} ${a.iconColor}`}
+              aria-hidden
+            >
+              {icon}
+            </div>
+          )}
+          <div className="text-[11px] text-ink-3 font-medium leading-tight flex-1 min-w-0">
+            {label}
           </div>
-        )}
-        <div className="text-[11px] text-ink-3 mb-1.5">{label}</div>
+        </div>
+
+        {/* 数値(参照画像 S5 準拠で 28→32px に拡大) */}
         <div
-          className={`text-[28px] font-extrabold leading-none ${a.valueColor}`}
+          className={`text-[32px] font-black leading-none tracking-tight ${a.valueColor}`}
         >
           {value}
           {unit && <span className="text-[16px] font-extrabold ml-0.5">{unit}</span>}
         </div>
+
+        {/* サブテキスト + トレンド */}
         {(subText || trend) && (
-          <div className="text-[11px] text-ink-3 mt-1.5 flex items-center gap-1.5">
+          <div className="text-[11px] text-ink-3 mt-2 flex items-center gap-1.5">
             {trend && (
               <span
                 className={
                   trend.dir === "up"
-                    ? "text-p3 font-bold"
+                    ? "text-status-done font-bold"
                     : trend.dir === "down"
-                      ? "text-p1 font-bold"
+                      ? "text-status-active font-bold"
                       : "text-ink-3 font-bold"
                 }
               >

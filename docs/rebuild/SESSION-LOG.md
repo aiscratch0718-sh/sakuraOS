@@ -4,6 +4,67 @@
 
 ---
 
+## S6 — Phase 11 共通基盤実装(4 specialist 並列、219k tokens)/ 2026-05-11
+
+### コンテキスト
+板澤様の決定:
+- 参照画像準拠への全面リワーク確定
+- Phase 3-C(マリオ風)/ 3-D(ボスHP)を **廃止**
+- Phase 3-E(幹部育成)を保持
+- 既存ページは直接書換え方針(B 案)
+- クライアント方針変更通知は不要
+- 「エージェントをフル活用して実装」
+
+### このセッションで完了
+**P11-01**(私が直接、5 分):
+- Tailwind config に `brand.report3.{from/to}`, `status.{active,done,warn,urgent}`, `radius.card/cardLg` 追加
+- globals.css `:root` に CSS 変数追加 + `.pill-active/done/warn/urgent` クラス追加
+
+**P11-02 〜 P11-07 + P11-14 部分実施**(4 specialist 並列、219k tokens):
+
+| Agent ID | 役割 | 成果物 | 行数 |
+|---|---|---|---|
+| a4b05a06328259c74 | react-specialist | `Stepper` `StepFooter`(`src/components/blocks/stepper/`) | 280 |
+| ae460175ff40ec5a2 | react-specialist | `LineItemTable`(decimal.js + memo) | 430 |
+| a30f50b71dbc498bd | component-library-specialist | `PhotoGrid` + `SidebarFooterWidget` | 370 |
+| a5acb8ad689e19b09 | react-specialist | `DocumentPreview` + `SiteInfoPanel` + `QuickTips` | 530 |
+| (parent) | - | KpiCard リファイン(数値 32px / アイコン横並び) + AlertCard リファイン(左バー 6px / status セマンティック) | - |
+
+合計 **約 1,610 行のコード生成**、すべて TypeScript strict 通過。
+
+**barrel export 整備**:
+- `src/components/blocks/index.ts` 新規(7 コンポーネント / 2 型 集約 export)
+
+### ベストプラクティス検証(各 specialist で必須宣言済)
+- ✅ アクセシビリティ: aria-current / aria-disabled / aria-live / role / focus-visible 完備
+- ✅ ロジック分離: Stepper は Server Component、StepFooter のみ "use client"
+- ✅ 計算精度: LineItemTable は decimal.js で `quantity × unitPrice` + 税(ROUND_HALF_UP)
+- ✅ パフォーマンス: React.memo / useCallback / useMemo で再描画最小化
+- ✅ 既存トークン使用: 独自カラーゼロ、p1-p4 はゲーミフィケーション専用に温存
+- ✅ a11y キーボード: Tab / Enter / Backspace / Alt+←→ で全操作可能
+- ✅ TypeScript strict + noUncheckedIndexedAccess エラーゼロ
+
+### 動作確認
+- `npm run build` 通過 ✅
+- ライブラリ追加: lucide-react / decimal.js
+
+### 次セッション(S7)予定
+**Phase 11 後半**:
+- P11-08 REPORT3 入力 6 ステップウィザード化(/sp/report3/new + /pc/report3/new)
+- P11-09 下書き保存機能
+- P11-10 バリデーション
+- P11-11 クイック入力 RPC
+- P11-12 ロゴ統一
+- P11-13 Lucide アイコン統一(Sidebar の絵文字置換)
+- P11-15 各既存ページの角丸/シャドウ揃え
+
+その後 S8〜S15 で Phase 12 各画面に着手。
+
+### コミット
+- 後述の Final commit にて
+
+---
+
 ## S5 — 参照データ画像 12 枚監査(4 specialist 並列、172k tokens)/ 2026-05-11
 
 ### コンテキスト

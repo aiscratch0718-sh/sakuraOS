@@ -1,16 +1,39 @@
 import Link from "next/link";
 
-export type AlertSeverity = "p1" | "p2" | "blue";
+/**
+ * Severity スケール(参照画像 S5 由来 + 既存互換):
+ * - critical: 緊急(赤背景白文字)
+ * - active:   進行中・要対応(赤系)
+ * - warn:     注意(茶金)
+ * - info:     情報(青)
+ * - p1/p2/blue: 旧名(後方互換、内部マップで吸収)
+ */
+export type AlertSeverity =
+  | "critical"
+  | "active"
+  | "warn"
+  | "info"
+  | "p1" // 旧 = active
+  | "p2" // 旧 = warn
+  | "blue"; // 旧 = info
 
 const SEVERITY_BG: Record<AlertSeverity, string> = {
-  p1: "bg-p1/10 text-p1",
-  p2: "bg-p2/10 text-p2",
+  critical: "bg-red text-white",
+  active: "bg-red/10 text-red",
+  warn: "bg-amber/10 text-amber",
+  info: "bg-blue/10 text-blue",
+  p1: "bg-red/10 text-red",
+  p2: "bg-amber/10 text-amber",
   blue: "bg-blue/10 text-blue",
 };
 
 const SEVERITY_DETAIL_COLOR: Record<AlertSeverity, string> = {
-  p1: "text-p1",
-  p2: "text-p2",
+  critical: "text-red",
+  active: "text-red",
+  warn: "text-amber",
+  info: "text-blue",
+  p1: "text-red",
+  p2: "text-amber",
   blue: "text-blue",
 };
 
@@ -86,19 +109,19 @@ export function AlertCard({
 
   return (
     <div
-      className="rounded-panel border border-line border-l-4 border-l-p1 overflow-hidden"
+      className="rounded-cardLg border border-line border-l-[6px] border-l-status-active overflow-hidden shadow-card"
       style={{
         background:
-          "linear-gradient(90deg, rgba(217,65,90,0.04), transparent 60%)",
+          "linear-gradient(90deg, rgba(224,48,48,0.05), transparent 60%)",
       }}
     >
       <div className="px-4 py-3">
         <div className="flex items-center gap-2 mb-2.5">
-          <span aria-hidden className="text-[16px]">
+          <span aria-hidden className="text-[18px]">
             ⚠️
           </span>
-          <span className="text-[13px] font-extrabold text-p1">{title}</span>
-          <span className="pill-p1 ml-1">{items.length}件</span>
+          <span className="text-[13px] font-extrabold text-status-active">{title}</span>
+          <span className="pill pill-active ml-1">{items.length}件</span>
           {dataSource && (
             <span className="ml-auto text-[10px] text-ink-3">
               データ元: {dataSource}
