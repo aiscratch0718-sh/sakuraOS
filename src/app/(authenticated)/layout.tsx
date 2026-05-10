@@ -40,7 +40,11 @@ export default async function AuthenticatedLayout({
           background: `linear-gradient(135deg, ${primary} 0%, ${shade(primary, 18)} 100%)`,
         }}
       >
-        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+        {/* モバイル時のみロゴ表示。デスクトップではサイドバーがロゴを担当 */}
+        <Link
+          href="/"
+          className="flex items-center gap-2 hover:opacity-80 transition-opacity md:hidden"
+        >
           {logoUrl ? (
             /* eslint-disable-next-line @next/next/no-img-element */
             <img src={logoUrl} alt="ロゴ" className="h-7 max-w-[160px] object-contain" />
@@ -55,8 +59,8 @@ export default async function AuthenticatedLayout({
           )}
         </Link>
 
-        <span className="text-[12px] opacity-80 hidden sm:inline">
-          / {roleLabel(session.role)}ホーム
+        <span className="text-[12px] opacity-80 hidden md:inline">
+          {roleLabel(session.role)}ホーム
         </span>
 
         <div className="flex-1" />
