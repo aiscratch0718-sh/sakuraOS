@@ -175,15 +175,16 @@
 | 2026-05-10 | 獅子丸 AI はルールベース → 必要に応じて Claude API 連携(P2-06) | P2-06 |
 | 2026-05-10 | ゲーミフィケーションは現時点でのベストプラクティスで実装。クライアント確認後に大幅修正可能性あり。**設計指針**: ①実業務KPIと連動(架空ポイントではなく安全・出来高・期限遵守等の実数値)②個人ランキングだけでなくチーム達成を強調③表彰・承認による Recognition を中心(金銭報酬は補助的)④進捗(自分比較)を主、順位を従⑤opt-out 機能を全ユーザーに付与⑥失敗を罰しない設計(コンボ途切れの「赦し」期間 etc) | P3-A 全般 / P3-B 全般 |
 | 2026-05-10 | P1-08(既存ページ差し替え)は P2 と並行で実施。ダッシュボードを新コンポーネントで作ることが他ページのリファレンスになる。 | P1-08 |
+| 2026-05-10 | Phase 3 から疑似 specialist 化を導入(Task subagent_type: general-purpose に `.claude/agents/*.md` の役割を演じさせる)。Phase 1〜2 は単独実装で継続。 | P3 全般 |
+| 2026-05-10 | フォルダリネーム実行(`Claude-Code-Game-Studios` → `sakuraOSシステム開発用`)+ テンプレ由来ファイルを `docs/_template-archive/` へ集約。 | 全(パス参照のみ) |
 
 ---
 
 ## 🚨 ブロッカー / 未解決事項
 
-- [ ] **フォルダリネーム未実施** — 現在のローカルフォルダ名は `Claude-Code-Game-Studios`
-  (テンプレート由来の汎用名)のまま。`sakura-os` にリネームすべき。手順は
-  `docs/rebuild/FOLDER-RENAME.md`。Claude セッションをいったん終了する必要があるため、
-  ユーザー側で実施してもらう。次セッション開始時に完了を確認。
+- [x] ~~**フォルダリネーム未実施**~~ → **2026-05-10 S1.6 で実施済み**。
+  `Claude-Code-Game-Studios` → `sakuraOSシステム開発用` に変更。あわせてテンプレ由来
+  ファイルを `docs/_template-archive/` へ集約済み。詳細は `docs/rebuild/FOLDER-RENAME.md`。
 - [ ] **GitHub PAT のローテーション** — `git remote -v` で確認した remote URL に
   Personal Access Token が埋め込まれていた。漏洩リスクがあるため、GitHub > Settings >
   Developer settings から該当 PAT を revoke + 再生成 + remote 更新を推奨。

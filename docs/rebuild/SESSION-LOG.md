@@ -4,6 +4,51 @@
 
 ---
 
+## S1.6 — フォルダリネーム実行 + テンプレ由来ファイルのアーカイブ / 2026-05-10
+
+### コンテキスト
+- S1.5 では「リネーム手順書を作成しただけ、実体は未変更」だったことを板澤様が指摘
+- 「Claude-Code-Game-Studios という名前は 49 エージェントを使うために選んだフォルダで、
+   SAKURA OS の実装ファイルがテンプレ由来ファイルと混在して識別困難」という本質的な
+   課題が判明
+- フォルダ名は **A 案: `sakuraOSシステム開発用`**(板澤様ご指定)で確定
+- Phase 3 から疑似 specialist 化を導入することも合意
+
+### このセッションで完了
+1. **フォルダリネーム実行**:
+   `C:\...\エージェント会社\Claude-Code-Game-Studios\` →
+   `C:\...\エージェント会社\sakuraOSシステム開発用\`
+2. **テンプレ由来ファイルを `docs/_template-archive/` へ集約**:
+   - `README-template.md` / `REBRAND-SUMMARY.md` / `UPGRADING.md`(ルートから)
+   - `docs/COLLABORATIVE-DESIGN-PRINCIPLE.md` / `docs/WORKFLOW-GUIDE.md`
+   - `docs/examples/` / `docs/registry/`(フォルダごと移動)
+   - 移動前に `.claude/` 配下から参照されていないことを Grep で確認 → 参照ゼロを確認後に実行
+3. **`docs/_template-archive/README.md` 新規作成**(中身の説明 + 削除可否)
+4. **`PROJECT.md` 全面リライト**:
+   - 凡例追加(🌸 SAKURA OS / 🛠️ エージェント基盤 / 📚 テンプレ由来 / ⚙️ 設定)
+   - 全トップレベル要素を表形式で分類
+   - 「よくある混乱と解決」セクション追加
+5. **`CLAUDE.md` の冒頭情報を最新化**(リネーム済みパス、PROJECT.md の参照追加)
+6. **`docs/rebuild/FOLDER-RENAME.md`** を「実行済み」レポートに書き換え
+7. **`PROGRESS.md`** ブロッカーを完了に、Decisions Log に追記
+
+### 動作確認
+- `git status` 正常 ✅
+- `git remote -v` 不変 ✅
+- `npm run build` 通過 ✅(全62ルート)
+- ファイルロック発生なし(VS Code 等は事前に閉じられていた)
+
+### 次セッション(S2)へ申し送り
+- パスは `C:/Users/liim1/Desktop/エージェント会社/sakuraOSシステム開発用/` を使用
+- 次セッション起動時、PROGRESS.md の「次セッションでやること」を読み、ダッシュボード再構成
+  (P2-01〜P2-04, P2-06, P2-07)に着手
+- もし VS Code / Cursor をまだ古いパスで開いている場合は、新パスで開き直す必要あり
+
+### コミット
+- 後述の Final commit にて
+
+---
+
 ## S1.5 — プロジェクト識別性の改善 / 2026-05-10
 
 ### コンテキスト

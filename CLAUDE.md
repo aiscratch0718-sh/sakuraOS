@@ -10,10 +10,10 @@
 > - **GitHub**: `aiscratch0718-sh/sakuraOS`
 > - **デプロイ先**: Vercel(Tokyo region / hnd1)
 > - **DB**: Supabase Postgres
-> - **本番ドメイン名フォルダ推奨**: `sakura-os/`(GitHub repo 名と一致)
+> - **ローカルフォルダ**: `sakuraOSシステム開発用/`(2026-05-10 にリネーム済み、旧名 `Claude-Code-Game-Studios`)
 >
-> プロジェクト概要は `README.md`、設計詳細は `design/prd/`、ADR は
-> `docs/architecture/` を参照。
+> プロジェクトの全体マップは `PROJECT.md`、概要は `README.md`、設計詳細は
+> `design/prd/`、ADR は `docs/architecture/` を参照。
 
 ---
 
