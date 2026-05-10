@@ -76,7 +76,7 @@ export function SidebarFooterWidget({
 
   return (
     <div
-      className={`relative border-t border-white/10 px-3 py-3 flex flex-col gap-3 shrink-0 ${className}`}
+      className={`relative border-t border-white/10 px-3 py-2.5 flex flex-col gap-2 shrink-0 ${className}`}
     >
       {/* 上段: チームレベル + 進捗バー */}
       {team && (

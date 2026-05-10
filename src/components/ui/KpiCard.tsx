@@ -111,14 +111,14 @@ export function KpiCard({
   const a = ACCENT[accent];
 
   return (
-    <div className="relative overflow-hidden bg-panel border border-line rounded-cardLg px-5 py-4 shadow-card transition-all hover:shadow-cardHover">
+    <div className="relative overflow-hidden bg-panel border border-line rounded-card px-3.5 py-2.5 shadow-card transition-all hover:shadow-cardHover">
       {/* ヘッダー: タイトル + ヘルプ ? */}
-      <div className="flex items-center gap-1.5 mb-2">
-        <h3 className={`text-[13px] font-bold ${a.titleColor}`}>{label}</h3>
+      <div className="flex items-center gap-1 mb-1">
+        <h3 className={`text-[12px] font-bold ${a.titleColor}`}>{label}</h3>
         <button
           type="button"
           aria-label={`${label}の説明`}
-          className="w-4 h-4 rounded-full border border-line text-ink-3 text-[10px] flex items-center justify-center hover:bg-graybg transition-colors"
+          className="w-3.5 h-3.5 rounded-full border border-line text-ink-3 text-[9px] flex items-center justify-center hover:bg-graybg transition-colors leading-none"
           tabIndex={-1}
         >
           ?
@@ -126,13 +126,13 @@ export function KpiCard({
       </div>
 
       {/* メイン: 巨大な数値 + 任意の side widget(children) */}
-      <div className="flex items-center justify-between gap-3 mb-2">
+      <div className="flex items-center justify-between gap-2 mb-1">
         <div
-          className={`text-[40px] font-black leading-none tracking-tight ${a.valueColor}`}
+          className={`text-[28px] font-black leading-none tracking-tight ${a.valueColor}`}
         >
           {value}
           {unit && (
-            <span className="text-[20px] font-extrabold ml-0.5">{unit}</span>
+            <span className="text-[15px] font-extrabold ml-0.5">{unit}</span>
           )}
         </div>
         {children && <div className="flex-shrink-0">{children}</div>}
@@ -140,13 +140,15 @@ export function KpiCard({
 
       {/* サブテキスト */}
       {subText && (
-        <div className="text-[11px] text-ink-3 mb-3">{subText}</div>
+        <div className="text-[10px] text-ink-3 mb-1.5 leading-snug">
+          {subText}
+        </div>
       )}
 
       {/* フッター: トレンド(左) + 詳細リンク(右) */}
       {(trend || href) && (
-        <div className="flex items-center justify-between pt-2 border-t border-line/60">
-          <div className="text-[11px] flex items-center gap-1.5">
+        <div className="flex items-center justify-between pt-1.5 border-t border-line/60">
+          <div className="text-[10px] flex items-center gap-1">
             {trend && (
               <>
                 <span className="text-ink-3">
@@ -174,7 +176,7 @@ export function KpiCard({
           {href && (
             <a
               href={href}
-              className={`text-[11px] font-bold ${a.linkColor} hover:underline flex items-center gap-0.5`}
+              className={`text-[10px] font-bold ${a.linkColor} hover:underline flex items-center gap-0.5`}
             >
               {hrefLabel ?? "詳細へ"}
               <span aria-hidden>›</span>

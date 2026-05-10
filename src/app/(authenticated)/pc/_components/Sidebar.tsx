@@ -239,16 +239,16 @@ export function Sidebar({
   return (
     <aside
       aria-label="サイドナビゲーション"
-      className="w-60 shrink-0 hidden md:flex flex-col text-white sticky self-start top-0 h-screen"
+      className="w-52 shrink-0 hidden md:flex flex-col text-white sticky self-start top-0 h-screen"
       style={{
         background:
           "linear-gradient(180deg, #0f1e3c 0%, #0a1730 60%, #07122a 100%)",
       }}
     >
       {/* 上部: REPORT3 ロゴ */}
-      <div className="px-4 py-5 border-b border-white/10 shrink-0">
+      <div className="px-3 py-3 border-b border-white/10 shrink-0">
         <div
-          className="text-[26px] font-extrabold leading-none tracking-tight bg-clip-text text-transparent"
+          className="text-[22px] font-extrabold leading-none tracking-tight bg-clip-text text-transparent"
           style={{
             backgroundImage:
               "linear-gradient(135deg, var(--report3-from, #ff6b35) 0%, var(--report3-to, #ff3d6e) 100%)",
@@ -256,7 +256,7 @@ export function Sidebar({
         >
           REPORT3
         </div>
-        <div className="text-[11px] text-white/55 mt-1.5 font-medium tracking-wide">
+        <div className="text-[10px] text-white/55 mt-1 font-medium tracking-wide">
           業務管理システム
         </div>
       </div>
@@ -264,7 +264,7 @@ export function Sidebar({
       {/* スクロール領域 */}
       <nav
         role="navigation"
-        className="flex-1 overflow-y-auto py-3 sidebar-scroll"
+        className="flex-1 overflow-y-auto py-2 sidebar-scroll"
       >
         {/* フラットメニュー(カテゴリ無し) */}
         <ul className="space-y-0.5 px-2">
@@ -340,7 +340,7 @@ function NavLink({
       <Link
         href={item.href}
         aria-current={active ? "page" : undefined}
-        className={`flex items-center gap-2.5 pl-4 pr-3 py-2.5 rounded-md text-[13px] font-medium transition-colors ${
+        className={`flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-md text-[12px] font-medium transition-colors ${
           active ? activeClass : `${inactiveColor} ${hover}`
         }`}
       >

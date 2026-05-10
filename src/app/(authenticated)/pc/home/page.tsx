@@ -68,39 +68,39 @@ export default async function PcHomePage() {
   const canSeeSiteProgress = role === "leader" || role === "office" || role === "ceo" || role === "system";
 
   return (
-    <div className="px-6 py-5 max-w-[1400px] mx-auto">
+    <div className="px-4 py-3">
       {/* ─────────────── ヘッダー ─────────────── */}
-      <header className="mb-4 flex items-end justify-between flex-wrap gap-3">
+      <header className="mb-3 flex items-end justify-between flex-wrap gap-2">
         <div>
-          <h1 className="text-2xl font-extrabold text-navy">ホーム</h1>
-          <p className="text-[12px] text-ink-2 mt-0.5">
+          <h1 className="text-[20px] font-extrabold text-navy leading-tight">ホーム</h1>
+          <p className="text-[11px] text-ink-2 mt-0.5">
             業務の全体状況を確認し、今日の行動を始めましょう。
           </p>
         </div>
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap">
           <span className="text-[11px] text-ink-3">現在のロール:</span>
           <RoleTabs role={role} />
-          <div className="flex items-center gap-1 ml-1">
+          <div className="flex items-center gap-0.5 ml-1">
             <button
               type="button"
               aria-label="検索"
-              className="w-9 h-9 rounded-full hover:bg-graybg flex items-center justify-center text-ink-2"
+              className="w-8 h-8 rounded-full hover:bg-graybg flex items-center justify-center text-ink-2"
             >
-              <span aria-hidden>🔍</span>
+              <span aria-hidden className="text-[14px]">🔍</span>
             </button>
             <button
               type="button"
               aria-label="ヘルプ"
-              className="w-9 h-9 rounded-full hover:bg-graybg flex items-center justify-center text-ink-2"
+              className="w-8 h-8 rounded-full hover:bg-graybg flex items-center justify-center text-ink-2"
             >
-              <span aria-hidden>❓</span>
+              <span aria-hidden className="text-[14px]">❓</span>
             </button>
             <button
               type="button"
               aria-label="通知"
-              className="relative w-9 h-9 rounded-full hover:bg-graybg flex items-center justify-center text-ink-2"
+              className="relative w-8 h-8 rounded-full hover:bg-graybg flex items-center justify-center text-ink-2"
             >
-              <span aria-hidden>🔔</span>
+              <span aria-hidden className="text-[14px]">🔔</span>
               <span
                 aria-hidden
                 className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red"
@@ -113,7 +113,7 @@ export default async function PcHomePage() {
       {/* ─────────────── KPI 4 枚 ─────────────── */}
       <section
         aria-label="主要 KPI"
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 mb-3"
       >
         {/* 1. 本日の入力率(値+ドーナツを並列表示) */}
         <KpiCard
@@ -176,7 +176,7 @@ export default async function PcHomePage() {
       {/* ─────────────── 中段 3 列 ─────────────── */}
       <section
         aria-label="今日の業務"
-        className="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-4"
+        className="grid grid-cols-1 lg:grid-cols-3 gap-2.5 mb-3"
       >
         {/* 今日のやること */}
         <PanelCard
@@ -218,7 +218,7 @@ export default async function PcHomePage() {
       {/* ─────────────── 下段 3 列 ─────────────── */}
       <section
         aria-label="進捗・経営指標"
-        className="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-4"
+        className="grid grid-cols-1 lg:grid-cols-3 gap-2.5 mb-3"
       >
         {/* 現場別進捗 */}
         {canSeeSiteProgress && (
@@ -286,22 +286,22 @@ function PanelCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="bg-panel border border-line rounded-cardLg shadow-card overflow-hidden flex flex-col">
-      <header className="px-4 py-2.5 border-b border-line flex items-center justify-between">
-        <h2 className="text-[13px] font-bold text-ink flex items-center gap-1.5">
-          {icon && <span aria-hidden>{icon}</span>}
+    <section className="bg-panel border border-line rounded-card shadow-card overflow-hidden flex flex-col">
+      <header className="px-3 py-2 border-b border-line flex items-center justify-between">
+        <h2 className="text-[12px] font-bold text-ink flex items-center gap-1">
+          {icon && <span aria-hidden className="text-[13px]">{icon}</span>}
           {title}
         </h2>
         {href && (
           <Link
             href={href}
-            className="text-[11px] text-blue hover:underline font-medium"
+            className="text-[10px] text-blue hover:underline font-medium"
           >
             {hrefLabel ?? "すべて見る"} →
           </Link>
         )}
       </header>
-      <div className="p-3 flex-1">{children}</div>
+      <div className="p-2.5 flex-1 text-[12px]">{children}</div>
     </section>
   );
 }
