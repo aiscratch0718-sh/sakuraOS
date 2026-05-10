@@ -19,7 +19,7 @@
 | Phase 2 | ダッシュボード再構成 + ししまるマスコット | 9 | 2〜3 |
 | Phase 3-A | ポイント管理システム | 7 | 2 |
 | Phase 3-B | パワプロ風ステータス画面 | 8 | 2〜3 |
-| Phase 3-C | 現場マップ画面 | 5 | 1〜2 |
+| Phase 3-C | 現場マップ画面(マリオ風 + 従業員配置) | 8 | 2〜3 |
 | Phase 3-D | ボスHPモニター(TV用) | 4 | 1 |
 | Phase 3-E | 幹部育成スキルツリー | 3 | 1 |
 | Phase 4 | 演出 / アニメーション仕上げ | 4 | 1 |
@@ -370,34 +370,90 @@ create table public.user_abilities (
 
 ---
 
-# Phase 3-C: 現場マップ画面
+# Phase 3-C: 現場マップ画面(マリオ風 WORLD MAP + 従業員配置)
 
-## P3-C-01: マイグレーション 0014 — 現場マップ用カラム追加
+> **コンセプト**(板澤様 2026-05-10 確定):
+> - マリオのステージマップがモチーフ
+> - **WORLD - STAGE 形式のステージナンバリング**(1-1, 1-2, 2-1...)
+> - WORLD = エリア(area_group: 東京エリア / 神奈川エリア / 埼玉エリア 等)
+> - STAGE = エリア内の現場(現場名で表示、内部的には番号も持つ)
+> - **従業員がどの現場に配置されているか地図上で確認できる**(本要件は最重要)
+> - クライアントと詳細詰めは後日。導入確定済み、実装しないとならない。
+>
+> 詳細仕様確定までの暫定実装方針として進める。クライアント確認後に修正可能。
+
+## P3-C-01: マイグレーション 0014 — 現場マップ用カラム + ステージ番号
 ```sql
 alter table public.projects
   add column if not exists area_group text default '東京エリア',
   add column if not exists is_boss_stage boolean not null default false,
-  add column if not exists map_position_x numeric,    -- 0〜100 (%)
-  add column if not exists map_position_y numeric,    -- 0〜100 (%)
-  add column if not exists icon text default '🏠';
+  add column if not exists map_position_x numeric,        -- 0〜100 (%)
+  add column if not exists map_position_y numeric,        -- 0〜100 (%)
+  add column if not exists icon text default '🏠',
+  -- ステージナンバリング(1-1, 1-2 形式):
+  --   world_number は area_group ごとに 1, 2, 3...(ユーザー側設定 or 自動)
+  --   stage_number は同 world 内で 1, 2, 3...
+  --   表示は「{world_number}-{stage_number}: {project.name}」
+  add column if not exists world_number integer,          -- 1, 2, 3...
+  add column if not exists stage_number integer,          -- 1, 2, 3...
+  -- 同 world 内で stage_number は重複させない
+  add constraint uq_projects_world_stage unique (tenant_id, world_number, stage_number) deferrable;
+
+create index idx_projects_world_stage on public.projects(tenant_id, world_number, stage_number);
 ```
 
-## P3-C-02: `/pc/projects/map` ページ
-- WORLD タブ(area_group の distinct で動的生成)
-- SVG ノード + パス
-- ノード色は進捗で動的:
-  - ≥60%: 順調(緑) / 30〜59%: 注意(黄) / <30%: 遅延(赤パルス) / 0%: 未着手
+## P3-C-02: `/pc/projects/map` ページ — マリオ風ステージマップ
+- 上部に WORLD タブ(area_group の distinct で動的生成、各タブに「WORLD 1: 東京」表記)
+- 各 WORLD 内のマップ:
+  - SVG パスでステージをつなぐ(マリオ風)
+  - ステージノード(現場)に **「1-1」「1-2」表記 + 現場名** を併記
+  - クリア状況で見た目変化(完了 = 旗 / 進行中 = 通常 / ボス = 城アイコン)
+  - 進捗ノード色:
+    - ≥60% 順調(緑)/ 30〜59% 注意(黄)/ <30% 遅延(赤パルス)/ 0% 未着手(点線)
+- Mario 風背景装飾(雲・パイプ・ブロック・コイン)はデモ v4.0 から踏襲
 
-## P3-C-03: ししまるキャラマーカー
-- ログインユーザーの「現在配置中の現場」(`report3_entries` 直近)に表示
-- アニメーション付き(bounce)
+## P3-C-03: 従業員配置レイヤー(本要件のキー機能)
+**「どの従業員が今どの現場にいるか」を地図上で確認できる UI。**
 
-## P3-C-04: 現場詳細ポップアップ
-- ノードクリック → 進捗 / 配置班 / 今日の出来高 / 安全コンボ / 残工期 / ステータス
-- ボスHPモニターへ / クエスト入力へ ボタン
+実装方針:
+- **データソース**: 当日の `report3_entries.work_date = today` で `project_id` ごとに `user_id` を集約
+  - スケジュール導入後(Phase 5)は `schedules.schedule_date = today` も参照
+- **表示**:
+  - 各ステージノードの周囲に、配置中の従業員アバター(profiles.display_name の頭文字)を最大 5 つまで重ねて表示
+  - 5 名超の場合「+N」バッジ
+  - クリックで全配置メンバー一覧ポップアップ
+- **モード切替**(管理者目線とプレイヤー目線):
+  - **MAP モード(デフォルト)**: 進捗中心で表示
+  - **配置モード**: 全従業員のアバターをマップ上に配置(誰がどこにいるか俯瞰)
+  - **班別モード**: 班(`teams` or 暫定で `org_departments`)ごとに色分け
+- **タイムライン再生**(任意拡張): 過去日を選んで「このメンバーがこの日この現場にいた」を再生
 
-## P3-C-05: マップエディタ(管理者用)
-- `/pc/projects/[id]/edit` で map_position_x/y / area_group / is_boss_stage を設定可能に
+## P3-C-04: ししまるキャラマーカー(自分の現在地)
+- ログインユーザーの「本日配置中の現場」(`report3_entries` 直近)に
+  公式マスコット画像をマーカー化(`/mascot/mascot-avatar-circle-512.webp` 使用)
+- 浮遊アニメ(`animate-floatSlow`)
+- 自分が複数現場にいる時は最後の現場優先
+
+## P3-C-05: 現場詳細ポップアップ
+- ノードクリック → 進捗 / 配置班 / 配置メンバー一覧 / 今日の出来高 / 安全コンボ / 残工期 / ステータス
+- ボタン: 「ボスHPモニターへ」「クエスト入力へ」「Google Maps で開く」(P7-13 で実地図連携)
+
+## P3-C-06: マップエディタ(管理者用)
+- `/pc/projects/[id]/edit` で:
+  - map_position_x/y(地図上の座標)
+  - area_group, world_number, stage_number(ステージ番号)
+  - is_boss_stage(ボスフラグ)
+  - icon(絵文字 or アイコン名)
+- 推奨: ドラッグ&ドロップでマップ画面そのものから直接位置設定できる UI(管理者専用モード)
+
+## P3-C-07: ステージ番号自動採番ヘルパー
+- 新規 project 作成時に world_number, stage_number 未指定なら自動的に「同 world の最大 stage_number + 1」を割当
+- `assign_next_stage_number(area_group)` server action
+
+## P3-C-08: モバイル(`/sp/map`)版マップ
+- 縦スクロールで世界を表示(画面幅小さいので horizontal pan は使わず縦に)
+- 配置メンバーは省略表示(タップで詳細)
+- 自分が配置されている現場をハイライト(さくらししまるマーカーで可視化)
 
 ---
 
@@ -1007,3 +1063,8 @@ create index idx_file_access_log_user on public.file_access_log(user_id, occurre
   追加要件: TASK / SCH / ATT 補完、GENKA 詳細 / GAIKYO 新設、外部 SaaS 連携(LW / MF / CS / GMaps)、
   ゲーミフィケーション完成(バッジ画面 / クエスト / NAVI)、ロール別画面ガード徹底、
   Google Drive 風ファイル管理 + ロール別アクセス制御 + バックアップ + 履歴。
+- 2026-05-10: Phase 3-C(現場マップ)を 5 → 8 タスクに拡張。マリオ風ステージナンバリング
+  (1-1, 1-2 形式、WORLD = area_group / STAGE = 同 area 内の現場)を必須化。
+  **従業員がどの案件に配置されているかをマップで確認できる機能**(P3-C-03)を追加。
+  詳細仕様はクライアントと詰めるが導入確定済み。モバイル版 `/sp/map`(P3-C-08)も
+  必須に。マップエディタもステージ番号設定 UI 含めて拡張。
