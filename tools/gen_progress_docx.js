@@ -2,9 +2,9 @@
  * クライアント向け進捗報告書を Word 形式で生成するスクリプト。
  *
  * 出力:
- *   production/customer-comms/2026-05-10_progress-report.docx       (詳細版)
- *   production/customer-comms/2026-05-10_progress-summary-1page.docx (1 枚版)
- *   production/customer-comms/2026-05-10_questions-for-client.docx   (質問票)
+ *   production/打ち合わせ用/2026-05-10_progress-report.docx       (詳細版)
+ *   production/打ち合わせ用/2026-05-10_progress-summary-1page.docx (1 枚版)
+ *   production/打ち合わせ用/2026-05-10_questions-for-client.docx   (質問票)
  *
  * ベストプラクティス:
  * - A4 サイズ(日本クライアント向け)
@@ -37,7 +37,7 @@ const {
   TabStopPosition,
 } = require("docx");
 
-const OUT_DIR = path.join(__dirname, "..", "production", "customer-comms");
+const OUT_DIR = path.join(__dirname, "..", "production", "打ち合わせ用");
 
 // ============ 共通ヘルパー ============
 

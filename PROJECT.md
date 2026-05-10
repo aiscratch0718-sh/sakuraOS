@@ -45,7 +45,7 @@
 | `tools/` | 🌸 | SAKURA OS 用スクリプト(Excel 自動生成等) |
 | `design/` | 🌸+📚 | 設計文書群(下記参照) |
 | `docs/` | 🌸+📚 | ドキュメント群(下記参照) |
-| `production/` | 📚 | テンプレートのスプリント/マイルストーン管理(現状未活用) |
+| `production/` | 🌸+📚 | テンプレートのスプリント/マイルストーン管理。`production/打ち合わせ用/` にクライアント向け資料(進捗報告書 docx 等)を保管 |
 | `.claude/` | 🛠️ | **49 エージェント・skills・rules・hooks の定義群** |
 | `.git/` | ⚙️ | Git リポジトリ |
 | `node_modules/` | ⚙️ | npm 依存関係(Git 管理外) |
