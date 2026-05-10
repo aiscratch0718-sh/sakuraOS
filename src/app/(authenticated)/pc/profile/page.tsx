@@ -16,7 +16,15 @@ export default async function PcProfilePage() {
 
   return (
     <div className="px-6 py-6 max-w-3xl mx-auto">
-      <h1 className="text-xl font-extrabold text-navy mb-5">プロフィール</h1>
+      <div className="flex items-center justify-between mb-5">
+        <h1 className="text-xl font-extrabold text-navy">プロフィール</h1>
+        <a
+          href="/pc/profile/status"
+          className="px-3 py-1.5 rounded-btn bg-p4 text-white text-[12px] font-bold hover:bg-p4/90 transition-colors shadow-p4-glow"
+        >
+          ⚡ ステータス画面へ
+        </a>
+      </div>
 
       <div className="panel-pad mb-4">
         <div className="flex items-center gap-4 mb-5">
