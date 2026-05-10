@@ -34,7 +34,7 @@ SAKURA OS は「**入力1回主義**」を核とした建設業(配管工事)向
 | 10 | GPS Attendance (出退勤・GPS打刻) | Workflow | MVP | Not Started | — | Auth, User |
 | 11 | Notification Dispatcher (LINE WORKS 連携含む) | Workflow | MVP | Not Started | — | Auth, REPORT3 |
 | 12 | Gamification (XP / Rank / Badge / Quest / SC) | Workflow | MVP | Not Started | — | REPORT3, User |
-| 13 | ししまるナビ (画面案内・通知表示) | Workflow | MVP | Not Started | — | Gamification |
+| 13 | さくらししまるナビ (画面案内・通知表示) | Workflow | MVP | Not Started | — | Gamification |
 | 14 | Estimate / Invoice / Payment (見積/請求/入金) | Workflow | Beta (第3段階) | Not Started | — | Project, Customer |
 | 15 | Vehicle Management (車両運行 + GPS + アルコール) | Workflow | Beta (第3段階) | Not Started | — | User, Schedule, Google Maps |
 | 16 | Tool QR Management (電動工具 QR + GPS) | Workflow | Beta (第3段階) | Not Started | — | User, Google Maps |
@@ -47,7 +47,7 @@ SAKURA OS は「**入力1回主義**」を核とした建設業(配管工事)向
 | 23 | Google Maps Integration | Integrations | Beta | Not Started | — | Vehicle, Tool QR |
 | 24 | LINE WORKS Integration | Integrations | MVP | Not Started | — | Notification Dispatcher |
 | 25 | Cloud Sign Integration (電子契約) | Integrations | GA | Not Started | — | Estimate / Invoice |
-| 26 | (Future) Claude AI for ししまる | ML / LLM | Post-GA | Not Started | — | ししまるナビ, Gamification |
+| 26 | (Future) Claude AI for ししまる | ML / LLM | Post-GA | Not Started | — | さくらししまるナビ, Gamification |
 
 ---
 
@@ -57,7 +57,7 @@ SAKURA OS は「**入力1回主義**」を核とした建設業(配管工事)向
 |----------|-------------|---------|
 | **Foundation** | 全システム横断の基盤 | Auth, Org & Users, Audit Log, Multi-tenancy scaffolding |
 | **Domain Core** | 主要ドメインエンティティと状態 | REPORT3, Work Classification, Project, Customer, Schedule |
-| **Workflow** | ユーザー向けの主要フロー | GPS Attendance, Notification, Gamification, ししまるナビ, Estimate/Invoice, Vehicle, Tool QR |
+| **Workflow** | ユーザー向けの主要フロー | GPS Attendance, Notification, Gamification, さくらししまるナビ, Estimate/Invoice, Vehicle, Tool QR |
 | **Reporting** | 集計・レポート系 | Construction Overview, Per-site Cost, Customer Sales, Drawing/Doc, Meeting Folders |
 | **Integrations** | 外部 SaaS 連携(変更しない) | Money Forward, Google Maps, LINE WORKS, Cloud Sign |
 | **ML / LLM** | AI を伴うフィーチャ | (Future) Claude AI for ししまる |
@@ -98,7 +98,7 @@ SAKURA OS は「**入力1回主義**」を核とした建設業(配管工事)向
 1. **REPORT3** ⭐ — depends on: Auth, Project, Schedule, Work Classification, User
 2. **GPS Attendance** — depends on: Auth, User
 3. **Gamification** — depends on: REPORT3, User
-4. **ししまるナビ** — depends on: Gamification, Notification Dispatcher
+4. **さくらししまるナビ** — depends on: Gamification, Notification Dispatcher
 5. **Estimate / Invoice / Payment** — depends on: Project, Customer
 6. **Vehicle Management** — depends on: Vehicle master, Schedule, GPS, Google Maps
 7. **Tool QR Management** — depends on: User, Google Maps
@@ -137,7 +137,7 @@ SAKURA OS は「**入力1回主義**」を核とした建設業(配管工事)向
 | 7 | GPS Attendance | MVP | Workflow | product-manager | S |
 | 8 | Gamification (基本のみ — XP / Rank / SC) | MVP | Workflow | product-manager + business-analyst (SC 税務) | M |
 | 9 | Notification Dispatcher (LINE WORKS) | MVP | Workflow | product-manager + api-engineer | M |
-| 10 | ししまるナビ(基本案内) | MVP | Workflow | interaction-designer + content-writer | M |
+| 10 | さくらししまるナビ(基本案内) | MVP | Workflow | interaction-designer + content-writer | M |
 | --- MVP cut --- |
 | 11 | Schedule | Beta | Core | product-manager | M |
 | 12 | Estimate / Invoice / Payment | Beta | Workflow | product-manager + business-analyst | L |

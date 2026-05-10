@@ -2,7 +2,7 @@ import { requireSession } from "@/server/auth/session";
 import { formatJpFullDate } from "@/lib/format";
 import { KpiCard } from "@/components/ui/KpiCard";
 import { AlertCard } from "@/components/ui/AlertCard";
-import { Shishimaru } from "@/components/feature/Shishimaru";
+import { SakuraShishimaru } from "@/components/feature/SakuraShishimaru";
 import { ActiveSitesTable } from "@/components/feature/ActiveSitesTable";
 import { ActivityTimeline } from "@/components/feature/ActivityTimeline";
 import {
@@ -11,7 +11,7 @@ import {
   getActiveSitesToday,
   getRecentActivity,
 } from "@/features/dashboard/queries";
-import { generateShishimaruAdvice } from "@/features/dashboard/shishimaru";
+import { generateSakuraShishimaruAdvice } from "@/features/dashboard/sakura-shishimaru";
 
 export const dynamic = "force-dynamic";
 
@@ -26,8 +26,8 @@ export default async function PcHomePage() {
     getRecentActivity(8),
   ]);
 
-  // 獅子丸のサジェスト
-  const advice = generateShishimaruAdvice({
+  // さくらししまるのサジェスト
+  const advice = generateSakuraShishimaruAdvice({
     kpis,
     alertCount: alerts.length,
     highSeverityAlertCount: alerts.filter((a) => a.severity === "p1").length,
@@ -59,9 +59,9 @@ export default async function PcHomePage() {
         </div>
       </div>
 
-      {/* 獅子丸サジェスト(目立つ位置) */}
+      {/* さくらししまるからのサジェスト(目立つ位置) */}
       <div className="mb-4">
-        <Shishimaru
+        <SakuraShishimaru
           mood={advice.mood}
           message={advice.message}
           suggestion={advice.suggestion}

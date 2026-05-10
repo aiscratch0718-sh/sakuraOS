@@ -1,5 +1,5 @@
 /**
- * さくら獅子丸 — ルールベース助言エンジン。
+ * さくらししまる — ルールベース助言エンジン。
  *
  * 設計方針(2026-05-10 ベストプラクティス):
  * - 失敗を罰しない口調(警告でも前向き)
@@ -9,11 +9,11 @@
  *
  * 将来的には Claude API で本格的な分析にアップグレード可能。
  */
-import type { ShishimaruMood } from "@/components/feature/Shishimaru";
+import type { SakuraShishimaruMood } from "@/components/feature/SakuraShishimaru";
 import type { DashboardKpis } from "./queries";
 
-export type ShishimaruAdvice = {
-  mood: ShishimaruMood;
+export type SakuraShishimaruAdvice = {
+  mood: SakuraShishimaruMood;
   message: string;
   suggestion?: { label: string; href: string };
 };
@@ -30,12 +30,12 @@ export type ShishimaruAdvice = {
  * 6. 出勤率 ≥80% → happy
  * 7. データ不足 → thinking
  */
-export function generateShishimaruAdvice(input: {
+export function generateSakuraShishimaruAdvice(input: {
   kpis: DashboardKpis;
   alertCount: number;
   highSeverityAlertCount: number;
   expiringQualificationCount: number;
-}): ShishimaruAdvice {
+}): SakuraShishimaruAdvice {
   const { kpis, alertCount, highSeverityAlertCount, expiringQualificationCount } =
     input;
 

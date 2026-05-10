@@ -171,7 +171,7 @@ PROGRESS.md の「次セッションでやること」セクションに適用�
 
 ---
 
-## S2 — ダッシュボード再構成 + 獅子丸マスコット導入 / 2026-05-10
+## S2 — ダッシュボード再構成 + ししまるマスコット導入 / 2026-05-10
 
 ### コンテキスト
 - S1 で整備した共通コンポーネント(KpiCard / AlertCard / HpBar / Tag 等)を活用し、
@@ -180,15 +180,15 @@ PROGRESS.md の「次セッションでやること」セクションに適用�
   実業務 KPI 連動、自己ベスト主導)に従って実装
 
 ### このセッションで完了
-- **P2-01** ダッシュボードレイアウト刷新(獅子丸 → KPI 4枚 → アラート → 本日の稼働現場 → 承認キュー + 活動タイムライン)
+- **P2-01** ダッシュボードレイアウト刷新(ししまる → KPI 4枚 → アラート → 本日の稼働現場 → 承認キュー + 活動タイムライン)
 - **P2-02** KPI クエリ実装(`src/features/dashboard/queries.ts`)
   - 本日の日報提出 / 本日の出勤 / 安全コンボ日数 / 今月の累計時間 + 人件費
 - **P2-03** アラート集約クエリ(資格期限切れ間近 / 承認待ち / 重大ヒヤリハット未対応)
 - **P2-04** 本日の稼働現場テーブル(`<ActiveSitesTable>`)
 - **P2-05** タイムライン(`<ActivityTimeline>`、audit_log ベース)
-- **P2-06** 🦁 獅子丸サジェストロジック(`src/features/dashboard/shishimaru.ts`)
+- **P2-06** 🦁 ししまるサジェストロジック(`src/features/dashboard/shishimaru.ts`)
   - 8 段階の優先順位ルールで mood + message + suggestion を生成
-- **P2-07** 🦁 獅子丸の表情ロジック(5 mood: celebrate / great / happy / warning / thinking)
+- **P2-07** 🦁 ししまるの表情ロジック(5 mood: celebrate / great / happy / warning / thinking)
   - 配色 + 左ボーダー + ラベルで mood を表現
 
 ### 変更ファイル
@@ -347,7 +347,7 @@ PROGRESS.md の「次セッションでやること」セクションに適用�
 ### 次セッション(S2)へ申し送り
 - 着手タスク: **P2-01 + P2-02 + P2-03 + P2-04 + P2-06 + P2-07**(ダッシュボード再構成)
 - `/pc/home/page.tsx` を読み込んで現状を把握 → 新コンポーネントベースに書き換え
-- 獅子丸コンポーネント `src/components/ui/Shishimaru.tsx` を新規作成
+- ししまるコンポーネント `src/components/ui/Shishimaru.tsx` を新規作成
 - ルールベース `generateShishimaruAdvice` を `src/features/dashboard/actions.ts` に追加
 - KPI / アラート集約のサーバーサイド関数を `src/features/dashboard/queries.ts` に追加
 

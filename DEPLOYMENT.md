@@ -245,7 +245,7 @@ URL は `https://sakura-os-xxxxx.vercel.app` のような形式になる。
 Phase B が動いたら:
 
 1. **アカウント追加**: 作業員・現場リーダー・事務 のテストアカウントを Supabase Auth で作成
-2. **PRD通りの機能追加**: GPS打刻 / ししまるナビ / 入力漏れ検知 / 通知...
+2. **PRD通りの機能追加**: GPS打刻 / さくらししまるナビ / 入力漏れ検知 / 通知...
 3. **ADR-0001 完全実装**: 現状の実装は単一トランザクション化していない部分があるので、Postgres function (RPC) で 5系統 atomic fanout を実装
 4. **2FA**: Supabase Auth の TOTP 2FA を有効化
 5. **独自ドメイン**: Vercel で `sakura-os.com` 等を割り当て

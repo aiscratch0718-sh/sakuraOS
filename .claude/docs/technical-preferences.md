@@ -100,7 +100,7 @@
 - **Animation Specialist**: css-animation-specialist
 - **Realtime Specialist**: realtime-specialist (Supabase Realtime)
 - **Asset Specialist**: cdn-asset-specialist (Cloudflare Images / Vercel)
-- **Routing Notes**: Server Components by default; opt into Client Components only for: REPORT3 mobile input form, GPS/camera-using flows, the dashboard chart components, and the ししまるナビ overlay.
+- **Routing Notes**: Server Components by default; opt into Client Components only for: REPORT3 mobile input form, GPS/camera-using flows, the dashboard chart components, and the さくらししまるナビ overlay.
 
 ### File Type Routing
 

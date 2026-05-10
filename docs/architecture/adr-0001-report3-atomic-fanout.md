@@ -172,7 +172,7 @@ export async function submitReport3(
 2. **Idempotency key はトランザクション内で記録** — コミット失敗時にキーも
    ロールバックされ、リトライが正常に動く。
 3. **通知 / revalidate はコミット後のみ** — トランザクションのスコープ外。
-   ししまるナビの「ランクアップ通知」が空振りすることはない。
+   さくらししまるナビの「ランクアップ通知」が空振りすることはない。
 4. **`domainEvents.emit("report3.submitted", ...)`** — `notifications` システムが
    この event を購読し、LINE WORKS 通知を別途キューイングする。通知配信失敗で
    REPORT3 の保存が失敗することはない(逆方向の依存禁止)。
@@ -190,7 +190,7 @@ export async function submitReport3(
 | `audit_log` 記録 | ✅ | |
 | `idempotency_log` 記録 | ✅ | |
 | LINE WORKS 通知送信 | | ✅ (event subscriber) |
-| ししまるナビトースト表示 | | ✅ (Server Action return → Client) |
+| さくらししまるナビトースト表示 | | ✅ (Server Action return → Client) |
 | `revalidatePath` | | ✅ |
 | Money Forward への転送(月次集計) | | ✅ (別の cron / batch) |
 

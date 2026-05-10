@@ -3,7 +3,7 @@ import { requireSession } from "@/server/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { Tag } from "@/components/ui/Tag";
 import { ProgressBar } from "@/components/ui/ProgressBar";
-import { Shishimaru } from "@/components/feature/Shishimaru";
+import { SakuraShishimaru } from "@/components/feature/SakuraShishimaru";
 import { SkillRadarChart } from "@/components/feature/SkillRadarChart";
 import {
   getUserStatus,
@@ -84,7 +84,7 @@ export default async function StatusPage({
     { label: PARAM_KEYS[5].label, value: p.responsibility, color: PARAM_KEYS[5].color },
   ] as const;
 
-  // 獅子丸からのアドバイス(最弱パラメータを伸ばすよう促す)
+  // さくらししまるからのアドバイス(最弱パラメータを伸ばすよう促す)
   const lowest = PARAM_KEYS.reduce((min, k) => {
     const v = p[k.key as keyof SkillParameters] as number;
     return v < (p[min.key as keyof SkillParameters] as number) ? k : min;
@@ -213,7 +213,7 @@ export default async function StatusPage({
           </div>
         </section>
 
-        {/* === 右: レーダーチャート + 獅子丸 === */}
+        {/* === 右: レーダーチャート + さくらししまる === */}
         <section className="bg-panel border border-line rounded-panel overflow-hidden">
           <header className="px-4 py-3 border-b border-line">
             <h2 className="text-[14px] font-bold text-ink flex items-center gap-1.5">
@@ -224,7 +224,7 @@ export default async function StatusPage({
             <SkillRadarChart axes={radarAxes} size={300} accent="p2" />
           </div>
           <div className="px-4 pb-4">
-            <Shishimaru
+            <SakuraShishimaru
               mood={
                 lowestValue >= 70
                   ? "great"
