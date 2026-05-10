@@ -3,6 +3,25 @@
 B2B web/SaaS development managed through 49 coordinated Claude Code subagents.
 Each agent owns a specific domain, enforcing separation of concerns and quality.
 
+## ⚠️ SAKURA OS リビルド作業継続時の必読手順
+
+**このリポジトリでは SAKURA OS の v4.0 デモを参考にした全面リビルドが進行中です。**
+
+ユーザーから「リビルドの続き」「次のタスク」「P1-XX を進めて」「ステータス画面を作って」など、
+リビルドに関する指示があった場合、**コードを書き始める前に** 必ず以下の順で読むこと:
+
+1. `docs/rebuild/PROGRESS.md` — 現在の進捗 + 次に着手するタスク
+2. `docs/rebuild/MASTER-PLAN.md` — 全43タスクの詳細(必要部分のみ)
+3. `docs/rebuild/SESSION-LOG.md` — 直近1〜2セッションの引き継ぎ事項
+
+**作業完了後は必ず**:
+1. `npm run build` でビルド通過確認
+2. `PROGRESS.md` の「現在のステータス」「次セッションでやること」を更新
+3. `SESSION-LOG.md` に新セッションを append(最新を最上部に)
+4. git commit + push
+
+これを怠るとコンテキスト切れで進捗を失う。スキップ厳禁。
+
 > **Revenue model assumption**: B2B contract-based — monthly invoicing, bank
 > transfer, no subscription/auto-billing. There is no Stripe scaffolding in
 > this template. If you need self-serve billing later, add it as a
