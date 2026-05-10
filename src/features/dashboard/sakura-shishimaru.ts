@@ -5,8 +5,12 @@
  * - 失敗を罰しない口調(警告でも前向き)
  * - データから具体的に "どう動けば改善するか" を提示
  * - 1回に最大 1 つの提案(認知負荷を抑える)
+ * - 口調は親しみやすい現代口語(「〜だよ」「〜してね」)
+ * - 機能と乖離した文言は使わない(例:システムが自動検知する事柄を
+ *   「教えて」と言わない)
  * - クライアント確認後に大幅修正される可能性あり(暫定実装)
  *
+ * 注: 現状は完全にルールベース(Claude API は未統合)。
  * 将来的には Claude API で本格的な分析にアップグレード可能。
  */
 import type { SakuraShishimaruMood } from "@/components/feature/SakuraShishimaru";
@@ -43,7 +47,7 @@ export function generateSakuraShishimaruAdvice(input: {
   if (highSeverityAlertCount > 0) {
     return {
       mood: "warning",
-      message: `重大なヒヤリハットが ${highSeverityAlertCount} 件、まだ対応中じゃ。安全第一、まずはここを片付けるのじゃぞ。`,
+      message: `重大なヒヤリハットが ${highSeverityAlertCount} 件、まだ対応中だよ。安全第一、まずはここから片付けよう。`,
       suggestion: { label: "ヒヤリハット一覧へ", href: "/pc/incidents" },
     };
   }
@@ -52,7 +56,7 @@ export function generateSakuraShishimaruAdvice(input: {
   if (expiringQualificationCount > 0) {
     return {
       mood: "warning",
-      message: `あと 14 日以内に期限切れになる資格が ${expiringQualificationCount} 件あるぞ。早めに更新の手配をするとよい。`,
+      message: `あと 14 日以内に期限切れになる資格が ${expiringQualificationCount} 件あるよ。早めに更新の手配をしておこう。`,
       suggestion: { label: "資格マスタへ", href: "/pc/qualifications" },
     };
   }
@@ -61,14 +65,14 @@ export function generateSakuraShishimaruAdvice(input: {
   if (kpis.needApprovalCount > 5) {
     return {
       mood: "warning",
-      message: `承認待ちの日報が ${kpis.needApprovalCount} 件たまっておるぞ。早めに片付けるとみんな安心じゃ。`,
+      message: `承認待ちの日報が ${kpis.needApprovalCount} 件たまっているよ。早めに片付けるとみんな安心だね。`,
       suggestion: { label: "承認待ちへ", href: "/pc/approvals" },
     };
   }
   if (kpis.needApprovalCount > 0) {
     return {
       mood: "happy",
-      message: `承認待ちが ${kpis.needApprovalCount} 件あるぞ。今日中にチェックしてくれるかの。`,
+      message: `承認待ちが ${kpis.needApprovalCount} 件あるよ。今日中にチェックしておこう。`,
       suggestion: { label: "承認待ちへ", href: "/pc/approvals" },
     };
   }
@@ -83,7 +87,7 @@ export function generateSakuraShishimaruAdvice(input: {
   if (kpis.safetyComboDays >= 50) {
     return {
       mood: "celebrate",
-      message: `安全コンボ ${kpis.safetyComboDays} 日達成じゃ! みんなの心がけが現場を守っておる。素晴らしいぞ!`,
+      message: `安全コンボ ${kpis.safetyComboDays} 日達成だよ! みんなの心がけが現場を守っているね。素晴らしい!`,
     };
   }
 
@@ -91,7 +95,7 @@ export function generateSakuraShishimaruAdvice(input: {
   if (attendanceRate >= 0.8) {
     return {
       mood: "great",
-      message: `本日 ${kpis.attendanceCount} / ${kpis.activeMemberTotal} 名の出勤、よく揃っておるぞ! 今日も安全に頼むぞ。`,
+      message: `本日 ${kpis.attendanceCount} / ${kpis.activeMemberTotal} 名の出勤、よく揃っているね! 今日も安全に進めていこう。`,
     };
   }
 
@@ -99,14 +103,13 @@ export function generateSakuraShishimaruAdvice(input: {
   if (kpis.todayReports === 0) {
     return {
       mood: "thinking",
-      message:
-        "今日はまだ日報が上がってきておらんな。現場が動き出したら教えてくれるかの。",
+      message: "今日はまだ日報が上がってきていないよ。",
     };
   }
 
   // 8. デフォルト(平常)
   return {
     mood: "happy",
-    message: `今日は ${kpis.todayReports} 件の日報が届いておる。安全コンボ ${kpis.safetyComboDays} 日継続中じゃ。引き続き気を引き締めていこう!`,
+    message: `今日は ${kpis.todayReports} 件の日報が届いているよ。安全コンボ ${kpis.safetyComboDays} 日継続中。引き続き気を引き締めていこう!`,
   };
 }

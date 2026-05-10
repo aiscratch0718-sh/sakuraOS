@@ -92,10 +92,10 @@ export default async function StatusPage({
   const lowestValue = p[lowest.key as keyof SkillParameters] as number;
   const adviceMsg =
     lowestValue < 30
-      ? `${lowest.label}が伸びしろじゃ。日々の積み重ねで自然と上がっていくぞ。`
+      ? `${lowest.label}が伸びしろだよ。日々の積み重ねで自然と上がっていくよ。`
       : lowestValue < 70
-        ? `${lowest.label}があと +${Math.min(80, lowestValue + 12) - lowestValue}pt で B 昇格じゃ! 焦らずいこう。`
-        : `バランスが整っておる。安定した成長じゃな!`;
+        ? `${lowest.label}があと +${Math.min(80, lowestValue + 12) - lowestValue}pt で B 昇格だよ! 焦らずいこう。`
+        : `バランスが整っているね。安定した成長だよ!`;
 
   return (
     <div className="px-6 py-6 max-w-7xl mx-auto">
