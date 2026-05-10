@@ -103,11 +103,15 @@
 3. `SESSION-LOG.md` の S4 を確認
 4. `git status` で前回未コミットがないか確認
 
-### ⚠️ 重要: 次セッション開始時のマイグレーション適用状況の確認
+### ✅ migration 0012 / 0013 + seed は Supabase に適用済み
 
-migration 0012 / 0013 + seed 2 ファイルを Supabase に適用済みかどうかを板澤様に確認する。
+2026-05-10 S4 終了後、Supabase MCP コネクタ経由で適用完了:
+- migration 0012 (points_system) ✅
+- seed 0012 (point_rules 6件 + rewards 6件) ✅
+- migration 0013 (status_system) ✅
+- seed 0013 (title_definitions 12件 + special_abilities 8件) ✅
 
-未適用なら適用方法をご案内(`docs/rebuild/PROGRESS.md` 末尾参照、または Supabase Dashboard SQL Editor で順次貼り付け実行)。
+`/pc/points` `/pc/profile/status` 共に DB エラーなく動作可能。
 
 ### S5 でやること(Phase 3-C: 現場マップ画面)
 
