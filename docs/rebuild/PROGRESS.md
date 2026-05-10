@@ -8,11 +8,11 @@
 
 ## 🎯 現在のステータス
 
-- **進行中フェーズ**: Phase 2(完了) → Phase 3 へ移行
-- **次に着手するタスク**: **P3-A-01** マイグレーション 0012 (ポイント管理)
-- **完了タスク**: 13 / 43
+- **進行中フェーズ**: Phase 3-A(完了) → Phase 3-B へ移行
+- **次に着手するタスク**: **P3-B-01** マイグレーション 0013 (称号・スキル関連)
+- **完了タスク**: 19 / 43
 - **最終更新**: 2026-05-10
-- **最終セッション ID**: S2
+- **最終セッション ID**: S3
 
 ---
 
@@ -45,13 +45,13 @@
 
 ### Phase 3-A: ポイント管理
 
-- ⬜ **P3-A-01** マイグレーション 0012
-- ⬜ **P3-A-02** シード投入
-- ⬜ **P3-A-03** Server Actions
-- ⬜ **P3-A-04** 自動付与バッチ(pg_cron)
-- ⬜ **P3-A-05** `/pc/points` ページ
-- ⬜ **P3-A-06** `/pc/points/rules` ページ
-- ⬜ **P3-A-07** `/pc/points/exchange-requests` ページ
+- ✅ **P3-A-01** マイグレーション 0012(全 5 テーブル + award_points 関数 + RLS)
+- ✅ **P3-A-02** シード(point_rules 6件 + rewards 6件)
+- ✅ **P3-A-03** Server Actions(award/request/approve/reject/fulfill/optOut)
+- ⏭️ **P3-A-04** 自動付与バッチ(pg_cron)→ Phase 4 へ延期
+- ✅ **P3-A-05** `/pc/points` ページ
+- ✅ **P3-A-06** `/pc/points/rules` ページ
+- ✅ **P3-A-07** `/pc/points/exchange-requests` ページ
 
 ### Phase 3-B: パワプロ風ステータス
 
@@ -94,34 +94,53 @@
 
 ---
 
-## 🚀 次セッション(S3)でやること
+## 🚀 次セッション(S4)でやること
 
 ### 開始前チェック
 1. このファイル(`PROGRESS.md`)を最初に読む
-2. `MASTER-PLAN.md` で **P3-A**(ポイント管理)の詳細を確認
-3. `SESSION-LOG.md` の S2 を確認
+2. `MASTER-PLAN.md` で **P3-B**(パワプロ風ステータス画面)の詳細を確認
+3. `SESSION-LOG.md` の S3 を確認
 4. `git status` で前回未コミットがないか確認
 
-### S3 でやること(Phase 3-A: ポイント管理)
+### ⚠️ 重要: 次セッション開始時にやること
 
-**今後は Phase 3 から疑似 specialist 化(Task subagent_type: general-purpose)を導入する方針**(板澤様 確認済)。
-S3 では試験的に `orm-specialist` + `server-actions-specialist` の役割を 2 つ並列起動できるか試す。
+**マイグレーション 0012 (ポイント管理)を Supabase に適用する**。
+ローカルに `supabase/migrations/0012_points_system.sql` を作成済み。
+適用方法は 2 通り:
 
-1. **P3-A-01**: マイグレーション 0012 (ポイント関連テーブル)
-   - `points_balances` / `points_ledger` / `point_rules` / `rewards` / `exchange_requests`
-   - RLS は自テナントのみ。spend / approve は office+ ロール
-   - SQL は `MASTER-PLAN.md` の P3-A-01 に詳細あり
-2. **P3-A-02**: シード(初期 point_rules + rewards)
-3. **P3-A-03**: Server Actions(awardPoints, requestExchange, approveExchange...)
-4. **P3-A-04**: 自動付与バッチ(pg_cron、後回し可)
-5. **P3-A-05**: `/pc/points` ページ
-6. **P3-A-06**: `/pc/points/rules` ページ
-7. **P3-A-07**: `/pc/points/exchange-requests` ページ
+**方法 A. Supabase Dashboard SQL Editor 経由(手動、確実)**
+1. https://supabase.com/dashboard/project/{your-project-id}/sql で
+   `0012_points_system.sql` の中身を貼り付けて実行
+2. 続いて `seed/0012_seed_points.sql` を実行(初期データ投入)
 
-### S3 完了の目安
-- マイグレーション 0012 が Supabase に適用される
-- `/pc/points` が表示される(ランキング + 報酬カタログ + 残高)
-- 管理者は手動で `awardPoints` を呼べる
+**方法 B. Supabase CLI(自動、推奨)**
+```bash
+supabase db push
+```
+
+適用しないと `/pc/points` でテーブル不在エラーになります。
+
+### S4 でやること(Phase 3-B: パワプロ風ステータス画面)
+
+ゲーミフィケーションの目玉機能。最も視覚的インパクトが大きい。
+
+1. **P3-B-01**: マイグレーション 0013(称号・スキル関連)
+   - `title_definitions` / `titles_granted` / `skill_parameters` / `special_abilities` / `user_abilities`
+2. **P3-B-02**: シード(称号 12件 + 特殊能力 8件)
+3. **P3-B-03**: スキルパラメータ算出ロジック
+   - 6 軸: 技術力 / 判断力 / 安全 / 報連相 / 体力 / 責任感
+   - 既存 DB から計算可能なものから先に実装、不足は固定値で許容
+4. **P3-B-04**: `/pc/profile/status` ページ(パワプロ風画面)
+5. **P3-B-05**: SVG レーダーチャートコンポーネント
+6. **P3-B-06**: 称号付与モーダル(管理者用)
+7. **P3-B-07**: 称号獲得演出オーバーレイ
+8. **P3-B-08**: 全社員一覧ページ強化(Lv / 称号 / 今月pt 列追加)
+
+### S4 完了の目安
+- マイグレーション 0013 が Supabase に適用される
+- `/pc/profile/status` でキャラ画面が表示される
+- レーダーチャートが滑らかに描画される
+- 既存 `/pc/profile` から「ステータス画面を見る」リンクで遷移可能
 - ビルド通過 + PROGRESS.md / SESSION-LOG.md 更新 + コミット
 
 ---

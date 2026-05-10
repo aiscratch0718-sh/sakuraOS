@@ -207,16 +207,29 @@ const SECTIONS: Section[] = [
     ],
   },
   {
+    id: "gamification",
+    title: "ゲーミフィケーション",
+    icon: "🎮",
+    items: [
+      {
+        href: "/pc/points",
+        label: "ポイント管理",
+        icon: "💎",
+        match: (p) => p.startsWith("/pc/points"),
+      },
+      {
+        href: "/pc/gamification",
+        label: "ランキング(旧)",
+        icon: "🏆",
+        match: (p) => p.startsWith("/pc/gamification"),
+      },
+    ],
+  },
+  {
     id: "other",
     title: "その他",
     icon: "⚙️",
     items: [
-      {
-        href: "/pc/gamification",
-        label: "ランキング",
-        icon: "🏆",
-        match: (p) => p.startsWith("/pc/gamification"),
-      },
       {
         href: "/pc/profile",
         label: "プロフィール",

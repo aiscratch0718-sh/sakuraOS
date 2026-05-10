@@ -4,6 +4,84 @@
 
 ---
 
+## S3 — Phase 3-A: ポイント管理システム / 2026-05-10
+
+### コンテキスト
+- S2 で完了したダッシュボードを土台に、ゲーミフィケーション層の中核となる
+  ポイント管理システムを実装
+- ベストプラクティス設計指針(失敗を罰しない、実業務 KPI 連動 等)に基づく
+- 疑似 specialist 化を試そうとしたが、Phase 3-A は順序依存
+  (migration → action → UI)が強いため、実質的に並列メリットが薄いと判断し、
+  単独実装で進めた。Phase 3-B/3-C は並列で実施できる可能性あり、再検討予定。
+
+### このセッションで完了
+- **P3-A-01** マイグレーション 0012 (`supabase/migrations/0012_points_system.sql`)
+  - 5 テーブル: points_balances, points_ledger, point_rules, rewards, exchange_requests
+  - 1 enum: point_txn_type, exchange_status
+  - 1 関数: `award_points()` (security definer、原子的に balance + ledger 更新)
+  - RLS: テナント分離 + 役割ベース(office+ が承認)
+  - profiles に `gamification_opt_out` 列を追加
+- **P3-A-02** シード(`supabase/seed/0012_seed_points.sql`)
+  - point_rules 6件: 出来高 / 安全 / 称号 / 日報 / リーダー / KY活動
+  - rewards 6件: カフェ☕ / 有給🎟️ / Amazon🛍️ / 工具メンテ🔧 / 社長ランチ👑(レア) / 安全装備🦺(レア)
+- **P3-A-03** Server Actions (`src/features/points/actions.ts`)
+  - awardPoints / requestExchange / approveExchange / rejectExchange / markFulfilled / toggleGamificationOptOut
+- **P3-A-05** `/pc/points` ページ
+  - 自分の残高 / KPI(管理者は全社統計、社員は次の報酬まで残り pt)
+  - 今月のランキング(opt-out ユーザーは「匿名 N」表示)
+  - 今月の獲得内訳(カテゴリ別、進捗バー付き)
+  - 報酬交換所(レア報酬は金枠グラデ)
+- **P3-A-06** `/pc/points/rules` ページ(管理者専用)
+  - point_rules 全件表示、編集 UI は次バージョン
+- **P3-A-07** `/pc/points/exchange-requests` ページ
+  - 承認待ち / 承認済 / 却下 の 3 セクション
+  - 承認 / 却下ボタン付き(client-side、useTransition)
+- サイドバーに「ゲーミフィケーション」カテゴリ追加(💎 ポイント管理 / 🏆 旧ランキング)
+
+### 変更ファイル
+- `supabase/migrations/0012_points_system.sql` (新規)
+- `supabase/seed/0012_seed_points.sql` (新規)
+- `src/features/points/actions.ts` (新規)
+- `src/features/points/queries.ts` (新規)
+- `src/app/(authenticated)/pc/points/page.tsx` (新規)
+- `src/app/(authenticated)/pc/points/_components/ExchangeRequestForm.tsx` (新規)
+- `src/app/(authenticated)/pc/points/rules/page.tsx` (新規)
+- `src/app/(authenticated)/pc/points/exchange-requests/page.tsx` (新規)
+- `src/app/(authenticated)/pc/points/exchange-requests/_components/ExchangeApprovalForm.tsx` (新規)
+- `src/app/(authenticated)/pc/_components/Sidebar.tsx` (ゲーミフィケーションセクション追加)
+
+### スキップしたタスク(P3-A 内)
+- **P3-A-04** 自動付与バッチ(pg_cron) → Phase 4(演出仕上げ)へ延期
+  - 理由: 今は手動 awardPoints でも動作確認可能。pg_cron は Supabase Dashboard
+    での設定が必要で、開発フローと分離して扱うのが望ましい。
+
+### ベストプラクティス指針の反映
+- ✅ ranking で `gamification_opt_out` ユーザーは「匿名」表示
+- ✅ 失敗を罰しない: balance < 0 を CHECK 制約で拒否、ただし adjust 機能で柔軟対応可
+- ✅ Recognition 中心: 称号獲得を中核とした reward カテゴリ「称号」
+- ✅ 自分比較: 「今月の獲得内訳」で自分の頑張りを可視化、ランキングは併設
+- ✅ チーム達成: リーダー手当(班月間目標達成時)で間接的にチーム評価
+- ✅ ledger は append-only、全変更追跡可能(監査証跡)
+
+### 動作確認
+- `npm run build` 通過 ✅
+- 新ルート 3 つ生成: /pc/points, /pc/points/exchange-requests, /pc/points/rules
+
+### ⚠️ 次セッション開始前の注意事項
+**マイグレーション 0012 を Supabase に適用しないと `/pc/points` はエラーになる**。
+PROGRESS.md の「次セッションでやること」セクションに適用手順を記載済み。
+
+### 次セッション(S4)へ申し送り
+- 着手タスク: **P3-B-01** マイグレーション 0013(称号・スキル関連)
+- パワプロ風ステータス画面はゲーミフィケーションの目玉。視覚的インパクト最大
+- 6 軸レーダーチャート(SVG)が技術的中心
+- Phase 3-B/3-C は subsystem が独立しているため、疑似 specialist 化(並列)を再試行する余地あり
+
+### コミット
+- 後述の Final commit にて
+
+---
+
 ## S2 — ダッシュボード再構成 + 獅子丸マスコット導入 / 2026-05-10
 
 ### コンテキスト
