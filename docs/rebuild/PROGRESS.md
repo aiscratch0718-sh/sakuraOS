@@ -8,12 +8,14 @@
 
 ## 🎯 現在のステータス
 
-- **進行中フェーズ**: Phase 3-B(ほぼ完了) → Phase 3-C へ移行予定
-- **次に着手するタスク**: **P3-C-01** マイグレーション 0014 (現場マップ用カラム追加) + **P3-B-08** users ページ強化(残作業)
-- **完了タスク**: 26 / 43
+- **進行中フェーズ**: Phase 3-B(完了) → Phase 3-C へ移行予定
+- **次に着手するタスク**: **P3-C-01** マイグレーション 0014(現場マップ用カラム追加)
+  ※ 設計図 12 項目監査の結果、Phase 5〜10 が新規追加されました。
+  Phase 3-C 完了後の優先順位はクライアントヒアリング後に決定。
+- **完了タスク**: 26 / 約 110(全タスク数を 43 → 約 110 に拡張、2026-05-10 監査結果反映)
 - **最終更新**: 2026-05-10
-- **最終セッション ID**: S4
-- **🔥 specialist 起動成功: S4 で 3 つの specialist を並列起動 ✅**
+- **最終セッション ID**: S4.5(監査セッション)
+- **🔥 specialist 起動成功: S4 で 4 つの specialist を並列起動 ✅**
 
 ---
 
@@ -92,6 +94,86 @@
 - ⬜ **P4-02** entry アニメ
 - ⬜ **P4-03** ししまる float アニメ
 - ⬜ **P4-04** モバイル版主要画面
+
+### Phase 5: CORE 業務補完(TASK / SCH / ATT 専用打刻)
+
+- ⬜ **P5-01** マイグレーション 0014(tasks / schedules / attendance_punches)
+- ⬜ **P5-02** REPORT3 fanout に tasks.actual_hours 加算を追加
+- ⬜ **P5-03** `/pc/projects/[id]/tasks` Kanban ボード
+- ⬜ **P5-04** `/sp/tasks` モバイル: 自分のタスク一覧
+- ⬜ **P5-05** `/pc/schedules` 配車表(週間ビュー)
+- ⬜ **P5-06** `/pc/schedules/edit` スケジュール編集
+- ⬜ **P5-07** `/sp/today` 今日の予定 + タスク
+- ⬜ **P5-08** ATT 打刻 server action(GPS 取得)
+- ⬜ **P5-09** `/pc/attendance` 勤怠一覧(管理者)
+- ⬜ **P5-10** スケジュール → REPORT3 の予選定
+- ⬜ **P5-11** タスク差戻し / 連動の通知
+- ⬜ **P5-12** TASK / SCH / ATT のロール別画面ガード
+
+### Phase 6: GENKA 詳細 + GAIKYO
+
+- ⬜ **P6-01** マイグレーション 0015(project_cost_breakdown view + construction_overview)
+- ⬜ **P6-02** 集計再計算関数 recalculate_construction_overview
+- ⬜ **P6-03** `/pc/projects/[id]/cost` 現場別 原価管理表
+- ⬜ **P6-04** `/pc/gaikyo` 工事概況表(全社)
+- ⬜ **P6-05** `/pc/gaikyo/[projectId]` 現場別工事概況詳細
+- ⬜ **P6-06** `/pc/customer-sales` 既存ページ強化
+- ⬜ **P6-07** REPORT3 / supplier_invoice / vehicle_run / invoice の overview 再計算 trigger
+- ⬜ **P6-08** PDF 出力 — 工事概況表
+
+### Phase 7: 外部 SaaS 連携
+
+- ⬜ **P7-01** 環境変数 + `/pc/settings/integrations` 接続状態
+- ⬜ **P7-02** LINE WORKS — 通知送信モジュール
+- ⬜ **P7-03** LINE WORKS — グループマッピングテーブル + UI
+- ⬜ **P7-04** LINE WORKS — 通知ルーティング server action
+- ⬜ **P7-05** LINE WORKS — 異常検知 + 入力遅れ通知バッチ
+- ⬜ **P7-06** Money Forward — OAuth2 認証フロー
+- ⬜ **P7-07** Money Forward — 仕訳 CSV 生成 + 連携
+- ⬜ **P7-08** Money Forward — 給与連携
+- ⬜ **P7-09** Money Forward — 連携ログ + 再送機能
+- ⬜ **P7-10** Cloud Sign — 契約書送信 server action
+- ⬜ **P7-11** Cloud Sign — 締結ステータス webhook 受信
+- ⬜ **P7-12** Cloud Sign — 締結済み PDF を Storage に保存
+- ⬜ **P7-13** Google Maps — 案件住所からマップ表示
+- ⬜ **P7-14** Google Maps — 配車ルート表示
+- ⬜ **P7-15** Google Maps — 現場マップ実地理マップ統合(P3-C と統合)
+- ⬜ **P7-16** 連携テスト + フェイルセーフ
+
+### Phase 8: ゲーミフィケーション完成
+
+- ⬜ **P8-01** バッジ画面 `/pc/badges` `/sp/badges`(図鑑形式)
+- ⬜ **P8-02** クエスト画面 `/pc/quests` `/sp/quests`
+- ⬜ **P8-03** クエスト達成判定バッチ
+- ⬜ **P8-04** XP 自動付与拡張(称号/連続出勤/KY/バッジ)
+- ⬜ **P8-05** ランクアップ通知 + 演出
+- ⬜ **P8-06** 称号自動付与ロジック evaluate_titles_for_user
+- ⬜ **P8-07** さくらししまる AI ナビ — 状況察知エンジン
+- ⬜ **P8-08** `<SakuraShishimaruNavi>` 全画面右下フローティング
+- ⬜ **P8-09** NAVI トーン設定 + Claude API オプション
+
+### Phase 9: ロール別画面ガード徹底
+
+- ⬜ **P9-01** ガード対象の網羅監査
+- ⬜ **P9-02** 中央ガード関数 requireRole(allowed) 実装
+- ⬜ **P9-03** 全マスタ画面に requireRole 適用
+- ⬜ **P9-04** Sidebar / `<RoleGate>` で UI レベル隠蔽
+- ⬜ **P9-05** ロール別 Playwright テスト
+
+### Phase 10: 汎用ファイル管理(Google Drive 風) + ロール別アクセス制御 + バックアップ + 履歴
+
+- ⬜ **P10-01** マイグレーション 0016(file_folders / files / file_access_grants / file_access_log)
+- ⬜ **P10-02** can_access_file() アクセス可否判定関数
+- ⬜ **P10-03** Storage バケット `files` + RLS ポリシー
+- ⬜ **P10-04** `/pc/files` ルートエクスプローラ
+- ⬜ **P10-05** `/pc/files/[folderId]` フォルダ詳細
+- ⬜ **P10-06** `<FileUploadDialog>` ドラッグ&ドロップ
+- ⬜ **P10-07** `<FolderTree>` 仮想スクロール
+- ⬜ **P10-08** `<FilePreview>` 画像/PDF/Office
+- ⬜ **P10-09** `<FileAccessControlDialog>` 権限管理 UI
+- ⬜ **P10-10** 既存 safety_documents / contractor_templates / receipts.photo_url の段階的統合
+- ⬜ **P10-11** 履歴管理 + バージョニング
+- ⬜ **P10-12** 論理バックアップ + 監査ログエクスポート
 
 ---
 
@@ -225,6 +307,8 @@ supabase db push
 | 2026-05-10 | P1-08(既存ページ差し替え)は P2 と並行で実施。ダッシュボードを新コンポーネントで作ることが他ページのリファレンスになる。 | P1-08 |
 | 2026-05-10 | Phase 3 から疑似 specialist 化を導入(Task subagent_type: general-purpose に `.claude/agents/*.md` の役割を演じさせる)。Phase 1〜2 は単独実装で継続。 | P3 全般 |
 | 2026-05-10 | フォルダリネーム実行(`Claude-Code-Game-Studios` → `sakuraOSシステム開発用`)+ テンプレ由来ファイルを `docs/_template-archive/` へ集約。 | 全(パス参照のみ) |
+| 2026-05-10 | **設計図 12 項目の照合監査を実施**。Phase 5(CORE 業務補完)/ Phase 6(GENKA + GAIKYO)/ Phase 7(外部 SaaS 連携)/ Phase 8(ゲーミフィケーション完成)/ Phase 9(ロール別画面ガード徹底)/ Phase 10(汎用ファイル管理 + ロール別アクセス制御)を MASTER-PLAN.md に追加。総タスク 43 → 約 110 に拡張。**A 案: 全面拡張で進める**(板澤様確認済)。 | 全 |
+| 2026-05-10 | **ファイル管理は Google Drive 風(フォルダ階層 + ロール別アクセス制御)で実装**。既存の安全書類 / 元請テンプレート / 領収書写真は段階的に汎用ファイル管理へ統合する方針。バージョニング + 監査ログも必須(板澤様要件)。 | Phase 10 |
 
 ---
 

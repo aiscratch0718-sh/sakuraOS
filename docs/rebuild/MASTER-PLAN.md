@@ -11,7 +11,7 @@
 
 ---
 
-## 全体構成(3フェーズ・累計43タスク)
+## 全体構成(累計 約 100 タスク)
 
 | フェーズ | 内容 | タスク数 | 想定セッション |
 |---|---|---|---|
@@ -23,6 +23,16 @@
 | Phase 3-D | ボスHPモニター(TV用) | 4 | 1 |
 | Phase 3-E | 幹部育成スキルツリー | 3 | 1 |
 | Phase 4 | 演出 / アニメーション仕上げ | 4 | 1 |
+| **Phase 5** | **CORE 業務補完(TASK / SCH / ATT 専用打刻)** | **12** | **3〜4** |
+| **Phase 6** | **GENKA 詳細 + GAIKYO(工事概況表)** | **8** | **2〜3** |
+| **Phase 7** | **外部 SaaS 連携(LINE WORKS / Money Forward / Cloud Sign / Google Maps)** | **16** | **5〜6** |
+| **Phase 8** | **ゲーミフィケーション完成(バッジ画面 / クエスト / XP 自動付与拡張 / さくらししまる AI ナビ)** | **9** | **3〜4** |
+| **Phase 9** | **ロール別画面ガード徹底(全画面の権限分離)** | **5** | **1〜2** |
+| **Phase 10** | **汎用ファイル管理(Google Drive 風)+ ロール別アクセス制御 + バックアップ + 履歴** | **12** | **3〜4** |
+| **合計** | **— ** | **約 110** | **約 30〜40 セッション** |
+
+> 設計図 12 項目との照合監査(2026-05-10)結果から Phase 5〜10 を追加。
+> 詳細は `docs/rebuild/SESSION-LOG.md` の S4.5 監査セッション参照。
 
 ---
 
@@ -470,11 +480,514 @@ create table public.skill_tree_nodes (
 
 ---
 
+# Phase 5: CORE 業務補完(TASK / SCH / ATT 専用打刻)
+
+> 2026-05-10 の設計図照合監査で「設計図 CORE のうち TASK / SCH / 専用 ATT が空白」と判明。
+> Phase 5 で REPORT3 への入口となる TASK 管理、配車・人員配置の SCH、
+> モバイル専用の打刻画面 ATT を補完する。
+
+## P5-01: マイグレーション 0014 — TASK / SCH / ATT 関連テーブル
+```sql
+-- TASK: 案件配下のタスク
+create table public.tasks (
+  id uuid primary key default uuid_generate_v4(),
+  tenant_id uuid not null references public.tenants(id),
+  project_id uuid not null references public.projects(id),
+  parent_task_id uuid references public.tasks(id),
+  title text not null,
+  description text,
+  status text not null check (status in ('todo','in_progress','blocked','done','cancelled')),
+  priority text not null default 'normal' check (priority in ('low','normal','high','urgent')),
+  assignee_user_id uuid references public.profiles(id),
+  due_date date,
+  estimated_hours numeric(6,2),
+  actual_hours numeric(6,2) default 0,  -- REPORT3 から自動集計
+  display_order integer default 0,
+  created_by uuid not null references public.profiles(id),
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+create index idx_tasks_project_status on public.tasks(project_id, status);
+create index idx_tasks_assignee on public.tasks(assignee_user_id, status);
+
+-- SCH: スケジュール / 配車表
+create table public.schedules (
+  id uuid primary key default uuid_generate_v4(),
+  tenant_id uuid not null references public.tenants(id),
+  schedule_date date not null,
+  project_id uuid not null references public.projects(id),
+  user_id uuid not null references public.profiles(id),
+  vehicle_id uuid references public.vehicles(id),
+  shift_start time,
+  shift_end time,
+  role_in_shift text,  -- 'driver' | 'leader' | 'member'
+  notes text,
+  created_by uuid not null references public.profiles(id),
+  created_at timestamptz default now()
+);
+create unique index uq_schedules_user_date on public.schedules(user_id, schedule_date);
+create index idx_schedules_date_project on public.schedules(schedule_date, project_id);
+create index idx_schedules_vehicle on public.schedules(vehicle_id, schedule_date);
+
+-- ATT: 専用打刻
+create table public.attendance_punches (
+  id uuid primary key default uuid_generate_v4(),
+  tenant_id uuid not null references public.tenants(id),
+  user_id uuid not null references public.profiles(id),
+  punched_at timestamptz not null default now(),
+  punch_type text not null check (punch_type in ('clock_in','clock_out','break_start','break_end')),
+  project_id uuid references public.projects(id),
+  lat numeric(10,7),
+  lng numeric(10,7),
+  accuracy_m numeric(7,2),
+  source text not null default 'sp_app' check (source in ('sp_app','pc_app','admin_manual')),
+  created_at timestamptz default now()
+);
+create index idx_attendance_user_date on public.attendance_punches(user_id, punched_at desc);
+```
+
+## P5-02: REPORT3 fanout に tasks.actual_hours 加算を追加
+- `submit_report3_atomic` RPC を更新し、project_id + work_classification と一致するタスクを検索 → actual_hours += hours
+
+## P5-03: `/pc/projects/[id]/tasks` ページ — タスクボード(Kanban 風)
+- todo / in_progress / blocked / done の 4 列
+- ドラッグ&ドロップで status 更新(client component + server action)
+- assignee アバター、due_date バッジ、estimated_hours vs actual_hours の進捗バー
+
+## P5-04: `/sp/tasks` ページ — モバイル: 自分のタスク一覧
+- assignee_user_id = 自分、status != done で当日 due 順
+- タップで詳細、status 変更ボタン
+- REPORT3 入力への近道リンク
+
+## P5-05: `/pc/schedules` ページ — 配車表(週間ビュー)
+- 縦軸: ユーザー / 車両、横軸: 日付(7日)
+- セルにシフト & 案件 & 車両 を集約表示
+- 月単位ビューも切替可
+
+## P5-06: `/pc/schedules/edit` — スケジュール編集
+- ドラッグ&ドロップで割当変更
+- 衝突検知(同日 user 重複は uq 制約で DB が弾く)
+
+## P5-07: `/sp/today` ページ — 今日の予定 + タスク
+- 朝一で見る画面: 今日のシフト / 案件 / タスク / 通知
+- ATT 打刻ボタン(出勤/退勤/休憩開始/休憩終了)
+
+## P5-08: ATT 打刻 server action(`punchAttendance`)
+- GPS 取得 → punch_type を受け取り attendance_punches に INSERT
+- audit_log にも記録
+
+## P5-09: `/pc/attendance` ページ — 勤怠一覧(管理者)
+- ユーザー × 日 マトリクス、出退勤時刻と勤務時間
+- 差戻し / 手動調整(admin manual punch)機能
+
+## P5-10: スケジュール → REPORT3 の予選定
+- `/sp/report3/new` で本日のスケジュールから自動的に project_id / work_classification を初期選択
+
+## P5-11: タスク差戻し / 連動の `notifications` 通知
+- タスク assigned, due 接近, blocked → notifications テーブルに INSERT
+
+## P5-12: TASK / SCH / ATT のロール別画面ガード(P9 と整合)
+- TASK: 全員閲覧、編集は leader+
+- SCH: 閲覧は全員、編集は office+
+- ATT 打刻: 本人のみ、閲覧(他人)は leader+ in 同班
+
+---
+
+# Phase 6: GENKA 詳細 + GAIKYO(工事概況表)
+
+> REPORT3 → 原価への自動反映は既存(project_cost_aggregates)。
+> Phase 6 では、それを「現場別に詳細表示する画面」と、
+> 設計図の核 GAIKYO(工事概況表)を新設する。
+
+## P6-01: マイグレーション 0015 — GENKA / GAIKYO 関連
+```sql
+-- 原価詳細(REPORT3 / supplier_invoices / receipts / vehicle_runs から集計)
+create or replace view public.project_cost_breakdown as
+select
+  p.id as project_id,
+  p.tenant_id,
+  p.name as project_name,
+  -- 人件費(REPORT3 ベース、既存)
+  coalesce(sum(case when src = 'labor' then amount end), 0) as labor_cost,
+  -- 材料費(supplier_invoices 'material')
+  coalesce(sum(case when src = 'material' then amount end), 0) as material_cost,
+  -- 外注費(supplier_invoices 'subcontractor')
+  coalesce(sum(case when src = 'subcontractor' then amount end), 0) as subcontract_cost,
+  -- 車両費(vehicle_runs * 距離単価 + 駐車場代等)
+  coalesce(sum(case when src = 'vehicle' then amount end), 0) as vehicle_cost,
+  -- リース費 / 雑費
+  coalesce(sum(case when src = 'misc' then amount end), 0) as misc_cost,
+  coalesce(sum(amount), 0) as total_cost
+from public.projects p
+left join (...集計サブクエリ) costs on costs.project_id = p.id
+group by p.id, p.tenant_id, p.name;
+
+-- GAIKYO: 工事概況表(現場×期間 集計)
+create table public.construction_overview (
+  id uuid primary key default uuid_generate_v4(),
+  tenant_id uuid not null references public.tenants(id),
+  project_id uuid not null references public.projects(id),
+  period_start date not null,
+  period_end date not null,
+  -- 売上(invoices から集計)
+  invoice_amount integer not null default 0,
+  -- 原価(project_cost_breakdown view から集計)
+  labor_cost integer not null default 0,
+  material_cost integer not null default 0,
+  subcontract_cost integer not null default 0,
+  vehicle_cost integer not null default 0,
+  misc_cost integer not null default 0,
+  total_cost integer not null default 0,
+  -- 利益(計算済み)
+  gross_profit integer not null default 0,
+  gross_profit_rate numeric(5,2),
+  -- 進捗
+  progress_rate numeric(5,2),
+  status text not null default 'in_progress' check (status in ('in_progress','completed','suspended')),
+  recalculated_at timestamptz default now(),
+  unique (project_id, period_start, period_end)
+);
+create index idx_overview_project on public.construction_overview(project_id, period_end desc);
+```
+
+## P6-02: 集計再計算関数 `recalculate_construction_overview(project_id)`
+- security definer、トランザクション
+- view を SELECT して overview にアップサート
+
+## P6-03: `/pc/projects/[id]/cost` — 現場別 原価管理表
+- 4 カテゴリ円グラフ(人件費 / 材料費 / 外注費 / 車両費)
+- 月次推移ライングラフ
+- 内訳テーブル(誰が何時間 / どの仕入先からいくら)
+
+## P6-04: `/pc/gaikyo` — 工事概況表(全社)
+- 全現場の 売上 / 原価 / 利益 / 進捗 を一覧
+- ソート可、フィルタ(完了/進行/停止)
+- 月別 / 期別 集計切替
+
+## P6-05: `/pc/gaikyo/[projectId]` — 現場別 工事概況詳細
+- 月次推移、累計売上 vs 累計原価のグラフ
+- 顧客別売上集計
+
+## P6-06: `/pc/customer-sales` — 既存ページ強化
+- 顧客×現場 マトリクスを overview から再構成
+- 顧客別の累計利益率を表示
+
+## P6-07: REPORT3 / supplier_invoice / vehicle_run / invoice 保存時の overview 再計算 trigger
+- 各テーブル INSERT/UPDATE 後に `recalculate_construction_overview` を呼ぶトリガ
+- 重い場合は pg_cron で日次バッチに切替可
+
+## P6-08: PDF 出力 — 工事概況表(請求書 PDF と同様、月次レポート)
+- 既存の billing/pdf/generator.ts を拡張
+
+---
+
+# Phase 7: 外部 SaaS 連携
+
+> ⚠️ 各サービスの API キー/認証情報を **板澤様→クライアント(秋元様)** から
+> 入手する必要があります。Phase 7 の各タスクは、対応する API キーが揃った段階で
+> 実装着手可能。
+
+## P7-01: 環境変数 + 設定画面の整備
+- `.env.example` に LINE_WORKS_BOT_TOKEN / MF_CLIENT_ID 等を追加
+- `/pc/settings/integrations` で接続状態を可視化(管理者専用)
+
+## P7-02: LINE WORKS — 通知送信モジュール
+- `src/lib/lineworks/client.ts` を新規
+- `sendNotificationToGroup(group_id, message)` を実装
+- env: LINE_WORKS_BOT_ID / API_KEY
+
+## P7-03: LINE WORKS — グループマッピングテーブル + UI
+```sql
+create table public.lineworks_groups (
+  id uuid primary key default uuid_generate_v4(),
+  tenant_id uuid not null references public.tenants(id),
+  group_name text not null,
+  lineworks_group_id text not null,
+  scope_type text not null check (scope_type in ('all','department','position','project','role')),
+  scope_id uuid,  -- department_id / project_id 等
+  is_active boolean default true
+);
+```
+
+## P7-04: LINE WORKS — 通知ルーティング server action
+- notifications.created_at 時にトリガで lineworks_groups から該当 group を引き、Bot API で送信
+- フォールバック: 失敗時は notifications テーブルに記録(再送可)
+
+## P7-05: LINE WORKS — 異常検知 + 入力遅れ通知バッチ
+- pg_cron で日次:
+  - 出勤予定だが punch_in 無い → 該当ユーザーの所属班 LW グループに通知
+  - 大幅遅刻 / 早退 / 残業オーバー → 上長に通知
+
+## P7-06: Money Forward — 認証フロー
+- OAuth2 implementation(`/api/auth/mf/callback`)
+- mf_credentials テーブルに access/refresh token 保存
+
+## P7-07: Money Forward — 仕訳 CSV 生成 + 連携
+- 月次バッチ: invoices / supplier_invoices / receipts → MF 形式の CSV 生成
+- API があれば直接 PUT、無ければダウンロード提供
+
+## P7-08: Money Forward — 給与連携
+- attendance_punches + profiles.hourly_rate_cents → 給与データ生成 → MF 給与 PJ へ
+
+## P7-09: Money Forward — 連携ログ + 再送機能
+```sql
+create table public.mf_sync_log (
+  id uuid primary key default uuid_generate_v4(),
+  tenant_id uuid not null references public.tenants(id),
+  sync_type text not null,  -- 'journal' | 'invoice' | 'salary'
+  target_period text not null,  -- '2026-05'
+  status text not null check (status in ('pending','success','failed','retrying')),
+  request_payload jsonb,
+  response_payload jsonb,
+  error_message text,
+  retry_count integer default 0,
+  created_at timestamptz default now()
+);
+```
+
+## P7-10: Cloud Sign — 契約書送信 server action
+- 見積承認後 → 契約書 PDF 生成 → Cloud Sign API で送信
+- 送信ログを `cloudsign_envelopes` に記録
+
+## P7-11: Cloud Sign — 締結ステータスの webhook 受信
+- `/api/webhooks/cloudsign` で受信、署名検証後に envelope.status を更新
+
+## P7-12: Cloud Sign — 締結済み PDF を Storage に保存
+- 案件・顧客と紐付けて `signed_contracts/` フォルダ(後の Phase 10 の汎用ファイル管理に統合)
+
+## P7-13: Google Maps — 案件住所からマップ表示
+- `/pc/projects/[id]` に Google Maps Embed
+- API キーは public 用と server 用を分離
+
+## P7-14: Google Maps — 配車ルート表示
+- スケジュール画面で「現場 A → 現場 B」のルート計算
+- Distance Matrix API 使用
+
+## P7-15: Google Maps — `/pc/projects/map` の現場マーカーを実地図に重畳(Phase 3-C と統合)
+- 現状はゲーム風 SVG マップ。実地理マップとの切替モードを追加
+
+## P7-16: 連携テスト + フェイルセーフ
+- API 障害時の fallback メッセージ
+- リトライキューと dead letter
+
+---
+
+# Phase 8: ゲーミフィケーション完成(残課題回収)
+
+## P8-01: バッジ画面 — `/pc/badges` `/sp/badges`
+- 既存 `badges` テーブル + `user_badges` を可視化
+- 図鑑形式: 獲得済み / 未獲得をシルエット表示
+
+## P8-02: クエスト画面 — `/pc/quests` `/sp/quests`
+- 既存 `quests` テーブル + 進捗バー
+- アクティブ / 完了 / 失敗の 3 タブ
+
+## P8-03: クエスト達成判定バッチ
+- pg_cron で REPORT3 / safety_combo / titles_granted を見て、quest 進捗を更新
+
+## P8-04: XP 自動付与拡張
+- 既存: REPORT3 提出 +10 XP のみ
+- 追加: 称号獲得 / 連続出勤 / KY完了 / バッジ獲得 で XP 加算
+- award_points と統合(`category = 'XP'`)
+
+## P8-05: ランクアップ通知 + 演出
+- レベルアップ時にフルスクリーン演出(P3-B-07 と同形式)
+- notifications テーブル経由でモバイルにも通知
+
+## P8-06: 称号自動付与ロジック
+- `evaluate_titles_for_user` security definer 関数
+- 安全コンボ 180 日 → 安全の番人 自動付与など
+
+## P8-07: さくらししまる AI ナビ — 状況察知エンジン
+- ダッシュボード以外でも能動的に出現
+- 未提出日報がある時 / 期限切れ資格が近い時 / 配車衝突発生時 に「ナビ」として声かけ
+
+## P8-08: NAVI コンポーネント `<SakuraShishimaruNavi>` 配置
+- 全画面右下フローティング(opt-out 可)
+- 状況に応じてバルーン表示
+
+## P8-09: NAVI トーン設定 + Claude API オプション
+- ルールベース → Claude API による文脈理解にアップグレード可能な抽象化レイヤー
+
+---
+
+# Phase 9: ロール別画面ガード徹底
+
+> 設計図の「マスタ更新は事務ロールのみ」原則を全画面で履行。
+> 現状は一部画面のみ redirect ガード。
+
+## P9-01: ガード対象の網羅監査
+- 全 `/pc/*` `/sp/*` ページを `requireSession` + role check の網羅で監査
+- 漏れているページを `production/qa/role-guard-audit.md` に列挙
+
+## P9-02: 中央ガード関数 `requireRole(allowed: UserRole[])` を実装
+- session.role が含まれない場合 redirect("/pc/home")
+- 既存の `requireSession` と並存
+
+## P9-03: 全マスタ画面に `requireRole(['office','ceo','system'])` 適用
+- `/pc/qualifications`, `/pc/price-items`, `/pc/work-classifications`, `/pc/org-*`,
+  `/pc/customers`, `/pc/users`, `/pc/projects/*` の編集ページなど
+
+## P9-04: 全ページのナビゲーション側で **「見せない」ガード**
+- Sidebar.tsx で role に応じてリンク自体を hide(現状一部実装済み)
+- 統一的な `<RoleGate role={...}>` コンポーネントを作成
+
+## P9-05: ロール別テストプラン作成
+- `tests/role-guard.spec.ts`(Playwright)で全 5 ロール × 全主要画面を巡回
+
+---
+
+# Phase 10: 汎用ファイル管理(Google Drive 風) + ロール別アクセス制御 + バックアップ + 履歴
+
+> 設計図の「DOC: 図面・書類・添付ファイル管理」と、
+> 板澤様の追加要件「Google Drive 風のフォルダ管理 + ロール別アクセス制御」を実装。
+> 既存の安全書類 / 元請テンプレート / 領収書写真等もこの汎用システムに段階的に集約していく。
+
+## P10-01: マイグレーション 0016 — ファイル管理スキーマ
+```sql
+-- フォルダ階層(再帰)
+create table public.file_folders (
+  id uuid primary key default uuid_generate_v4(),
+  tenant_id uuid not null references public.tenants(id),
+  parent_folder_id uuid references public.file_folders(id) on delete cascade,
+  name text not null,
+  description text,
+  -- 関連エンティティ(任意): 案件配下フォルダ等の自動分類用
+  related_table text,    -- 'projects' | 'customers' | 'users' | null
+  related_id uuid,
+  created_by uuid not null references public.profiles(id),
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  unique (parent_folder_id, name)  -- 同一階層で名前重複禁止
+);
+create index idx_folders_tenant_parent on public.file_folders(tenant_id, parent_folder_id);
+create index idx_folders_related on public.file_folders(related_table, related_id);
+
+-- ファイル本体
+create table public.files (
+  id uuid primary key default uuid_generate_v4(),
+  tenant_id uuid not null references public.tenants(id),
+  folder_id uuid references public.file_folders(id) on delete cascade,
+  name text not null,
+  mime_type text not null,
+  size_bytes bigint not null,
+  storage_path text not null,   -- Supabase Storage のパス
+  description text,
+  -- バージョン管理(同一 file_id + version)
+  version integer not null default 1,
+  is_latest boolean not null default true,
+  uploaded_by uuid not null references public.profiles(id),
+  uploaded_at timestamptz default now()
+);
+create index idx_files_folder_latest on public.files(folder_id, is_latest);
+create index idx_files_tenant on public.files(tenant_id, uploaded_at desc);
+
+-- アクセス権限(フォルダ または ファイル単位)
+-- subject:
+--   role:office  → ロール指定
+--   user:<uuid>  → 個別ユーザー指定
+--   department:<uuid> → 部署指定
+create type file_access_subject_type as enum ('role', 'user', 'department', 'public');
+create type file_access_permission as enum ('read', 'write', 'manage');
+
+create table public.file_access_grants (
+  id uuid primary key default uuid_generate_v4(),
+  tenant_id uuid not null references public.tenants(id),
+  -- 対象: フォルダ or ファイル(どちらか一方が NOT NULL)
+  folder_id uuid references public.file_folders(id) on delete cascade,
+  file_id uuid references public.files(id) on delete cascade,
+  -- 権限の付与先
+  subject_type file_access_subject_type not null,
+  subject_value text not null,  -- 'office' / '<user_id>' / '<dept_id>' / null(public)
+  permission file_access_permission not null,
+  granted_by uuid not null references public.profiles(id),
+  granted_at timestamptz default now(),
+  -- どちらかは必須
+  check ((folder_id is not null and file_id is null) or (folder_id is null and file_id is not null))
+);
+create index idx_access_folder on public.file_access_grants(folder_id);
+create index idx_access_file on public.file_access_grants(file_id);
+create index idx_access_subject on public.file_access_grants(subject_type, subject_value);
+
+-- アクセスログ(監査用)
+create table public.file_access_log (
+  id uuid primary key default uuid_generate_v4(),
+  tenant_id uuid not null references public.tenants(id),
+  file_id uuid references public.files(id) on delete set null,
+  folder_id uuid references public.file_folders(id) on delete set null,
+  user_id uuid not null references public.profiles(id),
+  action text not null check (action in ('view','download','upload','delete','rename','move','grant','revoke')),
+  ip_address inet,
+  user_agent text,
+  occurred_at timestamptz default now()
+);
+create index idx_file_access_log_file on public.file_access_log(file_id, occurred_at desc);
+create index idx_file_access_log_user on public.file_access_log(user_id, occurred_at desc);
+```
+
+## P10-02: アクセス可否判定関数 `can_access_file(p_file_id, p_user_id, p_permission)`
+- security definer
+- 親フォルダの権限を継承(再帰)
+- ロール / ユーザー / 部署のいずれかにマッチすれば許可
+- system ロールは常に許可
+
+## P10-03: Storage バケット `files` 新設 + RLS ポリシー
+- can_access_file() を呼ぶ Storage policy
+
+## P10-04: `/pc/files` — ルートエクスプローラ
+- 左ペイン: フォルダツリー(再帰展開)
+- 右ペイン: 現在フォルダの中身一覧(grid / list 切替)
+- パンくずナビゲーション
+- 検索バー(全文検索: 名前 / 説明)
+
+## P10-05: `/pc/files/[folderId]` — フォルダ詳細
+- 上記 + 右上に「アップロード」「新規フォルダ」「権限管理」ボタン
+
+## P10-06: `<FileUploadDialog>` — ドラッグ&ドロップ + 複数同時アップロード
+- 進捗バー、サイズ上限チェック、自動 mime_type 推定
+- 完了後 file_access_log に 'upload' を記録
+
+## P10-07: `<FolderTree>` 補助コンポーネント
+- 仮想スクロール対応(数千フォルダでも快適)
+- 現在地ハイライト
+
+## P10-08: `<FilePreview>` — プレビュー機能
+- 画像 / PDF / Office 系(Office Online or PDF 化)
+- ダウンロードボタン(file_access_log 記録)
+
+## P10-09: `<FileAccessControlDialog>` — 権限管理 UI(管理者専用)
+- フォルダ / ファイルに対する grant 一覧の追加・削除
+- ロール / ユーザー / 部署単位で権限を付与
+- "継承を上書き" の警告表示
+
+## P10-10: 既存ファイル系の段階的統合
+- `safety_documents`(現状の `/pc/safety-documents`)→ files テーブルへ移行
+- `contractor_templates` → files テーブル + 専用 metadata 列
+- `receipts.photo_url` → files への移行
+- 既存ページは互換ビューとして維持
+
+## P10-11: 履歴管理 + バージョニング
+- 同名ファイル再 upload 時:
+  - 既存 file の `is_latest = false`
+  - 新ファイルを `version = old.version + 1` で INSERT
+- バージョン履歴ビュー
+
+## P10-12: 論理バックアップ + 監査ログのエクスポート
+- pg_cron で日次 / 週次の論理バックアップ
+- audit_log + file_access_log の月次 CSV エクスポート(Storage 保存)
+- 管理者用の「エクスポートをダウンロード」UI
+
+---
+
 # 完了の定義(全フェーズ通しの DoD)
 
-- 全マイグレーション適用済み(0012〜0015)
+- 全マイグレーション適用済み(0012〜0016)
 - 全タスクのうち各 AC 達成
 - `/pc/home` を秋元様(クライアント)に見せた時、デモ版の v4.0 のテイストが残りつつ、本物のデータで動作している
+- 設計図 12 項目すべての実装完了
+- 各ロール(worker / leader / office / ceo / system)で適切に画面が出し分けられる
+- 外部 SaaS(LINE WORKS / MF / Cloud Sign / Google Maps)との連携が動作
+- ファイル管理画面で Google Drive 風のフォルダ操作ができ、ロール別にアクセス制御が効く
 - `npm run build` がエラーなくパス
 - 既存の本番機能(REPORT3 / 見積 / 請求 / 領収書 / マスタ)は一切退行していない
 - `PROGRESS.md` の全タスクがチェック済み
@@ -489,4 +1002,8 @@ create table public.skill_tree_nodes (
    「Plan Change History」に追記する
 
 ## Plan Change History
-- 2026-05-10: 初版作成(Claude セッションにて)
+- 2026-05-10: 初版作成(Claude セッションにて、Phase 1〜4 の 43 タスク)
+- 2026-05-10: 設計図 12 項目との照合監査結果を反映、Phase 5〜10 を追加(計約 110 タスク)。
+  追加要件: TASK / SCH / ATT 補完、GENKA 詳細 / GAIKYO 新設、外部 SaaS 連携(LW / MF / CS / GMaps)、
+  ゲーミフィケーション完成(バッジ画面 / クエスト / NAVI)、ロール別画面ガード徹底、
+  Google Drive 風ファイル管理 + ロール別アクセス制御 + バックアップ + 履歴。
