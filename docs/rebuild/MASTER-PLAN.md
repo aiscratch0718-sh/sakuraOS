@@ -29,10 +29,13 @@
 | **Phase 8** | **ゲーミフィケーション完成(バッジ画面 / クエスト / XP 自動付与拡張 / さくらししまる AI ナビ + AI 統合)** | **16**(P8-09 を 8 サブタスクに細分化) | **4〜6** |
 | **Phase 9** | **ロール別画面ガード徹底(全画面の権限分離)** | **5** | **1〜2** |
 | **Phase 10** | **汎用ファイル管理(Google Drive 風)+ ロール別アクセス制御 + バックアップ + 履歴** | **12** | **3〜4** |
-| **合計** | **— ** | **約 110** | **約 30〜40 セッション** |
+| **Phase 11** | **REPORT3 ステップウィザード化(6 ステップ)+ 共通レイアウトパターン整備(3-pane / 2-pane / Stepper)** | **15** | **3〜4** |
+| **Phase 12** | **画面密度の参照画像準拠化(ダッシュ再構成 / 案件 2-pane / 見積請求 2-pane / 配車マップ / 原価詳細 / クエスト統合 / 通知 2-pane / 車両工具統合 / モバイルホーム改修)** | **22** | **6〜8** |
+| **合計** | **— ** | **約 147** | **約 40〜55 セッション** |
 
 > 設計図 12 項目との照合監査(2026-05-10)結果から Phase 5〜10 を追加。
-> 詳細は `docs/rebuild/SESSION-LOG.md` の S4.5 監査セッション参照。
+> 参照データ画像 12 枚分析(2026-05-11、4 specialist 並列)から Phase 11〜12 を追加。
+> 詳細は `docs/rebuild/audit-reports/2026-05-11_S5_reference-data-audit.md` 参照。
 
 ---
 
@@ -1104,11 +1107,258 @@ create index idx_file_access_log_user on public.file_access_log(user_id, occurre
 
 ---
 
+# Phase 11: REPORT3 ステップウィザード化 + 共通レイアウトパターン整備
+
+> 参照画像分析(2026-05-11)で確定:
+> - REPORT3 入力は **6 ステップ ウィザード化**
+> - 全画面共通の **3-pane / 2-pane / Stepper** レイアウトパターンを整備
+> - サイドバー左下「チームレベルゲージ + アバター」常駐ウィジェット化
+> - REPORT3 ロゴ運用統一
+
+## P11-01: デザイントークン拡張(ロゴグラデ + status セマンティック)
+- `tailwind.config.ts` に追加:
+  - `brand.report3.{from: "#E8516A", to: "#F5A45A"}`
+  - `status.{active, done, warn, urgent}` セマンティック色
+  - `borderRadius.card=12px / cardLg=16px`
+- `globals.css` の `:root` にも対応する CSS 変数
+
+## P11-02: 共通 Stepper コンポーネント
+- `src/components/blocks/stepper/`
+  - `<Stepper>`(ol + 各 step `aria-current="step"`)
+  - `<StepIndicator>`(完了済み aria-label="完了"、未完成 aria-disabled)
+  - `<StepFooter>`([← 戻る][下書き保存][一時保存][次へ →])
+- ステップ間 focus 移動(次へ押下後 `<h2 tabIndex=-1>` に focus)
+- ショートカット: `Alt+→` 次へ / `Alt+←` 戻る(PC のみ)
+
+## P11-03: 共通 LineItemTable コンポーネント
+- 見積書 / 請求書で共通利用
+- 列: No / 項目 / 数量 / 単位 / 単価 / 金額 / 削除
+- 行追加・削除、合計自動計算、aria-live="polite"
+
+## P11-04: 共通 DocumentPreview コンポーネント
+- 見積書 / 請求書 のライブプレビュー兼 PDF テンプレ
+- `type: "estimate" | "invoice"` バリアント
+- React コンポーネントを HTML プレビュー + PDF(`@react-pdf/renderer`)で 1 ソース化
+- 印影 SVG オーバーレイ、`tenant_id` ごとの印影画像 preload
+
+## P11-05: PhotoGrid コンポーネント
+- 4 枚 grid + 追加ボタン
+- `<input type="file" capture="environment">` でカメラ直結(モバイル)
+- アップロード進捗 + EXIF GPS 抽出
+
+## P11-06: SiteInfoPanel + QuickTips コンポーネント
+- 右パネル「現場情報 + 入力ガイド Quick Tips」
+- 折りたたみ(モバイル)/ 固定(PC)切替
+
+## P11-07: SidebarFooterWidget(全画面共通常駐)
+- サイドバー左下に「チームレベルゲージ + アバター + ロール表示」
+- `layout.tsx` で全画面に注入
+- View `team_progress_view` から取得
+
+## P11-08: REPORT3 入力 6 ステップウィザード化(`/sp/report3/new` 全面改修 + `/pc/report3/new` 新規)
+- 6 ステップ: 基本情報 → 作業内容 → 時間入力 → 写真添付 → 安全チェック → 確認・送信
+- 全ステップ 1 つの useFormContext で集約(再マウントしない)
+- `form.trigger(stepNFields)` で部分検証
+- URL `?step=N` で進捗状態
+- 既存 1 画面型は廃止、モバイルも同 Wizard
+
+## P11-09: REPORT3 下書き保存機能
+- `submitReport3Draft` Server Action(部分 zod、status='draft')
+- URL `?draft=<id>` 維持で再開可能
+- 下書き一覧画面(`/sp/report3/drafts`)
+
+## P11-10: ステップ間バリデーション + エラー表示
+- 失敗時: 最初のエラーフィールドに scrollIntoView + focus
+- `aria-live="assertive"` でスクリーンリーダー通知
+
+## P11-11: REPORT3 クイック入力 RPC + モバイル簡易入力 UI
+- `submit_report3_quick(...)` security definer RPC
+- 必須項目のみ受け取り、欠損項目はテナントデフォルトで補完
+- モバイル `/sp/home` から呼び出し
+
+## P11-12: REPORT3 ロゴ運用統一
+- 全 PC 画面サイドバー上部に「REPORT3」ロゴ固定
+- 下に「さくら株式会社 業務管理システム」サブテキスト
+- モバイル: 小さく `REPORT3` ワードマーク
+
+## P11-13: アイコン体系の Lucide 統一
+- 既存サイドバー絵文字 → Lucide アイコン(Home, Briefcase, Calculator, Calendar, MapPin, Truck, FileText, Bell, Trophy, Settings)
+- ゲーミフィケーション画面のみ絵文字維持
+
+## P11-14: 既存 KpiCard / AlertCard / Tag のリファイン
+- KpiCard: 数値 28 → 32px、アイコン+ラベル横並び
+- AlertCard: 左バー 4 → 6px 強調
+- Tag: セマンティック別名 `pill-active / pill-done` 追加
+
+## P11-15: 角丸 / シャドウのトーン揃え
+- panel 10 → 12px、KpiCard のみ 16px
+- 全コンポーネントで `shadow-card / shadow-md / shadow-lg` の使い分けを再点検
+
+---
+
+# Phase 12: 画面密度の参照画像準拠化(9 画面の大幅改修)
+
+> 参照画像 12 枚から各画面の理想形が判明。Phase 12 で 9 画面を順次改修・新設する。
+> 各画面の詳細仕様は `docs/rebuild/audit-reports/2026-05-11_S5_reference-data-audit.md` を必ず参照。
+
+## P12-01: ダッシュボード再構成(`/pc/home` 全面改修)
+- 上部: タイトル + 検索バー + 通知バッジ + プロフィール
+- KPI 4 枚: 78%(達成率) / 18 件 / ¥12,450,000(累計) / 18.6%(利益率)
+- **今日のタスク テーブル**(新規)
+- **直近の通知カード**
+- **配車マップ右上埋め込み**(新規、`<GoogleMapEmbed>` next/dynamic)
+- **稼働状況 棒グラフ**(新規、Recharts)
+- **売上/原価/利益 月次グラフ**(新規、Recharts grouped bar)
+- **クエスト・バッジサマリー**(右下、ミニカード)
+- 下部「よく使うアクション」ボタン群
+- ロール別表示マトリクス(worker/leader/office/ceo/system × KPI/タスク/マップ/グラフ/クエスト)
+
+## P12-02: 案件管理 2-pane 化(`/pc/projects` 全面改修)
+- KPI 4 枚: 進行中 18件 / 完了予定 7件 / 受注 5件 / 完了 26件
+- 左テーブル(8 列)+ 右パネル(`<ProjectDetailPanel>`)
+- URL `?selected=<id>` 同期(行クリックで更新、リロードで保持)
+- フィルタ・検索・ページネーションすべて URL searchParams
+- Realtime: project_progress channel で右パネル partial revalidate
+- 該当案件がフィルタ外なら「該当なし」フォールバック
+
+## P12-03: スケジュール画面新設(`/pc/schedules`)
+- 縦軸チーム/班 × 横軸日付 7 日のグリッド
+- 各セルにシフトラベル + 配置現場の色付きピル
+- 右パネル「本日のスケジュール詳細」(出席者顔列 + 出力ボタン)
+- 凡例(▲ 出勤 / 休)
+- 編集モード: `@dnd-kit` DnD + キーボード fallback
+- migration 0017 拡張: `schedules.shift_type / assignment_color / is_dragged_at`
+- RPC `get_week_schedule(tenant_id, start_date)`(N+1 回避)
+
+## P12-04: 配車マップ新設(`/pc/dispatch-map`)
+- マリオ風 STAGE マップとは別物の **実地理 Google Maps**
+- 3-pane: フィルタ左 / マップ中央 / 現場詳細右
+- フィルタ: エリア / 日付 / 担当 / 距離 ≤ Nkm / 作業員数
+- 右パネル: 現場名 / 出席数 / 担当 / 「車両を割当」「現場レポートを送る」
+- 下部: 通行情報ストリップ
+- Google Maps Platform API + PostGIS `ST_DWithin`
+- RPC `get_dispatch_map(tenant_id, date, area, max_distance_km)`
+
+## P12-05: 原価管理画面新設(`/pc/cost`)
+- KPI 4 枚: 累計売上 / 平均粗利率 / 平均利益 / 完了件数
+- 売上・原価・利益月次グラフ(Recharts、12 ヶ月、青/赤/緑)
+- 右パネル: 利益率 Top 5 + アクションボタン(月次再集計 / レポート出力)
+- 案件別テーブル(列に 1月..12月)
+- Materialized View `mv_project_cost_monthly` + RPC `refresh_cost_monthly`
+- Edge Function で PDF レポート出力
+
+## P12-06: 見積書 2-pane + ステッパー化(`/pc/estimates` 全面改修)
+- 4 ステップ: 基本情報 / 物件情報 / プレビュー / 承認フロー
+- KPI 4: 有効期限 / 承認状態 / 進捗% / 合計金額
+- 左フォーム + 右ライブプレビュー(印影 SVG オーバーレイ)
+- 共通 `<LineItemTable>`(P11-03)+ `<DocumentPreview type="estimate">`(P11-04)
+- 下部: 下書き保存 / PDF 出力 / **クラウドサインへ送信** / 承認申請
+- 拡張: `estimates.cloud_sign_envelope_id / cloud_sign_status`
+- ライブプレビューは Client(react-hook-form watch + memo)、PDF は同 React テンプレを Server Action で renderToBuffer
+
+## P12-07: 請求書 2-pane + 入金ランキング(`/pc/invoices` 全面改修)
+- 4 ステップ: 請求書情報 / 明細入力 / プレビュー / 入金管理
+- 左請求情報 + 中央項目テーブル + 右プレビュー
+- 共通 `<LineItemTable>` + `<DocumentPreview type="invoice">`
+- 下部: 下書き保存 / PDF 出力 / メール送信 / 承認申請
+- **最下部「入金ランキング」横バー**(各社の入金状況可視化)
+- View `v_client_payment_status` + RPC `get_payment_ranking`
+- Money Forward webhook → payments upsert(idempotent + 署名検証)
+- 期日近い順アラート(7 日以内=橙、超過=赤)
+
+## P12-08: 通知 2-pane 化(`/pc/notifications` 全面改修)
+- KPI 4: 緊急 12 / 警告 3 / 通知 5 / 期限 4
+- 左一覧 + 右詳細(直接対応ボタン)
+- フィルタ(種別 / 期間 / 状態)+ タブ
+- migration 0017: `notifications.severity / category / read_at / status / source_*`
+- 新規テーブル `notification_actions`(各通知のアクションリンク)
+- View `notification_kpi_view`
+
+## P12-09: クエスト・バッジ画面新設(`/pc/quests-badges`)
+- KPI 4: Lv 18 / 128,450 XP / 進捗 8.9% / 獲得 23 個
+- 3 タブ: 進行中のクエスト / **チームクエスト** / バッジ一覧
+- 右パネル: アバター + Lv + ランク + 直近 3 バッジ + チームスコア
+- 「直近の達成」タイムライン + 「おすすめアクション」(進捗 ≥70%)
+- migration 0017 新規:
+  - `teams / team_members / team_quests / user_quest_progress`
+  - `badges.rarity` 列追加
+  - `compute_user_rank(user_id)` 関数
+
+## P12-10: 車両・工具統合画面(`/pc/fleet` 新規、既存 vehicles + tools 統合)
+- KPI 4: 稼働数 / 修理中 / 持出件数 / 警告
+- 4 タブ: 車両管理 / 工程確認 / 災害対策 / 通信記録
+- 一覧テーブル + 右パネル(車両画像 + GPS マップ + ステータス)
+- migration 0017 新規:
+  - `alcohol_checks`(道交法準拠、必須)
+  - `vehicle_inspections`
+  - `disaster_response_kits`
+  - `vehicle_radio_logs`
+- `vehicles.photo_url / status` 列追加
+- 既存 `/pc/vehicles` `/pc/tools` は redirect で残す(下位互換)
+
+## P12-11: モバイル ホーム画面改修(`/sp/home` 全面改修)
+- ヘッダー: アバター + 名前 + 通知ベル
+- 「今日の作業」カード(現場 + 時間 + 内容)
+- 大型ボタン3つ: **出勤(緑) / 退勤(赤) / REPORT3 入力(青)**
+- 「今日のタスク」チェックリスト
+- 「REPORT3 クイック入力」(`submit_report3_quick` RPC)
+- 「今月の進捗」(提出率 / 完了率 / 出勤日数)
+- ゲーミフィケーション + チームレベル
+- お知らせ(LIMIT 3)
+- フッターナビ: ホーム / REPORT3 / マップ / プロフィール
+- View `monthly_progress_view`
+
+## P12-12: migration 0017(画面拡張用 DB 整備)
+- 新規 11 テーブル + 既存 4 テーブル列追加 + 4 ビュー + 5 関数
+- すべて `tenant_id NOT NULL + RLS` 必須
+- 法令証跡(`alcohol_checks` / `attendance_punches`)は audit_log 連携
+- Phase 5 の `tasks / attendance_punches / work_assignments` を 0017 で先行投入
+
+## P12-13: ステータスタグのセマンティック化(`pill-active / pill-done` 追加)
+- 既存 `pill-red / pill-teal` を保持しつつ意味的な別名追加
+
+## P12-14: チームレベルゲージのデータソース整備
+- View `team_progress_view`
+- `<SidebarFooterWidget>`(P11-07)から参照
+
+## P12-15: KpiCard のリファイン
+- アイコン+ラベル横並び化
+- 数値 28 → 32px
+
+## P12-16: AlertCard のリファイン
+- 左バー 4 → 6px 強調
+- severity 別配色の精緻化
+
+## P12-17: ダッシュボードの「今日のタスク」テーブル
+- 列: タスク / 担当 / 期限 / ステータス
+- ロール別フィルタ(worker は自分担当、leader はチーム、office は全社)
+
+## P12-18: ダッシュボードの「直近の通知」カード
+- 通知 LIMIT 5、severity 別アイコン色
+
+## P12-19: ダッシュボードの稼働状況 棒グラフ
+- 縦棒 7 日分(過去 1 週間の出勤数 or REPORT3 提出数)
+
+## P12-20: ダッシュボードの売上/原価/利益月次グラフ
+- 3 系列縦棒(青=売上 / 赤=原価 / 緑=利益、12 ヶ月)
+- mv_project_cost_monthly から取得
+
+## P12-21: ダッシュボード「よく使うアクション」フッター
+- 出勤打刻 / REPORT3 / 配車 / 見積 / 通知 などのクイックリンク
+- ロールに応じて表示項目変化
+
+## P12-22: マリオ風 STAGE マップ vs 実地理マップの併存設計
+- マリオ風(Phase 3-C): `/pc/projects/map`(エンタメ / ゲーミフィケーション装飾)
+- 実地理(Phase 12-04): `/pc/dispatch-map`(配車業務オペレーション)
+- ナビゲーションで両者を別メニュー化、機能重複を避ける
+
+---
+
 # 完了の定義(全フェーズ通しの DoD)
 
-- 全マイグレーション適用済み(0012〜0016)
+- 全マイグレーション適用済み(0012〜0017)
 - 全タスクのうち各 AC 達成
-- `/pc/home` を秋元様(クライアント)に見せた時、デモ版の v4.0 のテイストが残りつつ、本物のデータで動作している
+- `/pc/home` を秋元様(クライアント)に見せた時、**参照データ画像 12 枚と高い一致度** で動作している
 - 設計図 12 項目すべての実装完了
 - 各ロール(worker / leader / office / ceo / system)で適切に画面が出し分けられる
 - 外部 SaaS(LINE WORKS / MF / Cloud Sign / Google Maps)との連携が動作
@@ -1141,3 +1391,12 @@ create index idx_file_access_log_user on public.file_access_log(user_id, occurre
   設計を確定。Phase 8 P8-09 を 8 サブタスク(P8-09a〜h)に細分化。
   実装着手は最後(有料 API 系統合フェーズ)。着手直前にクライアント説明資料を
   再提示する義務(P8-09h)を明文化。総タスク数: 約 113 → 約 120。
+- 2026-05-11(S5): **参照データ画像 12 枚 監査** を実施。4 specialist
+  (brand-director / interaction-designer / screen-designer / systems-analyst)
+  を並列起動して網羅分析。**Phase 11(REPORT3 ステップウィザード化 + 共通レイアウト
+  パターン整備)** と **Phase 12(画面密度の参照画像準拠化、9 画面の大幅改修)** を追加。
+  既存 Phase の詳細化(Phase 1 デザイントークン拡張、Phase 4 見積請求 2-pane、
+  Phase 6 原価詳細化、Phase 7 配車マップ追加、Phase 8 クエスト統合・通知改修)。
+  migration 0017 候補(11 新規テーブル + 4 既存拡張 + 5 ビュー + 5 関数)を
+  systems-analyst が起案。総タスク数: 約 120 → 約 147。
+  詳細監査レポート: `docs/rebuild/audit-reports/2026-05-11_S5_reference-data-audit.md`。

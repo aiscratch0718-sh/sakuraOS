@@ -4,6 +4,114 @@
 
 ---
 
+## S5 — 参照データ画像 12 枚監査(4 specialist 並列、172k tokens)/ 2026-05-11
+
+### コンテキスト
+板澤様から:
+- `参照データ/` フォルダに 12 PNG を共有
+- 「全 PNG を読み取って UI/UX/デザイン/システム構造を全部模倣せよ」
+- 「エージェントはフル稼働させてください」「トークンも惜しみなく使ってください」
+
+### このセッションで完了
+1. **私(parent)が 12 画像すべてを Read で読み込み**、全体像を把握
+2. **並列で 4 specialist 起動**(monorepo の `.claude/agents/*.md` の役割を踏襲):
+   - brand-director(adf177a5dcff1db54): デザイントークン抽出 — 50k tokens
+   - interaction-designer(a19af8f11944d6f92): ダッシュ/REPORT3/案件管理 — 40k tokens
+   - screen-designer(ae1492477397abca2): スケジュール/マップ/原価/見積/請求 — 41k tokens
+   - systems-analyst(a3a3c8943e64ef6f4): クエスト/通知/車両工具/モバイル + DB — 41k tokens
+   合計 **約 172k tokens 並列消費**
+3. **監査レポート作成**: `docs/rebuild/audit-reports/2026-05-11_S5_reference-data-audit.md`
+   - 4 specialist の報告を統合(全文記録)
+4. **MASTER-PLAN.md 大幅拡張**:
+   - Phase 11(REPORT3 ステップウィザード化 + 共通レイアウトパターン整備、15 タスク)新設
+   - Phase 12(画面密度の参照画像準拠化、22 タスク)新設
+   - 全体構成テーブル更新(120 → 147 タスク)
+   - Plan Change History 追記
+5. **PROGRESS.md 更新**:
+   - Phase 11 / 12 のタスクリスト追加
+   - 現在のステータスを更新(着手タスク候補 A/B/C 案を提示)
+   - Decisions Log に 5 件追記
+
+### 重要な発見
+
+#### A. デザイン言語(brand-director)
+- サイドバー濃紺グラデ + 左 4px 赤バー
+- REPORT3 ロゴ赤橙グラデ追加
+- 角丸 12px / カード 16px に統一
+- Lucide アイコン体系に統一(ゲーミフィケーションのみ絵文字)
+- **3-pane / 2-pane / Stepper の 3 大レイアウトパターン**
+- サイドバー左下の **チームレベルゲージ常駐**(全画面共通要素)
+
+#### B. ダッシュボード再構成(interaction-designer)
+- 配車マップ右上埋込(Google Maps)
+- 売上/原価/利益月次グラフ + 稼働状況棒グラフ
+- クエスト・バッジサマリー(右下)
+- 今日のタスクテーブル + 直近通知カード
+- よく使うアクション(下部ボタン群)
+
+#### C. REPORT3 6 ステップ Wizard 化
+- 1 画面 → 6 ステップ(基本情報 → 作業内容 → 時間入力 → 写真添付 → 安全チェック → 確認・送信)
+- モバイルも同 Wizard 採用(現状 1 画面型は廃止)
+- フォトグリッド + 現場情報 + Quick Tips 右パネル
+- 下書き保存機能
+
+#### D. 案件管理 / 見積 / 請求 の 2-pane 化
+- 一覧 + 詳細パネルの 2-pane
+- 見積/請求は 4 ステッパー + ライブプレビュー
+- 共通 `<DocumentPreview>` `<LineItemTable>` で重複排除
+- クラウドサイン送信ボタン
+
+#### E. 配車マップは実地理(マリオ風と別物)
+- マリオ風(Phase 3-C)= 装飾
+- 実地理(Phase 12-04)= 配車業務
+- 両者を別画面・別メニューで併存
+
+#### F. 車両・工具統合(/pc/fleet)
+- 4 タブ: 車両管理 / 工程確認 / 災害対策 / 通信記録
+- 法令証跡テーブル: alcohol_checks(道交法)/ vehicle_inspections / disaster_response_kits / vehicle_radio_logs
+
+#### G. クエスト・バッジ画面(/pc/quests-badges)
+- 3 タブ: 進行中 / **チームクエスト** / バッジ一覧
+- teams テーブル新設(チーム概念導入)
+- badges に rarity 列追加
+
+#### H. 通知 2-pane + KPI 4
+- severity / category / read_at / status / source_* 列追加
+- notification_actions 新規テーブル
+
+#### I. モバイル ホーム改修
+- 大型 3 ボタン: 出勤(緑)/ 退勤(赤)/ REPORT3(青)
+- 今日のタスク + REPORT3 クイック入力
+- ゲーミフィケーション + チームレベル
+- monthly_progress_view、submit_report3_quick RPC
+
+#### J. migration 0017(11 新規テーブル + 4 既存拡張 + 5 ビュー + 5 関数)
+- Phase 5 計画の `tasks / attendance_punches / work_assignments` を 0017 で先行投入
+- 法令証跡は audit_log 連携必須
+
+### 変更ファイル
+- `docs/rebuild/audit-reports/2026-05-11_S5_reference-data-audit.md`(新規、監査レポート完全版)
+- `docs/rebuild/MASTER-PLAN.md`(Phase 11/12 を末尾に追加、テーブル更新、Plan Change History)
+- `docs/rebuild/PROGRESS.md`(タスクリスト 37 件追加、Decisions Log 5 件追記、ステータス更新)
+- `docs/rebuild/SESSION-LOG.md`(本ファイル)
+
+### 動作確認
+- 設計のみのセッション、コード変更無し
+- ビルド影響なし
+
+### 次セッション(S6)へ申し送り
+- **板澤様判断推奨**: 次に着手するタスクの優先順位
+  - A 案: P11-01〜P11-07(共通基盤先行 — 後続が効率化)
+  - B 案: P3-C-01(現場マップ migration 0014)を当初予定通り着手
+  - C 案: P12-01(ダッシュボード再構成)で見栄え優先
+- specialist 化のフル稼働パターンが確立(S4 で 4 並列実装、S5 で 4 並列分析)
+- migration 0017 のSQL を書き起こす段階で再度 orm-specialist 起動推奨
+
+### コミット
+- 後述の Final commit にて
+
+---
+
 ## S4.7 — ADR-0002 策定(さくらししまる AI 統合設計、実装は最後)/ 2026-05-10
 
 ### コンテキスト
