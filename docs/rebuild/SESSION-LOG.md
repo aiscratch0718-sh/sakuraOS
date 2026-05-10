@@ -65,6 +65,125 @@
 
 ---
 
+## S6.5 — ダッシュボード徹底比較(4 specialist 並列、~242k tokens)/ 2026-05-11
+
+### コンテキスト
+- 板澤様より「並列処理でエージェントをフル活用して、参照画像と現状ダッシュボードを比べて何がどう違うか確認」の指示
+- S6 で実装した結果が参照画像と一致しているか客観評価が必要
+- 仕上がりに関してもしっかり確認してから報告
+
+### 実施内容
+1. Vercel デプロイ確認: `f5f0990`(密度修正版)が READY 状態を確認
+2. 4 specialist 並列起動(うち 1 件は別フォルダ誤参照で再起動):
+   - **Layout(aafb1cea2faf51321)**: 構造・グリッド・位置・密度 → 達成度 55%
+   - **Brand(aa430d8658dd5ac1a)**: タイポ・色・視覚言語 → 達成度 78%
+   - **Content(a897fd810df4bbb16)**: 失敗(`sakura_os_v4` フォルダを誤参照)
+   - **Content(aa04dbe08096e2687)**: 再起動、絶対パス明示 → 達成度 65%
+3. 3 specialist の結果を統合 → 総合達成度 **66%**
+4. 監査レポートを `docs/rebuild/audit-reports/2026-05-11_S6.5_dashboard-comparison.md` に保存
+
+### 主要発見
+
+**🔴 重大差分 9 項目**:
+1. 1 画面 fit 未達成(累積高 ~820px、参照 ~720px)
+2. 中段・下段の 3 列 grid が独立(揃わない)
+3. 最下段比率が逆(1:1 → 参照 1:2)
+4. 承認待ち一覧「案件名」カラム欠落
+5. 現場別進捗「予定」「遅延」カラム欠落(5→7 列必要)
+6. 今日のやること全行差分
+7. KPI #2「承認待ち」色違い(amber → red 系)
+8. REPORT3 ロゴ fallback 古い値残存(#ff6b35 / #ff3d6e)
+9. KPI 数値小さい(28px → 34px 推奨)
+
+**🟡 中程度 8 項目 / 🟢 軽微 4 項目**(レポート参照)
+
+**⚠️ 業態整合性の判断事項**:
+- 参照画像は建築業寄り(オフィスビル新築/マンション大規模修繕)
+- SAKURA OS は配管工事業向け
+- 板澤様の Q1 判断必要(A/B/C のいずれか)
+
+**✅ 一致部分**:
+- ヘッダー構成 / KPI #3/#4 / よく使うリンク 5 ボタン / クエスト主要数値
+- サイドバー濃紺グラデ / アクセントカラーマップ / トレンド色 / pill 色 / 角丸・シャドウ
+
+### 板澤様への確認待ち(2 件)
+- **Q1**: 業態整合性(A=建築 / B=配管維持 / C=実 DB 駆動)
+- **Q2**: 修正進め方(X=並列一気 / Y=段階 / Z=別優先)
+
+### 次セッション着手予定(Q1/Q2 確定後)
+修正セット【A】1 画面 fit 達成、【B】KPI 仕上げ、【C】中身データ準拠化
+→ 達成度 66% → 90% 以上を目標
+
+### Specialist 失敗から学んだ教訓
+- specialist 起動時は **絶対パスを明示** するべき
+- 相対パスや「プロジェクトルート」表記だと別フォルダを誤参照する可能性
+- 1 件目の失敗(a897fd810df4bbb16)は `sakura_os_v4` を見に行ってしまった
+- 再起動(aa04dbe08096e2687)では全 12 ファイル + 画像を絶対パスで明示 → 正常完了
+
+### コミット
+- 後述の Final commit にて
+
+---
+
+## S6 — Phase 11 共通基盤実装(4 specialist 並列、219k tokens)+ S6 続編(Sidebar/Dashboard 全面書換え + 密度修正)/ 2026-05-11
+
+### コンテキスト
+- 板澤様確定方針:
+  - 参照画像準拠への全面リワーク
+  - Phase 3-C(マリオ風)/ 3-D(ボスHP)廃止 / Phase 3-E(幹部育成)保持
+  - 既存ページは直接書換え(B 案)
+  - エージェントフル活用
+
+### S6 で完了したタスク
+
+**P11-01〜P11-07 共通基盤**(4 specialist 並列、219k tokens):
+- P11-01 デザイントークン拡張(brand.report3 / status.* / radius card+cardLg)
+- P11-02 Stepper + StepFooter
+- P11-03 LineItemTable(decimal.js)
+- P11-04 DocumentPreview(2-pane ライブプレビュー)
+- P11-05 PhotoGrid(camera capture)
+- P11-06 SiteInfoPanel + QuickTips
+- P11-07 SidebarFooterWidget
+
+**P11-12 / P11-13 / P12-01**(S6 続編、2 specialist 並列):
+- P11-12 REPORT3 ロゴ運用統一
+- P11-13 Lucide アイコン統一(13 メニュー)
+- P12-01 ダッシュボード再構成(10 補助コンポーネント)
+
+**密度修正**(板澤様指摘:「一画面に綺麗に収まってない」):
+- Sidebar 幅 w-60 → w-52
+- KpiCard 数値 40→28px、padding 削減
+- 外周 px-6 py-5 → px-4 py-3
+- セクション間 mb-4 → mb-3
+
+**KpiCard リライト**(板澤様指摘:「参照画像と全然違う」):
+- アイコンタイル廃止、左 4px バー廃止
+- タイトル + ❓ヘルプ → 巨大数値 + 任意 children(donut)
+- フッターに前日比トレンド + 詳細へリンク
+
+**緑ヘッダー削除**(板澤様指摘:参照画像にない):
+- (authenticated)/layout.tsx の緑グラデバー全削除
+- サインアウト/外観/プロフィール機能を SidebarFooterWidget のアバターメニューに移管
+
+### 変更ファイル(S6 累計)
+- src/components/blocks/{stepper,line-item-table,photo-grid,document-preview,site-info-panel,quick-tips}/
+- src/components/feature/SidebarFooterWidget.tsx
+- src/components/ui/{KpiCard,AlertCard}.tsx
+- src/app/(authenticated)/layout.tsx(緑ヘッダー削除)
+- src/app/(authenticated)/pc/_components/{Sidebar,ComingSoonPage}.tsx
+- src/app/(authenticated)/pc/home/{page,_components/*}.tsx(10 新規補助コンポーネント)
+- src/app/(authenticated)/pc/{cost,gaikyo,schedules,dispatch-map,fleet,quests-badges,masters}/page.tsx(プレースホルダ)
+- tailwind.config.ts / src/app/globals.css
+
+### S6 累計コミット
+- 6a89d05: Phase 11 共通基盤
+- 41d080e: Sidebar + Dashboard 全面書換え
+- b667882: PROGRESS.md 更新
+- 17eebb0: KpiCard 完全リライト + 緑ヘッダー削除
+- f5f0990: 密度修正(一画面 fit へ)
+
+---
+
 ## S5 — 参照データ画像 12 枚監査(4 specialist 並列、172k tokens)/ 2026-05-11
 
 ### コンテキスト
