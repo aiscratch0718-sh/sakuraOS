@@ -35,27 +35,27 @@ export function NoticesPanel({ notices }: { notices?: Notice[] }) {
 
   return (
     <div>
-      <ul className="divide-y divide-line">
+      <ul className="divide-y divide-gray-100">
         {data.map((n) => (
-          <li key={n.id} className="py-2 flex items-center gap-2">
-            <span className="text-[10px] text-ink-3 tabular-nums w-20 flex-shrink-0">
+          <li key={n.id} className="py-2.5 flex items-center gap-2">
+            <span className="text-[11px] text-gray-400 tabular-nums w-20 flex-shrink-0">
               {n.date}
             </span>
             {n.level === "important" && (
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-bg text-red flex-shrink-0">
+              <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-red-50 text-red-700 flex-shrink-0">
                 重要
               </span>
             )}
-            <span className="flex-1 text-[12px] text-ink truncate">
+            <span className="flex-1 text-[12px] text-gray-800 truncate">
               {n.title}
             </span>
           </li>
         ))}
       </ul>
-      <div className="text-right pt-1">
+      <div className="text-right pt-2">
         <Link
           href="/pc/notices"
-          className="text-[11px] text-blue hover:underline"
+          className="text-[11px] text-gray-500 hover:text-gray-700"
         >
           すべてのお知らせを見る →
         </Link>

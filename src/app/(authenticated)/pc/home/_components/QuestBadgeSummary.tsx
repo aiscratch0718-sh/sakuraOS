@@ -1,9 +1,9 @@
 import Link from "next/link";
 
 const BADGES = [
-  { id: "input-master", icon: "📝", name: "入力マスター", color: "bg-blue-bg text-blue" },
-  { id: "cost-king", icon: "💴", name: "原価番長", color: "bg-amber-bg text-amber" },
-  { id: "safety-leader", icon: "🛡️", name: "安全リーダー", color: "bg-teal-bg text-teal" },
+  { id: "input-master", name: "入力マスター", color: "bg-blue-50 text-blue-700" },
+  { id: "cost-king", name: "原価番長", color: "bg-amber-50 text-amber-700" },
+  { id: "safety-leader", name: "安全リーダー", color: "bg-teal-50 text-teal-700" },
 ];
 
 /**
@@ -37,8 +37,8 @@ export function QuestBadgeSummary({
       {/* 自分の XP */}
       <div>
         <div className="flex items-center justify-between mb-1">
-          <span className="text-[11px] text-ink-3">あなたの XP</span>
-          <span className="text-[11px] font-bold text-navy">Lv.{level}</span>
+          <span className="text-[11px] text-gray-500">あなたの XP</span>
+          <span className="text-[12px] font-bold text-gray-900">Lv.{level}</span>
         </div>
         <div
           role="progressbar"
@@ -46,20 +46,20 @@ export function QuestBadgeSummary({
           aria-valuemin={0}
           aria-valuemax={nextLevelXp}
           aria-label={`Lv.${level} の経験値 ${currentXp} / ${nextLevelXp}`}
-          className="h-2 rounded-full bg-graybg overflow-hidden"
+          className="h-2 rounded-full bg-gray-100 overflow-hidden"
         >
           <div
-            className="h-full bg-gradient-to-r from-amber to-amber-2"
+            className="h-full bg-gradient-to-r from-amber-400 to-orange-400 rounded-full"
             style={{ width: `${xpPct}%` }}
           />
         </div>
         <div className="flex items-center justify-between mt-0.5">
-          <span className="text-[10px] text-ink-3 tabular-nums">
+          <span className="text-[10px] text-gray-500 tabular-nums">
             {currentXp.toLocaleString("ja-JP")} / {nextLevelXp.toLocaleString("ja-JP")} XP
           </span>
-          <span className="text-[10px] text-ink-2 tabular-nums">
-            次のレベル(Lv.{level + 1})まで{" "}
-            <span className="font-bold text-navy">
+          <span className="text-[10px] text-gray-500 tabular-nums">
+            次のレベルまで{" "}
+            <span className="font-medium text-gray-700">
               {xpRemaining.toLocaleString("ja-JP")}
             </span>{" "}
             XP
@@ -70,10 +70,10 @@ export function QuestBadgeSummary({
       {/* チームクエスト */}
       <div>
         <div className="flex items-center justify-between mb-1">
-          <span className="text-[11px] font-bold text-ink">
-            🎯 {questLabel}
+          <span className="text-[12px] font-medium text-gray-800">
+            {questLabel}
           </span>
-          <span className="text-[10px] text-ink-3">期限 {questDeadline}</span>
+          <span className="text-[11px] text-gray-500">期限 {questDeadline}</span>
         </div>
         <div
           role="progressbar"
@@ -81,32 +81,31 @@ export function QuestBadgeSummary({
           aria-valuemin={0}
           aria-valuemax={questGoal}
           aria-label={`${questLabel} ${questProgress} / ${questGoal}`}
-          className="h-2 rounded-full bg-graybg overflow-hidden"
+          className="h-2 rounded-full bg-gray-100 overflow-hidden"
         >
           <div
-            className="h-full bg-teal"
+            className="h-full bg-teal-500 rounded-full"
             style={{ width: `${questPct}%` }}
           />
         </div>
-        <div className="text-[10px] text-ink-3 mt-0.5 tabular-nums">
+        <div className="text-[11px] text-gray-700 mt-0.5 tabular-nums">
           {questProgress} / {questGoal} 件
         </div>
       </div>
 
       {/* バッジ */}
       <div>
-        <div className="text-[11px] text-ink-3 mb-1.5">
+        <div className="text-[11px] text-gray-500 mb-1.5">
           最近獲得したバッジ
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {BADGES.map((b) => (
             <div
               key={b.id}
-              className={`flex items-center gap-1 px-2 py-1 rounded-pill text-[10px] font-bold ${b.color}`}
+              className={`px-2 py-1 rounded-full text-[11px] font-medium ${b.color}`}
               title={b.name}
             >
-              <span aria-hidden>{b.icon}</span>
-              <span>{b.name}</span>
+              {b.name}
             </div>
           ))}
         </div>
@@ -114,7 +113,7 @@ export function QuestBadgeSummary({
 
       <Link
         href="/pc/badges"
-        className="block text-right text-[11px] text-blue hover:underline"
+        className="block text-right text-[11px] text-gray-500 hover:text-gray-700"
       >
         すべてのバッジを見る →
       </Link>

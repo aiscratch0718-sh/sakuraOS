@@ -12,17 +12,17 @@ type TaskRow = {
 };
 
 const TAG_STYLE: Record<TaskRow["tag"], string> = {
-  必須: "bg-red-bg text-red",
-  確認: "bg-amber-bg text-amber",
-  対応: "bg-blue-bg text-blue",
-  情報: "bg-graybg text-ink-2",
+  必須: "bg-red-50 text-red-700",
+  確認: "bg-amber-50 text-amber-700",
+  対応: "bg-blue-50 text-blue-700",
+  情報: "bg-gray-100 text-gray-600",
 };
 
 const STATE_STYLE: Record<TaskState, { label: string; cls: string }> = {
-  urgent: { label: "緊急", cls: "bg-red-bg text-red" },
-  warn: { label: "要対応", cls: "bg-amber-bg text-amber" },
-  active: { label: "進行中", cls: "bg-blue-bg text-blue" },
-  done: { label: "完了", cls: "bg-teal-bg text-teal" },
+  urgent: { label: "緊急", cls: "bg-red-50 text-red-700" },
+  warn: { label: "要対応", cls: "bg-amber-50 text-amber-700" },
+  active: { label: "進行中", cls: "bg-blue-50 text-blue-700" },
+  done: { label: "完了", cls: "bg-green-50 text-green-700" },
 };
 
 /**
@@ -63,35 +63,35 @@ export function TodayTasksList({ tasks }: { tasks?: TaskRow[] }) {
   ];
 
   return (
-    <ul className="space-y-2">
+    <ul className="divide-y divide-gray-100">
       {rows.map((t, i) => {
         const state = STATE_STYLE[t.state];
         return (
           <li key={i}>
             <Link
               href={t.href}
-              className="flex items-center gap-2.5 p-2.5 rounded-card border border-line hover:bg-panel2 transition-colors"
+              className="flex items-center gap-2.5 py-2.5 px-1 hover:bg-gray-50 transition-colors"
             >
               <span
-                className={`text-[10px] font-bold px-2 py-0.5 rounded-pill ${TAG_STYLE[t.tag]}`}
+                className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${TAG_STYLE[t.tag]}`}
               >
                 {t.tag}
               </span>
               <div className="flex-1 min-w-0">
-                <div className="text-[12px] text-ink truncate">{t.label}</div>
+                <div className="text-[12px] text-gray-900 truncate">{t.label}</div>
                 {t.note && (
-                  <div className="text-[10px] text-ink-3">{t.note}</div>
+                  <div className="text-[10px] text-gray-400">{t.note}</div>
                 )}
               </div>
               <span
-                className={`text-[10px] font-bold px-1.5 py-0.5 rounded-pill ${state.cls}`}
+                className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${state.cls}`}
                 aria-label={`状態: ${state.label}`}
               >
                 {state.label}
               </span>
-              <span className="text-[12px] font-extrabold text-navy tabular-nums">
+              <span className="text-[12px] font-semibold text-gray-900 tabular-nums">
                 {t.count}
-                <span className="text-[10px] text-ink-3 ml-0.5">件</span>
+                <span className="text-[10px] text-gray-400 ml-0.5">件</span>
               </span>
             </Link>
           </li>

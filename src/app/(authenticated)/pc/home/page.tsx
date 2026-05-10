@@ -21,7 +21,7 @@ export const dynamic = "force-dynamic";
 /**
  * PC ホーム(/pc/home)— SAKURA OS 統合ダッシュボード。
  *
- * 参照画像: 参照データ/ダッシュボード.png 準拠。
+ * ライトテーマ・コーポレート系トーンに統一(2026-05-11)。
  *
  * レイアウト:
  *  - ヘッダー: タイトル + ロールタブ + 検索/ヘルプ/通知
@@ -29,6 +29,9 @@ export const dynamic = "force-dynamic";
  *  - 中段 3 列: 今日のやること / 承認待ち一覧 / 配置マップ
  *  - 下段 3 列: 現場別進捗 / 売上原価利益 / クエスト・バッジ
  *  - 最下段: お知らせ + よく使うリンク
+ *
+ * レイアウトのブレイクポイント:
+ *  - ~900px ナロー環境でも 3 カラム表示するため md (768px+) で 3-up に切替
  *
  * ロール別表示:
  *  - worker: KPI + 今日のやること + 承認待ち + クエスト・バッジ + 最下段
@@ -68,12 +71,12 @@ export default async function PcHomePage() {
   const canSeeSiteProgress = role === "leader" || role === "office" || role === "ceo" || role === "system";
 
   return (
-    <div className="min-h-screen flex flex-col overflow-hidden px-4 py-2">
+    <div className="min-h-screen flex flex-col px-6 py-4 bg-gray-50">
       {/* ─────────────── ヘッダー ─────────────── */}
-      <header className="mb-2 flex items-end justify-between flex-nowrap gap-2">
+      <header className="mb-3 flex items-end justify-between flex-nowrap gap-2">
         <div>
-          <h1 className="text-[20px] font-extrabold text-navy leading-tight">ホーム</h1>
-          <p className="text-[11px] text-ink-2 mt-0.5">
+          <h1 className="text-[20px] font-extrabold text-gray-900 leading-tight">ホーム</h1>
+          <p className="text-[11px] text-gray-500 mt-0.5">
             業務の全体状況を確認し、今日の行動を始めましょう。
           </p>
         </div>
@@ -83,26 +86,69 @@ export default async function PcHomePage() {
             <button
               type="button"
               aria-label="検索"
-              className="w-8 h-8 rounded-full hover:bg-graybg flex items-center justify-center text-ink-2"
+              className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500"
             >
-              <span aria-hidden className="text-[14px]">🔍</span>
+              <svg
+                aria-hidden
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
             </button>
             <button
               type="button"
               aria-label="ヘルプ"
-              className="w-8 h-8 rounded-full hover:bg-graybg flex items-center justify-center text-ink-2"
+              className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500"
             >
-              <span aria-hidden className="text-[14px]">❓</span>
+              <svg
+                aria-hidden
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                <path d="M12 17h.01" />
+              </svg>
             </button>
             <button
               type="button"
               aria-label="通知"
-              className="relative w-8 h-8 rounded-full hover:bg-graybg flex items-center justify-center text-ink-2"
+              className="relative w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500"
             >
-              <span aria-hidden className="text-[14px]">🔔</span>
+              <svg
+                aria-hidden
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+              </svg>
               <span
                 aria-hidden
-                className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red"
+                className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500"
               />
             </button>
           </div>
@@ -112,7 +158,7 @@ export default async function PcHomePage() {
       {/* ─────────────── KPI 4 枚 ─────────────── */}
       <section
         aria-label="主要 KPI"
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 mb-2"
+        className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-2"
       >
         {/* 1. 本日の入力率(値+ドーナツを並列表示) */}
         <KpiCard
@@ -125,7 +171,7 @@ export default async function PcHomePage() {
           href="/pc/reports"
           hrefLabel="詳細へ"
         >
-          <MiniDonut value={inputRate} size={64} stroke={7} />
+          <MiniDonut value={inputRate} size={80} stroke={7} />
         </KpiCard>
 
         {/* 2. 承認待ち */}
@@ -175,26 +221,26 @@ export default async function PcHomePage() {
       {/* ─────────────── 中段 + 下段 統合 12 カラム ─────────────── */}
       <section
         aria-label="今日の業務と進捗"
-        className="grid grid-cols-1 lg:grid-cols-12 gap-2 mb-2 flex-1"
+        className="grid grid-cols-12 gap-2 mb-2 flex-1"
       >
         {/* 中段: 今日のやること col-span-4 / 承認待ち col-span-4 / 配置マップ col-span-4 */}
-        <div className="lg:col-span-4">
-          <PanelCard title="今日のやること" icon="📌" href="/pc/tasks" hrefLabel="すべてのタスクを見る">
+        <div className="col-span-12 md:col-span-4">
+          <PanelCard title="今日のやること" href="/pc/tasks" hrefLabel="すべてのタスクを見る">
             <TodayTasksList />
           </PanelCard>
         </div>
-        <div className="lg:col-span-4">
-          <PanelCard title="承認待ち一覧" icon="✓" href="/pc/approvals" hrefLabel="すべて見る">
+        <div className="col-span-12 md:col-span-4">
+          <PanelCard title="承認待ち一覧" href="/pc/approvals" hrefLabel="すべて見る">
             <ApprovalQueueTable />
           </PanelCard>
         </div>
-        <div className="lg:col-span-4">
+        <div className="col-span-12 md:col-span-4">
           {canSeeMap ? (
-            <PanelCard title="配置マップ(稼働中の現場)" icon="🗺" href="/pc/dispatch" hrefLabel="すべて見る">
+            <PanelCard title="配置マップ(稼働中の現場)" href="/pc/dispatch" hrefLabel="すべて見る">
               <DispatchMapPreview sites={sites} />
             </PanelCard>
           ) : (
-            <PanelCard title="クエスト・バッジ" icon="🏅">
+            <PanelCard title="クエスト・バッジ">
               <QuestBadgeSummary />
             </PanelCard>
           )}
@@ -202,22 +248,22 @@ export default async function PcHomePage() {
 
         {/* 下段: 現場別進捗 col-span-4 / 売上原価利益 col-span-4 / クエスト col-span-4 */}
         {canSeeSiteProgress && (
-          <div className="lg:col-span-4">
-            <PanelCard title="現場別進捗" icon="🏗️" href="/pc/projects" hrefLabel="すべて見る">
+          <div className="col-span-12 md:col-span-4">
+            <PanelCard title="現場別進捗" href="/pc/projects" hrefLabel="すべて見る">
               <SiteProgressTable />
             </PanelCard>
           </div>
         )}
         {canSeeRevenue && (
-          <div className="lg:col-span-4">
-            <PanelCard title="売上・原価・利益(今期累計)" icon="📊" href="/pc/reports/finance" hrefLabel="詳細へ">
+          <div className="col-span-12 md:col-span-4">
+            <PanelCard title="売上・原価・利益(今期累計)" href="/pc/reports/finance" hrefLabel="詳細へ">
               <RevenueCostProfitChart />
             </PanelCard>
           </div>
         )}
         {canSeeMap && (
-          <div className="lg:col-span-4">
-            <PanelCard title="クエスト・バッジ" icon="🏅">
+          <div className="col-span-12 md:col-span-4">
+            <PanelCard title="クエスト・バッジ">
               <QuestBadgeSummary />
             </PanelCard>
           </div>
@@ -225,14 +271,14 @@ export default async function PcHomePage() {
       </section>
 
       {/* ─────────────── 最下段: お知らせ + よく使うリンク ─────────────── */}
-      <section aria-label="お知らせとよく使うリンク" className="grid grid-cols-1 lg:grid-cols-12 gap-2">
-        <div className="lg:col-span-4">
-          <PanelCard title="お知らせ" icon="📢">
+      <section aria-label="お知らせとよく使うリンク" className="grid grid-cols-12 gap-2">
+        <div className="col-span-12 md:col-span-4">
+          <PanelCard title="お知らせ">
             <NoticesPanel />
           </PanelCard>
         </div>
-        <div className="lg:col-span-8">
-          <PanelCard title="よく使うリンク" icon="⚡">
+        <div className="col-span-12 md:col-span-8">
+          <PanelCard title="よく使うリンク">
             <QuickLinksFooter />
           </PanelCard>
         </div>
@@ -243,31 +289,27 @@ export default async function PcHomePage() {
 
 /**
  * 共通パネルカード(タイトル + 任意の「すべて見る」リンク + 本体)。
+ * ライトテーマ: 白背景 / 細グレー罫線 / 軽い影。アイコンは描画しない。
  */
 function PanelCard({
   title,
-  icon,
   href,
   hrefLabel,
   children,
 }: {
   title: string;
-  icon?: string;
   href?: string;
   hrefLabel?: string;
   children: React.ReactNode;
 }) {
   return (
-    <section className="bg-panel border border-line rounded-card shadow-card overflow-hidden flex flex-col">
-      <header className="px-3 py-1.5 border-b border-line flex items-center justify-between">
-        <h2 className="text-[12px] font-bold text-ink flex items-center gap-1">
-          {icon && <span aria-hidden className="text-[13px]">{icon}</span>}
-          {title}
-        </h2>
+    <section className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden flex flex-col h-full">
+      <header className="px-3 py-1.5 border-b border-gray-200 flex items-center justify-between">
+        <h2 className="text-[12px] font-bold text-gray-800">{title}</h2>
         {href && (
           <Link
             href={href}
-            className="text-[10px] text-blue hover:underline font-medium"
+            className="text-[10px] text-gray-500 hover:text-gray-700 hover:underline font-medium"
           >
             {hrefLabel ?? "すべて見る"} →
           </Link>

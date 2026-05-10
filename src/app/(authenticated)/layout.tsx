@@ -30,17 +30,18 @@ export default async function AuthenticatedLayout({
 
   const primary = tenant?.primary_color ?? "#1a3a6a";
   const accent = tenant?.accent_color ?? "#2568c8";
-  const bg = tenant?.bg_color ?? "#f6f9fc";
+  // ライトテーマに統一(参照画像準拠)。テナントカラーは CSS 変数として残し、
+  // 将来再導入できるようにする。
+  const bg = tenant?.bg_color ?? "#f8fafc"; // slate-50 相当
 
   const themeStyle: React.CSSProperties & Record<string, string> = {
     "--brand-primary": primary,
     "--brand-accent": accent,
     "--brand-bg": bg,
-    background: bg,
   };
 
   return (
-    <div className="min-h-screen" style={themeStyle}>
+    <div className="min-h-screen bg-gray-50" style={themeStyle}>
       <main className="min-h-screen">{children}</main>
     </div>
   );

@@ -11,10 +11,10 @@ export type SiteProgressRow = {
 };
 
 const STATUS_STYLE: Record<SiteProgressRow["status"], string> = {
-  計画中: "bg-purple-bg text-purple",
-  進行中: "bg-blue-bg text-blue",
-  遅延: "bg-red-bg text-red",
-  完了直前: "bg-teal-bg text-teal",
+  計画中: "bg-gray-100 text-gray-600",
+  進行中: "bg-blue-50 text-blue-700",
+  遅延: "bg-red-50 text-red-700",
+  完了直前: "bg-green-50 text-green-700",
 };
 
 /**
@@ -73,35 +73,33 @@ export function SiteProgressTable({ rows }: { rows?: SiteProgressRow[] }) {
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-[11px]">
+      <table className="w-full text-[12px] text-gray-700">
         <caption className="sr-only">現場別進捗</caption>
-        <thead>
-          <tr className="text-left text-ink-3 border-b border-line">
-            <th scope="col" className="py-1.5 font-medium">現場名</th>
-            <th scope="col" className="py-1.5 font-medium">ステータス</th>
-            <th scope="col" className="py-1.5 font-medium min-w-[100px]">進捗</th>
-            <th scope="col" className="py-1.5 font-medium text-right">予定</th>
-            <th scope="col" className="py-1.5 font-medium text-right">遅延</th>
-            <th scope="col" className="py-1.5 font-medium text-right">期日</th>
-            <th scope="col" className="py-1.5 font-medium">担当</th>
+        <thead className="bg-gray-50 text-gray-500">
+          <tr className="text-left">
+            <th scope="col" className="py-2 px-2 font-medium">現場名</th>
+            <th scope="col" className="py-2 px-2 font-medium">ステータス</th>
+            <th scope="col" className="py-2 px-2 font-medium min-w-[100px]">進捗</th>
+            <th scope="col" className="py-2 px-2 font-medium text-right">予定</th>
+            <th scope="col" className="py-2 px-2 font-medium text-right">遅延</th>
+            <th scope="col" className="py-2 px-2 font-medium text-right">期日</th>
+            <th scope="col" className="py-2 px-2 font-medium">担当</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="divide-y divide-gray-100">
           {data.map((r) => {
             const delta = r.progressPct - r.plannedPct;
             const deltaColor =
               delta > 0
-                ? "text-teal"
+                ? "text-green-600"
                 : delta === 0
-                ? "text-ink-2"
-                : delta <= -10
-                ? "text-red"
-                : "text-amber";
+                ? "text-gray-500"
+                : "text-red-600";
             const deltaLabel =
               delta > 0 ? `+${delta}%` : delta === 0 ? "±0%" : `${delta}%`;
             return (
-              <tr key={r.id} className="border-b border-line/60 last:border-0">
-                <td className="py-2 pr-2 font-bold text-ink">
+              <tr key={r.id} className="hover:bg-gray-50 transition-colors">
+                <td className="py-2 px-2 text-gray-900">
                   <Link
                     href={`/pc/projects/${r.id}`}
                     className="hover:underline"
@@ -109,17 +107,17 @@ export function SiteProgressTable({ rows }: { rows?: SiteProgressRow[] }) {
                     {r.name}
                   </Link>
                 </td>
-                <td className="py-2 pr-2">
+                <td className="py-2 px-2">
                   <span
-                    className={`text-[10px] font-bold px-1.5 py-0.5 rounded whitespace-nowrap ${STATUS_STYLE[r.status]}`}
+                    className={`text-[11px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${STATUS_STYLE[r.status]}`}
                   >
                     {r.status}
                   </span>
                 </td>
-                <td className="py-2 pr-2">
+                <td className="py-2 px-2">
                   <div className="flex items-center gap-1.5">
                     <div
-                      className="flex-1 h-1.5 rounded-full bg-graybg overflow-hidden"
+                      className="flex-1 h-1.5 rounded-full bg-gray-100 overflow-hidden"
                       role="progressbar"
                       aria-valuenow={r.progressPct}
                       aria-valuemin={0}
@@ -127,25 +125,25 @@ export function SiteProgressTable({ rows }: { rows?: SiteProgressRow[] }) {
                       aria-label={`${r.name} 進捗 ${r.progressPct}%`}
                     >
                       <div
-                        className="h-full bg-blue"
+                        className="h-full bg-blue-500 rounded-full"
                         style={{ width: `${Math.min(100, r.progressPct)}%` }}
                       />
                     </div>
-                    <span className="font-bold text-ink tabular-nums w-8 text-right">
+                    <span className="font-medium text-gray-900 tabular-nums w-8 text-right">
                       {r.progressPct}%
                     </span>
                   </div>
                 </td>
-                <td className="py-2 pr-2 text-right text-ink-2 tabular-nums">
+                <td className="py-2 px-2 text-right text-gray-600 tabular-nums">
                   {r.plannedPct}%
                 </td>
-                <td className={`py-2 pr-2 text-right font-bold tabular-nums ${deltaColor}`}>
+                <td className={`py-2 px-2 text-right font-medium tabular-nums ${deltaColor}`}>
                   {deltaLabel}
                 </td>
-                <td className="py-2 pr-2 text-right text-ink-2 tabular-nums whitespace-nowrap">
+                <td className="py-2 px-2 text-right text-gray-600 tabular-nums whitespace-nowrap">
                   {r.dueDate}
                 </td>
-                <td className="py-2 text-ink-2 whitespace-nowrap">{r.owner}</td>
+                <td className="py-2 px-2 text-gray-600 whitespace-nowrap">{r.owner}</td>
               </tr>
             );
           })}

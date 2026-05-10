@@ -11,12 +11,12 @@ export type ApprovalRow = {
 };
 
 const KIND_STYLE: Record<ApprovalRow["kind"], string> = {
-  原価: "bg-purple-bg text-purple",
-  見積: "bg-blue-bg text-blue",
-  請求: "bg-teal-bg text-teal",
-  残業: "bg-amber-bg text-amber",
-  工具: "bg-blue-bg text-blue",
-  経費: "bg-graybg text-ink-2",
+  原価: "bg-blue-50 text-blue-700",
+  見積: "bg-teal-50 text-teal-700",
+  請求: "bg-teal-50 text-teal-700",
+  残業: "bg-amber-50 text-amber-700",
+  工具: "bg-purple-50 text-purple-700",
+  経費: "bg-green-50 text-green-700",
 };
 
 /**
@@ -75,7 +75,7 @@ export function ApprovalQueueTable({ rows }: { rows?: ApprovalRow[] }) {
 
   if (data.length === 0) {
     return (
-      <p className="text-[12px] text-ink-3 py-6 text-center">
+      <p className="text-[12px] text-gray-400 py-6 text-center">
         承認待ちはありません。
       </p>
     );
@@ -83,37 +83,37 @@ export function ApprovalQueueTable({ rows }: { rows?: ApprovalRow[] }) {
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-[11px]">
+      <table className="w-full text-[12px] text-gray-700">
         <caption className="sr-only">承認待ち一覧</caption>
-        <thead>
-          <tr className="text-left text-ink-3 border-b border-line">
-            <th scope="col" className="py-1.5 font-medium">種別</th>
-            <th scope="col" className="py-1.5 font-medium">案件名</th>
-            <th scope="col" className="py-1.5 font-medium">申請者</th>
-            <th scope="col" className="py-1.5 font-medium text-right">金額</th>
-            <th scope="col" className="py-1.5 font-medium text-right">経過時間</th>
+        <thead className="bg-gray-50 text-gray-500">
+          <tr className="text-left">
+            <th scope="col" className="py-2 px-2 font-medium">種別</th>
+            <th scope="col" className="py-2 px-2 font-medium">案件名</th>
+            <th scope="col" className="py-2 px-2 font-medium">申請者</th>
+            <th scope="col" className="py-2 px-2 font-medium text-right">金額</th>
+            <th scope="col" className="py-2 px-2 font-medium text-right">経過時間</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="divide-y divide-gray-100">
           {data.map((r) => (
-            <tr key={r.id} className="border-b border-line/60 last:border-0 hover:bg-panel2 transition-colors">
-              <td className="py-2 pr-2">
+            <tr key={r.id} className="hover:bg-gray-50 transition-colors">
+              <td className="py-2 px-2">
                 <span
-                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${KIND_STYLE[r.kind]} whitespace-nowrap`}
+                  className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${KIND_STYLE[r.kind]} whitespace-nowrap`}
                 >
                   {r.kind}
                 </span>
               </td>
-              <td className="py-2 pr-2 font-bold text-ink">
+              <td className="py-2 px-2 text-gray-900">
                 <Link href={r.href} className="hover:underline">
                   {r.projectName}
                 </Link>
               </td>
-              <td className="py-2 pr-2 text-ink-2">{r.applicant}</td>
-              <td className="py-2 pr-2 text-right font-extrabold text-navy whitespace-nowrap tabular-nums">
+              <td className="py-2 px-2 text-gray-600">{r.applicant}</td>
+              <td className="py-2 px-2 text-right font-semibold text-gray-900 whitespace-nowrap tabular-nums">
                 ¥{r.amountYen.toLocaleString("ja-JP")}
               </td>
-              <td className="py-2 text-right text-ink-3 whitespace-nowrap">
+              <td className="py-2 px-2 text-right text-gray-400 text-[11px] whitespace-nowrap">
                 {r.elapsed}
               </td>
             </tr>
