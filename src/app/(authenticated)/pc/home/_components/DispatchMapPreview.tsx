@@ -1,12 +1,42 @@
 import Link from "next/link";
 import type { SiteSnapshot } from "@/features/dashboard/queries";
 
+type DotState = "順調" | "進行中" | "注意" | "計画" | "遅延";
+
+const DOT_STYLE: Record<DotState, { dot: string; fill: string; label: string }> = {
+  順調: { dot: "bg-status-done", fill: "#34c759", label: "順調" },
+  進行中: { dot: "bg-blue", fill: "#3b82f6", label: "進行中" },
+  注意: { dot: "bg-amber", fill: "#f59e0b", label: "注意" },
+  計画: { dot: "bg-purple", fill: "#a855f7", label: "計画" },
+  遅延: { dot: "bg-red", fill: "#ef4444", label: "遅延" },
+};
+
+/**
+ * 進捗ステータスから 5 色のドットへマッピング。
+ * SiteSnapshot.status (DB enum) + attendedToday から決定。
+ */
+function resolveDotState(s: SiteSnapshot): DotState {
+  switch (s.status) {
+    case "on_track":
+      return s.monthHours >= 80 ? "順調" : "進行中";
+    case "caution":
+      return "注意";
+    case "delayed":
+      return "遅延";
+    case "no_activity":
+    default:
+      return "計画";
+  }
+}
+
 /**
  * 配置マップ プレビュー。地図は Google Maps が未導入のため SVG のプレースホルダ。
+ * 現場ドットはステータス別に 5 色(順調=緑/進行中=青/注意=黄/計画=紫/遅延=赤)。
  * TODO(P12-01-data): @vis.gl/react-google-maps 導入後、本物の地図 + GPS ピンに差替え。
  */
 export function DispatchMapPreview({ sites }: { sites: SiteSnapshot[] }) {
   const top = sites.slice(0, 6);
+  const states: DotState[] = top.map(resolveDotState);
 
   return (
     <div className="grid grid-cols-5 gap-3">
@@ -30,14 +60,16 @@ export function DispatchMapPreview({ sites }: { sites: SiteSnapshot[] }) {
               <line key={`h${y}`} x1="0" y1={y} x2="200" y2={y} />
             ))}
           </g>
-          {/* ピン */}
-          {top.map((_, i) => {
+          {/* ピン (5 色) */}
+          {top.map((s, i) => {
             const x = 30 + ((i * 47) % 150);
             const y = 30 + ((i * 31) % 80);
+            const state = states[i] ?? resolveDotState(s);
+            const fill = DOT_STYLE[state].fill;
             return (
               <g key={i}>
-                <circle cx={x} cy={y} r="6" fill="#e03030" opacity="0.3" />
-                <circle cx={x} cy={y} r="3" fill="#e03030" />
+                <circle cx={x} cy={y} r="6" fill={fill} opacity="0.3" />
+                <circle cx={x} cy={y} r="3" fill={fill} />
               </g>
             );
           })}
@@ -54,25 +86,35 @@ export function DispatchMapPreview({ sites }: { sites: SiteSnapshot[] }) {
             稼働中の現場はありません
           </li>
         )}
-        {top.map((s) => (
-          <li key={s.id}>
-            <Link
-              href={`/pc/projects/${s.id}`}
-              className="flex items-center gap-2 px-2 py-1.5 rounded-btn hover:bg-panel2 transition-colors"
-            >
-              <span
-                aria-hidden
-                className="w-1.5 h-1.5 rounded-full bg-red flex-shrink-0"
-              />
-              <span className="flex-1 text-[11px] text-ink truncate">
-                {s.name}
-              </span>
-              <span className="text-[10px] font-bold text-blue bg-blue-bg px-1.5 py-0.5 rounded">
-                {s.attendedToday}名
-              </span>
-            </Link>
-          </li>
-        ))}
+        {top.map((s, i) => {
+          const state = states[i] ?? resolveDotState(s);
+          const style = DOT_STYLE[state];
+          return (
+            <li key={s.id}>
+              <Link
+                href={`/pc/projects/${s.id}`}
+                className="flex items-center gap-2 px-2 py-1.5 rounded-btn hover:bg-panel2 transition-colors"
+              >
+                <span
+                  aria-hidden
+                  className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${style.dot}`}
+                />
+                <span className="flex-1 text-[11px] text-ink truncate">
+                  {s.name}
+                </span>
+                <span
+                  className="text-[10px] text-ink-3 whitespace-nowrap"
+                  aria-label={`ステータス: ${style.label}`}
+                >
+                  {style.label}
+                </span>
+                <span className="text-[10px] font-bold text-blue bg-blue-bg px-1.5 py-0.5 rounded">
+                  {s.attendedToday}名
+                </span>
+              </Link>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

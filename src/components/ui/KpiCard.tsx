@@ -128,11 +128,11 @@ export function KpiCard({
       {/* メイン: 巨大な数値 + 任意の side widget(children) */}
       <div className="flex items-center justify-between gap-2 mb-1">
         <div
-          className={`text-[28px] font-black leading-none tracking-tight ${a.valueColor}`}
+          className={`text-[34px] font-black leading-none tracking-tight ${a.valueColor}`}
         >
           {value}
           {unit && (
-            <span className="text-[15px] font-extrabold ml-0.5">{unit}</span>
+            <span className="text-[16px] font-extrabold ml-0.5">{unit}</span>
           )}
         </div>
         {children && <div className="flex-shrink-0">{children}</div>}

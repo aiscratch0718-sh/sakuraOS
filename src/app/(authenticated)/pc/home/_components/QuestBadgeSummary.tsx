@@ -8,6 +8,7 @@ const BADGES = [
 
 /**
  * クエスト・バッジ サマリー(参照画像 下段右)。
+ * XP / 次レベルまでの残 XP / クエスト進捗 + 期限を表示。
  * TODO(P12-01-data): user_xp / quests / user_badges から本実装。現状はモック。
  */
 export function QuestBadgeSummary({
@@ -17,7 +18,7 @@ export function QuestBadgeSummary({
   questLabel = "安全第一チャレンジ",
   questProgress = 14,
   questGoal = 20,
-  questDeadline = "5/31",
+  questDeadline = "2025/06/30",
 }: {
   level?: number;
   currentXp?: number;
@@ -28,6 +29,7 @@ export function QuestBadgeSummary({
   questDeadline?: string;
 }) {
   const xpPct = Math.min(100, Math.round((currentXp / nextLevelXp) * 100));
+  const xpRemaining = Math.max(0, nextLevelXp - currentXp);
   const questPct = Math.min(100, Math.round((questProgress / questGoal) * 100));
 
   return (
@@ -51,8 +53,17 @@ export function QuestBadgeSummary({
             style={{ width: `${xpPct}%` }}
           />
         </div>
-        <div className="text-[10px] text-ink-3 mt-0.5 tabular-nums">
-          {currentXp.toLocaleString("ja-JP")} / {nextLevelXp.toLocaleString("ja-JP")} XP
+        <div className="flex items-center justify-between mt-0.5">
+          <span className="text-[10px] text-ink-3 tabular-nums">
+            {currentXp.toLocaleString("ja-JP")} / {nextLevelXp.toLocaleString("ja-JP")} XP
+          </span>
+          <span className="text-[10px] text-ink-2 tabular-nums">
+            次のレベル(Lv.{level + 1})まで{" "}
+            <span className="font-bold text-navy">
+              {xpRemaining.toLocaleString("ja-JP")}
+            </span>{" "}
+            XP
+          </span>
         </div>
       </div>
 

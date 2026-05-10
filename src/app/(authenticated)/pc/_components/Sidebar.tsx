@@ -251,7 +251,7 @@ export function Sidebar({
           className="text-[22px] font-extrabold leading-none tracking-tight bg-clip-text text-transparent"
           style={{
             backgroundImage:
-              "linear-gradient(135deg, var(--report3-from, #ff6b35) 0%, var(--report3-to, #ff3d6e) 100%)",
+              "linear-gradient(135deg, var(--report3-from, #F5A45A) 0%, var(--report3-to, #E8516A) 100%)",
           }}
         >
           REPORT3
@@ -351,7 +351,7 @@ function NavLink({
             className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-sm"
             style={{
               background:
-                "linear-gradient(180deg, var(--report3-from, #ff6b35) 0%, var(--report3-to, #ff3d6e) 100%)",
+                "linear-gradient(180deg, var(--report3-from, #F5A45A) 0%, var(--report3-to, #E8516A) 100%)",
             }}
           />
         )}

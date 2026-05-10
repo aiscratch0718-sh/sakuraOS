@@ -68,9 +68,9 @@ export default async function PcHomePage() {
   const canSeeSiteProgress = role === "leader" || role === "office" || role === "ceo" || role === "system";
 
   return (
-    <div className="px-4 py-3">
+    <div className="min-h-screen flex flex-col overflow-hidden px-4 py-2">
       {/* ─────────────── ヘッダー ─────────────── */}
-      <header className="mb-3 flex items-end justify-between flex-wrap gap-2">
+      <header className="mb-2 flex items-end justify-between flex-nowrap gap-2">
         <div>
           <h1 className="text-[20px] font-extrabold text-navy leading-tight">ホーム</h1>
           <p className="text-[11px] text-ink-2 mt-0.5">
@@ -78,7 +78,6 @@ export default async function PcHomePage() {
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[11px] text-ink-3">現在のロール:</span>
           <RoleTabs role={role} />
           <div className="flex items-center gap-0.5 ml-1">
             <button
@@ -113,7 +112,7 @@ export default async function PcHomePage() {
       {/* ─────────────── KPI 4 枚 ─────────────── */}
       <section
         aria-label="主要 KPI"
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 mb-3"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 mb-2"
       >
         {/* 1. 本日の入力率(値+ドーナツを並列表示) */}
         <KpiCard
@@ -131,7 +130,7 @@ export default async function PcHomePage() {
 
         {/* 2. 承認待ち */}
         <KpiCard
-          accent="p2"
+          accent="p1"
           label="承認待ち"
           value={kpis.needApprovalCount}
           unit="件"
@@ -173,97 +172,70 @@ export default async function PcHomePage() {
         />
       </section>
 
-      {/* ─────────────── 中段 3 列 ─────────────── */}
+      {/* ─────────────── 中段 + 下段 統合 12 カラム ─────────────── */}
       <section
-        aria-label="今日の業務"
-        className="grid grid-cols-1 lg:grid-cols-3 gap-2.5 mb-3"
+        aria-label="今日の業務と進捗"
+        className="grid grid-cols-1 lg:grid-cols-12 gap-2 mb-2 flex-1"
       >
-        {/* 今日のやること */}
-        <PanelCard
-          title="今日のやること"
-          icon="📌"
-          href="/pc/tasks"
-          hrefLabel="すべてのタスクを見る"
-        >
-          <TodayTasksList />
-        </PanelCard>
-
-        {/* 承認待ち一覧 */}
-        <PanelCard
-          title="承認待ち一覧"
-          icon="✓"
-          href="/pc/approvals"
-          hrefLabel="すべて見る"
-        >
-          <ApprovalQueueTable />
-        </PanelCard>
-
-        {/* 配置マップ */}
-        {canSeeMap ? (
-          <PanelCard
-            title="配置マップ(稼働中の現場)"
-            icon="🗺"
-            href="/pc/dispatch"
-            hrefLabel="すべて見る"
-          >
-            <DispatchMapPreview sites={sites} />
+        {/* 中段: 今日のやること col-span-4 / 承認待ち col-span-4 / 配置マップ col-span-4 */}
+        <div className="lg:col-span-4">
+          <PanelCard title="今日のやること" icon="📌" href="/pc/tasks" hrefLabel="すべてのタスクを見る">
+            <TodayTasksList />
           </PanelCard>
-        ) : (
-          <PanelCard title="クエスト・バッジ" icon="🏅">
-            <QuestBadgeSummary />
+        </div>
+        <div className="lg:col-span-4">
+          <PanelCard title="承認待ち一覧" icon="✓" href="/pc/approvals" hrefLabel="すべて見る">
+            <ApprovalQueueTable />
           </PanelCard>
-        )}
-      </section>
+        </div>
+        <div className="lg:col-span-4">
+          {canSeeMap ? (
+            <PanelCard title="配置マップ(稼働中の現場)" icon="🗺" href="/pc/dispatch" hrefLabel="すべて見る">
+              <DispatchMapPreview sites={sites} />
+            </PanelCard>
+          ) : (
+            <PanelCard title="クエスト・バッジ" icon="🏅">
+              <QuestBadgeSummary />
+            </PanelCard>
+          )}
+        </div>
 
-      {/* ─────────────── 下段 3 列 ─────────────── */}
-      <section
-        aria-label="進捗・経営指標"
-        className="grid grid-cols-1 lg:grid-cols-3 gap-2.5 mb-3"
-      >
-        {/* 現場別進捗 */}
+        {/* 下段: 現場別進捗 col-span-4 / 売上原価利益 col-span-4 / クエスト col-span-4 */}
         {canSeeSiteProgress && (
-          <PanelCard
-            title="現場別進捗"
-            icon="🏗️"
-            href="/pc/projects"
-            hrefLabel="すべて見る"
-          >
-            <SiteProgressTable />
-          </PanelCard>
+          <div className="lg:col-span-4">
+            <PanelCard title="現場別進捗" icon="🏗️" href="/pc/projects" hrefLabel="すべて見る">
+              <SiteProgressTable />
+            </PanelCard>
+          </div>
         )}
-
-        {/* 売上・原価・利益 */}
         {canSeeRevenue && (
-          <PanelCard
-            title="売上・原価・利益(今期累計)"
-            icon="📊"
-            href="/pc/reports/finance"
-            hrefLabel="詳細へ"
-          >
-            <RevenueCostProfitChart />
-          </PanelCard>
+          <div className="lg:col-span-4">
+            <PanelCard title="売上・原価・利益(今期累計)" icon="📊" href="/pc/reports/finance" hrefLabel="詳細へ">
+              <RevenueCostProfitChart />
+            </PanelCard>
+          </div>
         )}
-
-        {/* クエスト・バッジ(canSeeMap=true の場合のみここに表示) */}
         {canSeeMap && (
-          <PanelCard title="クエスト・バッジ" icon="🏅">
-            <QuestBadgeSummary />
-          </PanelCard>
+          <div className="lg:col-span-4">
+            <PanelCard title="クエスト・バッジ" icon="🏅">
+              <QuestBadgeSummary />
+            </PanelCard>
+          </div>
         )}
       </section>
 
       {/* ─────────────── 最下段: お知らせ + よく使うリンク ─────────────── */}
-      <section
-        aria-label="お知らせとよく使うリンク"
-        className="grid grid-cols-1 lg:grid-cols-2 gap-3"
-      >
-        <PanelCard title="お知らせ" icon="📢">
-          <NoticesPanel />
-        </PanelCard>
-
-        <PanelCard title="よく使うリンク" icon="⚡">
-          <QuickLinksFooter />
-        </PanelCard>
+      <section aria-label="お知らせとよく使うリンク" className="grid grid-cols-1 lg:grid-cols-12 gap-2">
+        <div className="lg:col-span-4">
+          <PanelCard title="お知らせ" icon="📢">
+            <NoticesPanel />
+          </PanelCard>
+        </div>
+        <div className="lg:col-span-8">
+          <PanelCard title="よく使うリンク" icon="⚡">
+            <QuickLinksFooter />
+          </PanelCard>
+        </div>
       </section>
     </div>
   );
@@ -287,7 +259,7 @@ function PanelCard({
 }) {
   return (
     <section className="bg-panel border border-line rounded-card shadow-card overflow-hidden flex flex-col">
-      <header className="px-3 py-2 border-b border-line flex items-center justify-between">
+      <header className="px-3 py-1.5 border-b border-line flex items-center justify-between">
         <h2 className="text-[12px] font-bold text-ink flex items-center gap-1">
           {icon && <span aria-hidden className="text-[13px]">{icon}</span>}
           {title}
@@ -301,7 +273,7 @@ function PanelCard({
           </Link>
         )}
       </header>
-      <div className="p-2.5 flex-1 text-[12px]">{children}</div>
+      <div className="p-2 flex-1 text-[12px]">{children}</div>
     </section>
   );
 }
