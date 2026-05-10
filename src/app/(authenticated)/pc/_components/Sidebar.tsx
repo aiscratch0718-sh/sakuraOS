@@ -2,303 +2,225 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  Home,
+  ClipboardEdit,
+  Briefcase,
+  FileText,
+  Calculator,
+  BarChart3,
+  Calendar,
+  MapPin,
+  Truck,
+  Trophy,
+  Bell,
+  Settings,
+  SlidersHorizontal,
+  Wrench,
+  Smartphone,
+  CheckSquare,
+  User,
+  type LucideIcon,
+} from "lucide-react";
+import { SidebarFooterWidget } from "@/components/feature/SidebarFooterWidget";
 
-type SubItem = {
+/**
+ * SAKURA OS PC サイドバー(REPORT3 ブランド版)
+ *
+ * 参照画像「ダッシュボード.png」準拠でフラットメニュー構成。
+ * カテゴリ別アコーディオン構造は廃止し、ロール別表示制御のみ維持。
+ *
+ * - 上部: REPORT3 ロゴ + 「業務管理システム」サブタイトル
+ * - 本体: フラットなメニュー(Lucide アイコン + ラベル)
+ * - 開発者メニュー: system role のみ(SP 画面直行リンク群)
+ * - 下部: SidebarFooterWidget(チームレベル + ユーザー情報)
+ */
+
+type NavItem = {
   href: string;
   label: string;
-  icon: string;
+  icon: LucideIcon;
   match: (pathname: string) => boolean;
   show?: (role: string) => boolean;
 };
 
-type Section = {
-  id: string;
-  title: string;
-  icon: string;
-  items: SubItem[];
-};
+// ロール別表示ヘルパ
+const allRoles = () => true;
+const officePlus = (role: string) =>
+  ["office", "ceo", "system"].includes(role);
+const officeCeoOnly = (role: string) =>
+  ["office", "ceo", "system"].includes(role);
+const leaderPlus = (role: string) =>
+  ["leader", "office", "ceo", "system"].includes(role);
 
-// 常時 1 番上に固定で出す項目
-const TOP_ITEMS: SubItem[] = [
+// フラットなメインメニュー(参照画像準拠)
+const NAV_ITEMS: NavItem[] = [
   {
     href: "/pc/home",
-    label: "ダッシュボード",
-    icon: "🏠",
+    label: "ホーム",
+    icon: Home,
     match: (p) => p === "/pc/home",
+    show: allRoles,
+  },
+  {
+    href: "/sp/report3/new",
+    label: "REPORT3入力",
+    icon: ClipboardEdit,
+    match: (p) => p.startsWith("/sp/report3"),
+    show: allRoles,
+  },
+  {
+    href: "/pc/projects",
+    label: "案件管理",
+    icon: Briefcase,
+    match: (p) => p.startsWith("/pc/projects"),
+    show: allRoles,
+  },
+  {
+    href: "/pc/estimates",
+    label: "見積・請求",
+    icon: FileText,
+    match: (p) =>
+      p.startsWith("/pc/estimates") ||
+      p.startsWith("/pc/invoices") ||
+      p.startsWith("/pc/payments"),
+    show: officePlus,
+  },
+  {
+    href: "/pc/cost",
+    label: "原価管理",
+    icon: Calculator,
+    match: (p) => p.startsWith("/pc/cost"),
+    show: officeCeoOnly,
+  },
+  {
+    href: "/pc/gaikyo",
+    label: "工事概況",
+    icon: BarChart3,
+    match: (p) => p.startsWith("/pc/gaikyo"),
+    show: officeCeoOnly,
+  },
+  {
+    href: "/pc/schedules",
+    label: "スケジュール",
+    icon: Calendar,
+    match: (p) => p.startsWith("/pc/schedules"),
+    show: allRoles,
+  },
+  {
+    href: "/pc/dispatch-map",
+    label: "配置マップ",
+    icon: MapPin,
+    match: (p) => p.startsWith("/pc/dispatch-map"),
+    show: allRoles,
+  },
+  {
+    href: "/pc/fleet",
+    label: "車両・工具",
+    icon: Truck,
+    match: (p) =>
+      p.startsWith("/pc/fleet") ||
+      p.startsWith("/pc/vehicles") ||
+      p.startsWith("/pc/tools"),
+    show: leaderPlus,
+  },
+  {
+    href: "/pc/quests-badges",
+    label: "クエスト・バッジ",
+    icon: Trophy,
+    match: (p) =>
+      p.startsWith("/pc/quests-badges") ||
+      p.startsWith("/pc/gamification") ||
+      p.startsWith("/pc/points"),
+    show: allRoles,
+  },
+  {
+    href: "/pc/notifications",
+    label: "通知",
+    icon: Bell,
+    match: (p) => p.startsWith("/pc/notifications"),
+    show: allRoles,
+  },
+  {
+    href: "/pc/masters",
+    label: "マスタ管理",
+    icon: Settings,
+    match: (p) =>
+      p.startsWith("/pc/masters") ||
+      p.startsWith("/pc/customers") ||
+      p.startsWith("/pc/users") ||
+      p.startsWith("/pc/price-items") ||
+      p.startsWith("/pc/qualifications") ||
+      p.startsWith("/pc/work-classifications") ||
+      p.startsWith("/pc/org-departments") ||
+      p.startsWith("/pc/org-positions"),
+    show: officePlus,
+  },
+  {
+    href: "/pc/settings/branding",
+    label: "設定",
+    icon: SlidersHorizontal,
+    match: (p) => p.startsWith("/pc/settings"),
+    show: officePlus,
   },
 ];
 
-// カテゴリ別グループ
-const SECTIONS: Section[] = [
-  {
-    id: "daily",
-    title: "業務オペレーション",
-    icon: "📋",
-    items: [
-      {
-        href: "/pc/notifications",
-        label: "通知",
-        icon: "🔔",
-        match: (p) => p.startsWith("/pc/notifications"),
-      },
-      {
-        href: "/pc/reports",
-        label: "日報一覧",
-        icon: "📋",
-        match: (p) => p.startsWith("/pc/reports"),
-      },
-      {
-        href: "/pc/approvals",
-        label: "承認待ち",
-        icon: "✓",
-        match: (p) => p.startsWith("/pc/approvals"),
-      },
-      {
-        href: "/pc/incidents",
-        label: "ヒヤリハット",
-        icon: "⚠",
-        match: (p) => p.startsWith("/pc/incidents"),
-      },
-    ],
-  },
-  {
-    id: "sales",
-    title: "営業・売上",
-    icon: "💴",
-    items: [
-      {
-        href: "/pc/estimates",
-        label: "見積",
-        icon: "📝",
-        match: (p) => p.startsWith("/pc/estimates"),
-      },
-      {
-        href: "/pc/invoices",
-        label: "請求書",
-        icon: "🧾",
-        match: (p) => p.startsWith("/pc/invoices"),
-      },
-      {
-        href: "/pc/payments",
-        label: "入金管理",
-        icon: "💴",
-        match: (p) => p.startsWith("/pc/payments"),
-      },
-      {
-        href: "/pc/customer-sales",
-        label: "客先別売上",
-        icon: "📈",
-        match: (p) => p.startsWith("/pc/customer-sales"),
-      },
-    ],
-  },
-  {
-    id: "expense",
-    title: "経費・書類",
-    icon: "💼",
-    items: [
-      {
-        href: "/pc/receipts",
-        label: "領収書管理",
-        icon: "🧾",
-        match: (p) => p.startsWith("/pc/receipts"),
-      },
-      {
-        href: "/pc/supplier-invoices",
-        label: "仕入先請求書",
-        icon: "📄",
-        match: (p) => p.startsWith("/pc/supplier-invoices"),
-      },
-      {
-        href: "/pc/expense",
-        label: "経費管理表",
-        icon: "💼",
-        match: (p) => p.startsWith("/pc/expense"),
-      },
-      {
-        href: "/pc/safety-documents",
-        label: "安全書類",
-        icon: "📑",
-        match: (p) => p.startsWith("/pc/safety-documents"),
-        show: (role) => ["leader", "office", "ceo", "system"].includes(role),
-      },
-      {
-        href: "/pc/contractor-templates",
-        label: "元請テンプレート",
-        icon: "📁",
-        match: (p) => p.startsWith("/pc/contractor-templates"),
-        show: (role) => ["office", "ceo", "system"].includes(role),
-      },
-    ],
-  },
-  {
-    id: "equipment",
-    title: "設備管理",
-    icon: "🛠️",
-    items: [
-      {
-        href: "/pc/tools",
-        label: "工具管理",
-        icon: "🛠️",
-        match: (p) => p.startsWith("/pc/tools"),
-      },
-      {
-        href: "/pc/vehicles",
-        label: "車両管理",
-        icon: "🚗",
-        match: (p) =>
-          p.startsWith("/pc/vehicles") || p.startsWith("/pc/vehicle-runs"),
-      },
-    ],
-  },
-  {
-    id: "master",
-    title: "マスタ管理",
-    icon: "🗂️",
-    items: [
-      {
-        href: "/pc/projects",
-        label: "現場マスタ",
-        icon: "🏗️",
-        match: (p) => p.startsWith("/pc/projects"),
-      },
-      {
-        href: "/pc/customers",
-        label: "客先マスタ",
-        icon: "🤝",
-        match: (p) => p.startsWith("/pc/customers"),
-      },
-      {
-        href: "/pc/users",
-        label: "ユーザー管理",
-        icon: "👥",
-        match: (p) => p.startsWith("/pc/users"),
-      },
-      {
-        href: "/pc/price-items",
-        label: "単価マスタ",
-        icon: "💰",
-        match: (p) => p.startsWith("/pc/price-items"),
-      },
-      {
-        href: "/pc/qualifications",
-        label: "資格マスタ",
-        icon: "🎓",
-        match: (p) => p.startsWith("/pc/qualifications"),
-      },
-      {
-        href: "/pc/work-classifications",
-        label: "工種マスタ",
-        icon: "🏷️",
-        match: (p) => p.startsWith("/pc/work-classifications"),
-      },
-      {
-        href: "/pc/org-departments",
-        label: "部署マスタ",
-        icon: "🏢",
-        match: (p) => p.startsWith("/pc/org-departments"),
-      },
-      {
-        href: "/pc/org-positions",
-        label: "役職マスタ",
-        icon: "🎖️",
-        match: (p) => p.startsWith("/pc/org-positions"),
-      },
-    ],
-  },
-  {
-    id: "gamification",
-    title: "ゲーミフィケーション",
-    icon: "🎮",
-    items: [
-      {
-        href: "/pc/points",
-        label: "ポイント管理",
-        icon: "💎",
-        match: (p) => p.startsWith("/pc/points"),
-      },
-      {
-        href: "/pc/gamification",
-        label: "ランキング(旧)",
-        icon: "🏆",
-        match: (p) => p.startsWith("/pc/gamification"),
-      },
-    ],
-  },
-  {
-    id: "other",
-    title: "その他",
-    icon: "⚙️",
-    items: [
-      {
-        href: "/pc/profile",
-        label: "プロフィール",
-        icon: "👤",
-        match: (p) => p.startsWith("/pc/profile"),
-      },
-      {
-        href: "/pc/settings/branding",
-        label: "外観設定",
-        icon: "🎨",
-        match: (p) => p.startsWith("/pc/settings/branding"),
-        show: (role) => ["office", "ceo", "system"].includes(role),
-      },
-    ],
-  },
-];
-
-// 開発者(system ロール)専用: モバイル UI への直行リンク
-const DEV_ITEMS: SubItem[] = [
+// 開発者(system role)専用: モバイル UI への直行リンク
+const DEV_ITEMS: NavItem[] = [
   {
     href: "/sp/home",
     label: "SP ホーム",
-    icon: "📱",
+    icon: Smartphone,
     match: (p) => p === "/sp/home",
   },
   {
     href: "/sp/report3/new",
     label: "SP 日報入力",
-    icon: "📝",
+    icon: ClipboardEdit,
     match: (p) => p.startsWith("/sp/report3/new"),
   },
   {
     href: "/sp/approvals",
     label: "SP 承認待ち",
-    icon: "✓",
+    icon: CheckSquare,
     match: (p) => p.startsWith("/sp/approvals"),
   },
   {
     href: "/sp/gamification",
     label: "SP ランク",
-    icon: "🏆",
+    icon: Trophy,
     match: (p) => p.startsWith("/sp/gamification"),
   },
   {
     href: "/sp/tools",
     label: "SP 工具",
-    icon: "🛠️",
+    icon: Wrench,
     match: (p) => p.startsWith("/sp/tools"),
   },
   {
     href: "/sp/vehicle-runs",
     label: "SP 車両運行",
-    icon: "🚗",
+    icon: Truck,
     match: (p) => p.startsWith("/sp/vehicle-runs"),
   },
   {
     href: "/sp/profile",
     label: "SP プロフィール",
-    icon: "👤",
+    icon: User,
     match: (p) => p === "/sp/profile",
   },
 ];
 
+// Props 互換のため tenantName / tagline / logoUrl は残すが未使用
 type SidebarProps = {
   role: string;
   displayName: string;
   roleLabel: string;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   tenantName: string;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   tagline?: string;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   logoUrl?: string | null;
 };
 
@@ -306,13 +228,13 @@ export function Sidebar({
   role,
   displayName,
   roleLabel,
-  tenantName,
-  tagline,
-  logoUrl,
+  // tenantName / tagline / logoUrl は REPORT3 ブランド固定化のため未使用
+  // (Props 型は layout.tsx との互換のため維持)
 }: SidebarProps) {
   const pathname = usePathname();
-  const initial = displayName.slice(0, 1);
   const isDev = role === "system";
+
+  const visibleNav = NAV_ITEMS.filter((it) => !it.show || it.show(role));
 
   return (
     <aside
@@ -323,93 +245,51 @@ export function Sidebar({
           "linear-gradient(180deg, #0f1e3c 0%, #0a1730 60%, #07122a 100%)",
       }}
     >
-      {/* ロゴ + 会社名 */}
-      <div className="px-4 py-4 border-b border-white/10 flex items-center gap-3 shrink-0">
-        <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center overflow-hidden flex-shrink-0 ring-1 ring-white/20">
-          {logoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={logoUrl}
-              alt="ロゴ"
-              className="w-full h-full object-contain"
-            />
-          ) : (
-            <span className="text-[14px] font-extrabold text-navy">
-              {tenantName.slice(0, 2)}
-            </span>
-          )}
+      {/* 上部: REPORT3 ロゴ */}
+      <div className="px-4 py-5 border-b border-white/10 shrink-0">
+        <div
+          className="text-[26px] font-extrabold leading-none tracking-tight bg-clip-text text-transparent"
+          style={{
+            backgroundImage:
+              "linear-gradient(135deg, var(--report3-from, #ff6b35) 0%, var(--report3-to, #ff3d6e) 100%)",
+          }}
+        >
+          REPORT3
         </div>
-        <div className="flex-1 min-w-0">
-          <div className="font-extrabold text-[13px] leading-tight truncate">
-            {tenantName}
-          </div>
-          {tagline && (
-            <div className="text-[10px] text-white/55 leading-tight mt-0.5 truncate">
-              {tagline}
-            </div>
-          )}
+        <div className="text-[11px] text-white/55 mt-1.5 font-medium tracking-wide">
+          業務管理システム
         </div>
       </div>
 
       {/* スクロール領域 */}
-      <nav className="flex-1 overflow-y-auto py-3 sidebar-scroll">
-        {/* トップレベル(ダッシュボード) */}
-        <ul className="space-y-0.5 px-3 mb-3">
-          {TOP_ITEMS.map((item) => {
-            if (item.show && !item.show(role)) return null;
-            return (
-              <NavLink
-                key={item.href}
-                item={item}
-                active={item.match(pathname)}
-                size="lg"
-              />
-            );
-          })}
+      <nav
+        role="navigation"
+        className="flex-1 overflow-y-auto py-3 sidebar-scroll"
+      >
+        {/* フラットメニュー(カテゴリ無し) */}
+        <ul className="space-y-0.5 px-2">
+          {visibleNav.map((item) => (
+            <NavLink
+              key={item.href}
+              item={item}
+              active={item.match(pathname)}
+            />
+          ))}
         </ul>
 
-        {/* セクション */}
-        {SECTIONS.map((section) => {
-          const visible = section.items.filter(
-            (it) => !it.show || it.show(role),
-          );
-          if (visible.length === 0) return null;
-          return (
-            <div key={section.id} className="mb-3">
-              <div className="px-4 mb-1 flex items-center gap-2 text-[10px] font-bold tracking-wider text-white/50">
-                <span aria-hidden className="text-[12px]">
-                  {section.icon}
-                </span>
-                <span>{section.title}</span>
-              </div>
-              <ul className="space-y-0.5 px-3">
-                {visible.map((item) => (
-                  <NavLink
-                    key={item.href}
-                    item={item}
-                    active={item.match(pathname)}
-                    size="sm"
-                  />
-                ))}
-              </ul>
-            </div>
-          );
-        })}
-
-        {/* 開発者メニュー */}
+        {/* 開発者メニュー (system role のみ) */}
         {isDev && (
-          <div className="mb-3 mt-2 border-t border-white/10 pt-3">
-            <div className="px-4 mb-1 flex items-center gap-2 text-[10px] font-bold tracking-wider text-amber/90">
+          <div className="mt-4 border-t border-white/10 pt-3">
+            <div className="px-4 mb-1.5 flex items-center gap-2 text-[10px] font-bold tracking-wider text-amber/90">
               <span aria-hidden>🔧</span>
               <span>開発者メニュー</span>
             </div>
-            <ul className="space-y-0.5 px-3">
+            <ul className="space-y-0.5 px-2">
               {DEV_ITEMS.map((item) => (
                 <NavLink
                   key={item.href}
                   item={item}
                   active={item.match(pathname)}
-                  size="sm"
                   variant="dev"
                 />
               ))}
@@ -418,16 +298,19 @@ export function Sidebar({
         )}
       </nav>
 
-      {/* 下部: ユーザー情報 */}
-      <div className="border-t border-white/10 px-3 py-3 flex items-center gap-3 shrink-0">
-        <div className="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center font-bold text-[13px] flex-shrink-0 ring-1 ring-white/20">
-          {initial}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="text-[12px] font-bold truncate">{displayName}</div>
-          <div className="text-[10px] text-white/60 truncate">{roleLabel}</div>
-        </div>
-      </div>
+      {/* 下部: チームレベル + ユーザー情報 */}
+      <SidebarFooterWidget
+        user={{
+          displayName,
+          role: roleLabel,
+          avatarText: displayName.slice(0, 1),
+        }}
+        team={{
+          name: "全社",
+          progressPercent: 65,
+          safetyScore: 80,
+        }}
+      />
     </aside>
   );
 }
@@ -435,38 +318,48 @@ export function Sidebar({
 function NavLink({
   item,
   active,
-  size,
   variant,
 }: {
-  item: SubItem;
+  item: NavItem;
   active: boolean;
-  size: "lg" | "sm";
   variant?: "dev";
 }) {
-  const padY = size === "lg" ? "py-2.5" : "py-1.5";
-  const fontSize = size === "lg" ? "text-[13px]" : "text-[12px]";
-  const baseColor =
-    variant === "dev" ? "text-amber/85" : active ? "text-white" : "text-white/75";
-  const activeBg =
-    variant === "dev"
-      ? "bg-amber/15 text-amber"
-      : "bg-white/15 text-white shadow-[inset_2px_0_0_0_rgba(255,255,255,0.7)]";
+  const Icon = item.icon;
+  const isDev = variant === "dev";
+
+  // ベース色 / 状態色の整理
+  const inactiveColor = isDev ? "text-amber/85" : "text-white/75";
   const hover = "hover:bg-white/10 hover:text-white";
+  const activeClass = isDev
+    ? "bg-amber/15 text-amber font-bold"
+    : "bg-white/15 text-white font-bold";
 
   return (
-    <li>
+    <li className="relative">
       <Link
         href={item.href}
-        className={`flex items-center gap-2.5 px-3 ${padY} rounded-md ${fontSize} font-medium transition-colors ${
-          active ? activeBg : `${baseColor} ${hover}`
+        aria-current={active ? "page" : undefined}
+        className={`flex items-center gap-2.5 pl-4 pr-3 py-2.5 rounded-md text-[13px] font-medium transition-colors ${
+          active ? activeClass : `${inactiveColor} ${hover}`
         }`}
       >
-        <span
+        {/* 左 3px の brand.report3 アクセントバー (アクティブ時のみ) */}
+        {active && !isDev && (
+          <span
+            aria-hidden
+            className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-sm"
+            style={{
+              background:
+                "linear-gradient(180deg, var(--report3-from, #ff6b35) 0%, var(--report3-to, #ff3d6e) 100%)",
+            }}
+          />
+        )}
+        <Icon
+          size={16}
+          strokeWidth={active ? 2.25 : 2}
           aria-hidden
-          className={`${size === "lg" ? "text-[15px]" : "text-[13px]"} w-4 text-center flex-shrink-0`}
-        >
-          {item.icon}
-        </span>
+          className="flex-shrink-0"
+        />
         <span className="truncate">{item.label}</span>
       </Link>
     </li>

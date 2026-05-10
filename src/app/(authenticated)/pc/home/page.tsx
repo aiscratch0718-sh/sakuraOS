@@ -1,237 +1,308 @@
+import Link from "next/link";
 import { requireSession } from "@/server/auth/session";
-import { formatJpFullDate } from "@/lib/format";
 import { KpiCard } from "@/components/ui/KpiCard";
-import { AlertCard } from "@/components/ui/AlertCard";
-import { SakuraShishimaru } from "@/components/feature/SakuraShishimaru";
-import { ActiveSitesTable } from "@/components/feature/ActiveSitesTable";
-import { ActivityTimeline } from "@/components/feature/ActivityTimeline";
 import {
   getDashboardKpis,
-  getDashboardAlerts,
   getActiveSitesToday,
-  getRecentActivity,
 } from "@/features/dashboard/queries";
-import { generateSakuraShishimaruAdvice } from "@/features/dashboard/sakura-shishimaru";
+import { MiniDonut } from "./_components/MiniDonut";
+import { TodayTasksList } from "./_components/TodayTasksList";
+import { ApprovalQueueTable } from "./_components/ApprovalQueueTable";
+import { DispatchMapPreview } from "./_components/DispatchMapPreview";
+import { SiteProgressTable } from "./_components/SiteProgressTable";
+import { RevenueCostProfitChart } from "./_components/RevenueCostProfitChart";
+import { QuestBadgeSummary } from "./_components/QuestBadgeSummary";
+import { NoticesPanel } from "./_components/NoticesPanel";
+import { QuickLinksFooter } from "./_components/QuickLinksFooter";
+import { RoleTabs } from "./_components/RoleTabs";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * PC ホーム(/pc/home)— SAKURA OS 統合ダッシュボード。
+ *
+ * 参照画像: 参照データ/ダッシュボード.png 準拠。
+ *
+ * レイアウト:
+ *  - ヘッダー: タイトル + ロールタブ + 検索/ヘルプ/通知
+ *  - KPI 4 枚(入力率 / 承認待ち / 未請求 / 利益率)
+ *  - 中段 3 列: 今日のやること / 承認待ち一覧 / 配置マップ
+ *  - 下段 3 列: 現場別進捗 / 売上原価利益 / クエスト・バッジ
+ *  - 最下段: お知らせ + よく使うリンク
+ *
+ * ロール別表示:
+ *  - worker: KPI + 今日のやること + 承認待ち + クエスト・バッジ + 最下段
+ *  - leader: + 配置マップ + 現場別進捗
+ *  - office / ceo / system: 全部
+ */
 export default async function PcHomePage() {
   const session = await requireSession();
 
-  // すべての集計クエリを並列実行
-  const [kpis, alerts, sites, activity] = await Promise.all([
+  // 既存集計クエリを並列実行(SiteSnapshot は配置マップ & 進捗表示で使う)
+  const [kpis, sites] = await Promise.all([
     getDashboardKpis(),
-    getDashboardAlerts(),
-    getActiveSitesToday(8),
-    getRecentActivity(8),
+    getActiveSitesToday(6),
   ]);
 
-  // さくらししまるのサジェスト
-  const advice = generateSakuraShishimaruAdvice({
-    kpis,
-    alertCount: alerts.length,
-    highSeverityAlertCount: alerts.filter((a) => a.severity === "p1").length,
-    expiringQualificationCount: alerts.filter((a) =>
-      a.title.includes("資格期限"),
-    ).length,
-  });
-
-  // KPI 表示用
-  const attendanceRate =
+  // 本日の入力率(出勤予定者ベース。activeMemberTotal がゼロなら 0%)
+  const inputRate =
     kpis.activeMemberTotal > 0
       ? Math.round((kpis.attendanceCount / kpis.activeMemberTotal) * 100)
       : 0;
-  const isExec = session.role === "ceo";
-  const greeting = greetingByHour();
+
+  // TODO(P12-01-data): 以下は本実装まで暫定モック
+  const unbilledYen = 12_450_000;
+  const unbilledCount = 7;
+  const unbilledDeltaYen = 1_230_000;
+  const profitRatePct = 18.6;
+  const profitYen = 24_680_000;
+  const revenueYen = 132_600_000;
+  const profitDeltaPt = 2.4;
+  const urgentApprovalCount = Math.min(3, kpis.needApprovalCount);
+  const approvalDeltaCount = -2;
+  const inputDeltaPt = 12;
+
+  const role = session.role;
+  const canSeeMap = role === "leader" || role === "office" || role === "ceo" || role === "system";
+  const canSeeRevenue = role === "office" || role === "ceo" || role === "system";
+  const canSeeSiteProgress = role === "leader" || role === "office" || role === "ceo" || role === "system";
 
   return (
-    <div className="px-6 py-6 max-w-7xl mx-auto">
-      {/* ページヘッダー */}
-      <div className="mb-5 flex items-end justify-between flex-wrap gap-2">
+    <div className="px-6 py-5 max-w-[1400px] mx-auto">
+      {/* ─────────────── ヘッダー ─────────────── */}
+      <header className="mb-4 flex items-end justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-xl font-extrabold text-navy flex items-center gap-2">
-            <span aria-hidden>📊</span>
-            {isExec ? "経営ダッシュボード" : "事務ホーム"}
-          </h1>
+          <h1 className="text-2xl font-extrabold text-navy">ホーム</h1>
           <p className="text-[12px] text-ink-2 mt-0.5">
-            {formatJpFullDate(new Date())} ─ {greeting}、{session.displayName}さん
+            業務の全体状況を確認し、今日の行動を始めましょう。
           </p>
         </div>
-      </div>
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className="text-[11px] text-ink-3">現在のロール:</span>
+          <RoleTabs role={role} />
+          <div className="flex items-center gap-1 ml-1">
+            <button
+              type="button"
+              aria-label="検索"
+              className="w-9 h-9 rounded-full hover:bg-graybg flex items-center justify-center text-ink-2"
+            >
+              <span aria-hidden>🔍</span>
+            </button>
+            <button
+              type="button"
+              aria-label="ヘルプ"
+              className="w-9 h-9 rounded-full hover:bg-graybg flex items-center justify-center text-ink-2"
+            >
+              <span aria-hidden>❓</span>
+            </button>
+            <button
+              type="button"
+              aria-label="通知"
+              className="relative w-9 h-9 rounded-full hover:bg-graybg flex items-center justify-center text-ink-2"
+            >
+              <span aria-hidden>🔔</span>
+              <span
+                aria-hidden
+                className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red"
+              />
+            </button>
+          </div>
+        </div>
+      </header>
 
-      {/* さくらししまるからのサジェスト(目立つ位置) */}
-      <div className="mb-4">
-        <SakuraShishimaru
-          mood={advice.mood}
-          message={advice.message}
-          suggestion={advice.suggestion}
-        />
-      </div>
-
-      {/* KPI 4枚 */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+      {/* ─────────────── KPI 4 枚 ─────────────── */}
+      <section
+        aria-label="主要 KPI"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4"
+      >
+        {/* 1. 本日の入力率 */}
         <KpiCard
-          icon="📋"
           accent="blue"
-          label="本日の日報提出"
-          value={kpis.todayReports}
+          icon="📋"
+          label="本日の入力率"
+          value=" "
+          subText={`入力済 ${kpis.attendanceCount} / 対象 ${kpis.activeMemberTotal} 件`}
+          trend={{ dir: "up", value: `${inputDeltaPt}pt`, comparison: "前日比" }}
+          href="/pc/report3"
+        >
+          <div className="absolute top-3 right-3">
+            <MiniDonut value={inputRate} size={64} stroke={7} />
+          </div>
+        </KpiCard>
+
+        {/* 2. 承認待ち */}
+        <KpiCard
+          accent="p2"
+          icon="✓"
+          label="承認待ち"
+          value={kpis.needApprovalCount}
           unit="件"
-          subText={`今週累計 ${kpis.weekReports} 件`}
+          subText={`うち 緊急 ${urgentApprovalCount} 件`}
+          trend={{
+            dir: approvalDeltaCount < 0 ? "down" : approvalDeltaCount > 0 ? "up" : "flat",
+            value: `${Math.abs(approvalDeltaCount)}件`,
+            comparison: "前日比",
+          }}
+          href="/pc/approvals"
         />
+
+        {/* 3. 未請求(確定分) */}
         <KpiCard
-          icon="👷"
-          accent="p3"
-          label="本日の出勤"
-          value={kpis.attendanceCount}
-          unit="名"
-          subText={`全${kpis.activeMemberTotal}名中(${attendanceRate}%)`}
-        />
-        <KpiCard
-          icon="🛡️"
-          accent="gold"
-          label="安全コンボ(全社)"
-          value={kpis.safetyComboDays}
-          unit="日"
-          subText="無事故継続日数"
-        />
-        <KpiCard
-          icon="⏱"
           accent="p4"
-          label="今月の累計時間"
-          value={kpis.monthHours.toFixed(1)}
-          unit="h"
-          subText={`人件費 概算 ¥${Math.round(kpis.monthLaborYen).toLocaleString("ja-JP")}`}
+          icon="💴"
+          label="未請求(確定分)"
+          value={`¥${unbilledYen.toLocaleString("ja-JP")}`}
+          subText={`件数 ${unbilledCount} 件`}
+          trend={{
+            dir: "up",
+            value: `¥${unbilledDeltaYen.toLocaleString("ja-JP")}`,
+            comparison: "前日比",
+          }}
+          href="/pc/invoices"
         />
-      </div>
 
-      {/* 要対応アラート(0件なら表示されない) */}
-      {alerts.length > 0 && (
-        <div className="mb-4">
-          <AlertCard items={alerts} />
-        </div>
-      )}
-
-      {/* 本日の稼働現場 */}
-      <section className="bg-panel border border-line rounded-panel mb-4 overflow-hidden">
-        <header className="px-4 py-3 border-b border-line flex items-center justify-between">
-          <h2 className="text-[14px] font-bold text-ink flex items-center gap-1.5">
-            <span aria-hidden>🏗️</span>
-            本日の稼働現場
-          </h2>
-          <span className="text-[10px] text-ink-3">
-            データ元: projects × report3_entries
-          </span>
-        </header>
-        <div className="p-2">
-          <ActiveSitesTable sites={sites} />
-        </div>
+        {/* 4. 利益率(今期累計) */}
+        <KpiCard
+          accent="p3"
+          icon="📈"
+          label="利益率(今期累計)"
+          value={profitRatePct.toFixed(1)}
+          unit="%"
+          subText={`利益 ¥${(profitYen / 10_000).toLocaleString("ja-JP")}万 / 売上 ¥${(revenueYen / 10_000).toLocaleString("ja-JP")}万`}
+          trend={{ dir: "up", value: `${profitDeltaPt}pt`, comparison: "前期比" }}
+          href="/pc/reports/profit"
+        />
       </section>
 
-      {/* 2列: 承認待ち件数表示 + 今日の活動タイムライン */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* 承認待ち概況 */}
-        <section className="bg-panel border border-line rounded-panel overflow-hidden">
-          <header className="px-4 py-3 border-b border-line flex items-center justify-between">
-            <h2 className="text-[14px] font-bold text-ink flex items-center gap-1.5">
-              <span aria-hidden>✓</span>
-              承認・処理キュー
-            </h2>
-          </header>
-          <div className="p-4 space-y-2.5">
-            <QueueRow
-              icon="📝"
-              label="日報の承認待ち"
-              count={kpis.needApprovalCount}
-              accent={kpis.needApprovalCount > 5 ? "p1" : kpis.needApprovalCount > 0 ? "p2" : "p3"}
-              href="/pc/approvals"
-            />
-            <QueueRow
-              icon="📋"
-              label="期限切れ間近の資格"
-              count={alerts.filter((a) => a.title.includes("資格期限")).length}
-              accent="p2"
-              href="/pc/qualifications"
-            />
-            <QueueRow
-              icon="⚠"
-              label="未対応のヒヤリハット"
-              count={alerts.filter((a) => a.title.includes("ヒヤリハット")).length}
-              accent="p1"
-              href="/pc/incidents"
-            />
-          </div>
-        </section>
+      {/* ─────────────── 中段 3 列 ─────────────── */}
+      <section
+        aria-label="今日の業務"
+        className="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-4"
+      >
+        {/* 今日のやること */}
+        <PanelCard
+          title="今日のやること"
+          icon="📌"
+          href="/pc/tasks"
+          hrefLabel="すべてのタスクを見る"
+        >
+          <TodayTasksList />
+        </PanelCard>
 
-        {/* タイムライン */}
-        <section className="bg-panel border border-line rounded-panel overflow-hidden">
-          <header className="px-4 py-3 border-b border-line flex items-center justify-between">
-            <h2 className="text-[14px] font-bold text-ink flex items-center gap-1.5">
-              <span aria-hidden>⏱</span>
-              今日の活動タイムライン
-            </h2>
-            <span className="text-[10px] text-ink-3">audit_log</span>
-          </header>
-          <div className="p-4">
-            <ActivityTimeline items={activity} />
-          </div>
-        </section>
-      </div>
+        {/* 承認待ち一覧 */}
+        <PanelCard
+          title="承認待ち一覧"
+          icon="✓"
+          href="/pc/approvals"
+          hrefLabel="すべて見る"
+        >
+          <ApprovalQueueTable />
+        </PanelCard>
+
+        {/* 配置マップ */}
+        {canSeeMap ? (
+          <PanelCard
+            title="配置マップ(稼働中の現場)"
+            icon="🗺"
+            href="/pc/dispatch"
+            hrefLabel="すべて見る"
+          >
+            <DispatchMapPreview sites={sites} />
+          </PanelCard>
+        ) : (
+          <PanelCard title="クエスト・バッジ" icon="🏅">
+            <QuestBadgeSummary />
+          </PanelCard>
+        )}
+      </section>
+
+      {/* ─────────────── 下段 3 列 ─────────────── */}
+      <section
+        aria-label="進捗・経営指標"
+        className="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-4"
+      >
+        {/* 現場別進捗 */}
+        {canSeeSiteProgress && (
+          <PanelCard
+            title="現場別進捗"
+            icon="🏗️"
+            href="/pc/projects"
+            hrefLabel="すべて見る"
+          >
+            <SiteProgressTable />
+          </PanelCard>
+        )}
+
+        {/* 売上・原価・利益 */}
+        {canSeeRevenue && (
+          <PanelCard
+            title="売上・原価・利益(今期累計)"
+            icon="📊"
+            href="/pc/reports/finance"
+            hrefLabel="詳細へ"
+          >
+            <RevenueCostProfitChart />
+          </PanelCard>
+        )}
+
+        {/* クエスト・バッジ(canSeeMap=true の場合のみここに表示) */}
+        {canSeeMap && (
+          <PanelCard title="クエスト・バッジ" icon="🏅">
+            <QuestBadgeSummary />
+          </PanelCard>
+        )}
+      </section>
+
+      {/* ─────────────── 最下段: お知らせ + よく使うリンク ─────────────── */}
+      <section
+        aria-label="お知らせとよく使うリンク"
+        className="grid grid-cols-1 lg:grid-cols-2 gap-3"
+      >
+        <PanelCard title="お知らせ" icon="📢">
+          <NoticesPanel />
+        </PanelCard>
+
+        <PanelCard title="よく使うリンク" icon="⚡">
+          <QuickLinksFooter />
+        </PanelCard>
+      </section>
     </div>
   );
 }
 
-function QueueRow({
+/**
+ * 共通パネルカード(タイトル + 任意の「すべて見る」リンク + 本体)。
+ */
+function PanelCard({
+  title,
   icon,
-  label,
-  count,
-  accent,
   href,
+  hrefLabel,
+  children,
 }: {
-  icon: string;
-  label: string;
-  count: number;
-  accent: "p1" | "p2" | "p3";
-  href: string;
+  title: string;
+  icon?: string;
+  href?: string;
+  hrefLabel?: string;
+  children: React.ReactNode;
 }) {
-  const accentBg = {
-    p1: "bg-p1/10 text-p1",
-    p2: "bg-p2/10 text-p2",
-    p3: "bg-p3/10 text-p3",
-  }[accent];
-
-  const isEmpty = count === 0;
-
   return (
-    <a
-      href={href}
-      className={`flex items-center gap-3 p-3 rounded-btn border border-line hover:bg-panel2 transition-colors ${isEmpty ? "opacity-60" : ""}`}
-    >
-      <div
-        aria-hidden
-        className={`w-9 h-9 rounded-lg flex items-center justify-center text-[16px] ${accentBg}`}
-      >
-        {icon}
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="text-[12px] font-bold text-ink">{label}</div>
-        <div className="text-[10px] text-ink-3">
-          {isEmpty ? "対応すべき項目はありません" : "クリックで対応画面へ"}
-        </div>
-      </div>
-      <div
-        className={`text-[24px] font-extrabold leading-none ${isEmpty ? "text-ink-3" : `text-${accent}`}`}
-      >
-        {count}
-      </div>
-    </a>
+    <section className="bg-panel border border-line rounded-cardLg shadow-card overflow-hidden flex flex-col">
+      <header className="px-4 py-2.5 border-b border-line flex items-center justify-between">
+        <h2 className="text-[13px] font-bold text-ink flex items-center gap-1.5">
+          {icon && <span aria-hidden>{icon}</span>}
+          {title}
+        </h2>
+        {href && (
+          <Link
+            href={href}
+            className="text-[11px] text-blue hover:underline font-medium"
+          >
+            {hrefLabel ?? "すべて見る"} →
+          </Link>
+        )}
+      </header>
+      <div className="p-3 flex-1">{children}</div>
+    </section>
   );
-}
-
-function greetingByHour(): string {
-  const h = new Date().getHours();
-  if (h < 5) return "おそくまでお疲れさまです";
-  if (h < 11) return "おはようございます";
-  if (h < 17) return "お疲れさまです";
-  if (h < 22) return "お疲れさまです";
-  return "遅くまでお疲れさまです";
 }
