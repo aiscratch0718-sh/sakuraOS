@@ -239,7 +239,7 @@ export function Sidebar({
   return (
     <aside
       aria-label="サイドナビゲーション"
-      className="w-60 shrink-0 hidden md:flex flex-col text-white sticky self-start top-[56px] h-[calc(100vh-56px)]"
+      className="w-60 shrink-0 hidden md:flex flex-col text-white sticky self-start top-0 h-screen"
       style={{
         background:
           "linear-gradient(180deg, #0f1e3c 0%, #0a1730 60%, #07122a 100%)",
@@ -298,12 +298,13 @@ export function Sidebar({
         )}
       </nav>
 
-      {/* 下部: チームレベル + ユーザー情報 */}
+      {/* 下部: チームレベル + ユーザー情報 + アバターメニュー(プロフィール/外観設定/サインアウト) */}
       <SidebarFooterWidget
         user={{
           displayName,
           role: roleLabel,
           avatarText: displayName.slice(0, 1),
+          canEditBranding: ["office", "ceo", "system"].includes(role),
         }}
         team={{
           name: "全社",

@@ -115,25 +115,23 @@ export default async function PcHomePage() {
         aria-label="主要 KPI"
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4"
       >
-        {/* 1. 本日の入力率 */}
+        {/* 1. 本日の入力率(値+ドーナツを並列表示) */}
         <KpiCard
           accent="blue"
-          icon="📋"
           label="本日の入力率"
-          value=" "
+          value={inputRate}
+          unit="%"
           subText={`入力済 ${kpis.attendanceCount} / 対象 ${kpis.activeMemberTotal} 件`}
           trend={{ dir: "up", value: `${inputDeltaPt}pt`, comparison: "前日比" }}
-          href="/pc/report3"
+          href="/pc/reports"
+          hrefLabel="詳細へ"
         >
-          <div className="absolute top-3 right-3">
-            <MiniDonut value={inputRate} size={64} stroke={7} />
-          </div>
+          <MiniDonut value={inputRate} size={64} stroke={7} />
         </KpiCard>
 
         {/* 2. 承認待ち */}
         <KpiCard
           accent="p2"
-          icon="✓"
           label="承認待ち"
           value={kpis.needApprovalCount}
           unit="件"
@@ -144,12 +142,12 @@ export default async function PcHomePage() {
             comparison: "前日比",
           }}
           href="/pc/approvals"
+          hrefLabel="一覧へ"
         />
 
         {/* 3. 未請求(確定分) */}
         <KpiCard
           accent="p4"
-          icon="💴"
           label="未請求(確定分)"
           value={`¥${unbilledYen.toLocaleString("ja-JP")}`}
           subText={`件数 ${unbilledCount} 件`}
@@ -159,18 +157,19 @@ export default async function PcHomePage() {
             comparison: "前日比",
           }}
           href="/pc/invoices"
+          hrefLabel="一覧へ"
         />
 
         {/* 4. 利益率(今期累計) */}
         <KpiCard
           accent="p3"
-          icon="📈"
           label="利益率(今期累計)"
           value={profitRatePct.toFixed(1)}
           unit="%"
           subText={`利益 ¥${(profitYen / 10_000).toLocaleString("ja-JP")}万 / 売上 ¥${(revenueYen / 10_000).toLocaleString("ja-JP")}万`}
           trend={{ dir: "up", value: `${profitDeltaPt}pt`, comparison: "前期比" }}
-          href="/pc/reports/profit"
+          href="/pc/cost"
+          hrefLabel="詳細へ"
         />
       </section>
 

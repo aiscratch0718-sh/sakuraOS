@@ -1,3 +1,8 @@
+"use client";
+
+import Link from "next/link";
+import { useState, useRef, useEffect } from "react";
+
 /**
  * サイドバー左下に常駐するチームレベル + ユーザー情報ウィジェット。
  *
@@ -5,28 +10,10 @@
  *   - 上段: 「チームレベル ⚡」+ Lv.N + 達成率% 進捗バー (緑→黄→赤の grad)
  *   - 中段: 「安全度 N%」(任意)
  *   - 下段: アバター ◯ + 名前 + ロール
+ *   - アバタークリックでメニュー展開(プロフィール / 外観設定 / サインアウト)
  *
- * Server Component。dark sidebar (navy-rich) 上で読みやすいダークテーマ前提。
- *
- * --------------------------------------------------------------------------
- * 既存 Sidebar への統合手順:
- *
- * `src/app/(authenticated)/pc/_components/Sidebar.tsx` の最下部にある
- * 「下部: ユーザー情報」ブロック (現状: w-9 h-9 rounded-full ... の div)
- * を、このコンポーネントに置換する。
- *
- *   import { SidebarFooterWidget } from "@/components/feature/SidebarFooterWidget";
- *
- *   // (Sidebar 内の最下部 — </nav> の直後)
- *   <SidebarFooterWidget
- *     user={{ displayName, role: roleLabel }}
- *     team={team}
- *   />
- *
- * `team` は親 (layout) で取得した値を Sidebar に Props として追加してから
- * 流し込む。team が undefined の場合はチームレベル行が消えてアバターのみ
- * 表示されるため、段階的にロールアウト可能。
- * --------------------------------------------------------------------------
+ * Client Component(メニュー開閉のため)。dark sidebar (navy-rich) 上で読みやすい
+ * ダークテーマ前提。
  */
 
 export type SidebarFooterWidgetProps = {
@@ -35,6 +22,7 @@ export type SidebarFooterWidgetProps = {
     role: string;
     avatarText?: string;
     avatarColor?: string;
+    canEditBranding?: boolean; // office/ceo/system のみ外観設定リンク表示
   };
   team?: {
     name: string;
@@ -54,9 +42,41 @@ export function SidebarFooterWidget({
     user.avatarText ?? user.displayName.slice(0, 1).toUpperCase();
   const avatarBg = user.avatarColor ?? "rgba(255,255,255,0.15)";
 
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  // クリック外で閉じる
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handler(e: MouseEvent) {
+      const t = e.target as Node;
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(t) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(t)
+      ) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [menuOpen]);
+
+  // Esc で閉じる
+  useEffect(() => {
+    if (!menuOpen) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setMenuOpen(false);
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [menuOpen]);
+
   return (
     <div
-      className={`border-t border-white/10 px-3 py-3 flex flex-col gap-3 shrink-0 ${className}`}
+      className={`relative border-t border-white/10 px-3 py-3 flex flex-col gap-3 shrink-0 ${className}`}
     >
       {/* 上段: チームレベル + 進捗バー */}
       {team && (
@@ -96,8 +116,16 @@ export function SidebarFooterWidget({
         </div>
       )}
 
-      {/* 下段: アバター + 名前 + ロール */}
-      <div className="flex items-center gap-3">
+      {/* 下段: アバター + 名前 + ロール(クリックでメニュー) */}
+      <button
+        ref={buttonRef}
+        type="button"
+        onClick={() => setMenuOpen((v) => !v)}
+        aria-haspopup="menu"
+        aria-expanded={menuOpen}
+        aria-label={`${user.displayName} のアカウントメニュー`}
+        className="flex items-center gap-3 -mx-1 px-1 py-1 rounded-card hover:bg-white/5 transition-colors text-left"
+      >
         <div
           className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-[13px] text-white flex-shrink-0 ring-1 ring-white/20"
           style={{ background: avatarBg }}
@@ -111,14 +139,57 @@ export function SidebarFooterWidget({
           </div>
           <div className="text-[10px] text-white/60 truncate">{user.role}</div>
         </div>
-      </div>
+        <span aria-hidden className="text-white/40 text-[10px]">
+          {menuOpen ? "▾" : "▸"}
+        </span>
+      </button>
+
+      {/* アバターメニュー */}
+      {menuOpen && (
+        <div
+          ref={menuRef}
+          role="menu"
+          className="absolute bottom-full left-3 right-3 mb-1 rounded-card border border-white/10 bg-[#1a2a3a] shadow-cardLg overflow-hidden"
+        >
+          <Link
+            href="/pc/profile"
+            onClick={() => setMenuOpen(false)}
+            role="menuitem"
+            className="block px-3 py-2.5 text-[12px] text-white hover:bg-white/10 transition-colors"
+          >
+            👤 プロフィール
+          </Link>
+          {user.canEditBranding && (
+            <Link
+              href="/pc/settings/branding"
+              onClick={() => setMenuOpen(false)}
+              role="menuitem"
+              className="block px-3 py-2.5 text-[12px] text-white hover:bg-white/10 transition-colors border-t border-white/5"
+            >
+              🎨 外観設定
+            </Link>
+          )}
+          <form
+            action="/sign-out"
+            method="POST"
+            className="border-t border-white/5"
+          >
+            <button
+              type="submit"
+              role="menuitem"
+              className="block w-full text-left px-3 py-2.5 text-[12px] text-red-300 hover:bg-red-500/20 transition-colors"
+            >
+              ⏏ サインアウト
+            </button>
+          </form>
+        </div>
+      )}
     </div>
   );
 }
 
 /**
  * チーム進捗バー。緑 → 黄 → 赤の grad で達成率を視覚化。
- * (低い値ほど赤=注意、高い値ほど緑=順調 を示す)
  */
 function TeamProgressBar({
   value,
