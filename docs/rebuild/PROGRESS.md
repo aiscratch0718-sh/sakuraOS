@@ -8,11 +8,11 @@
 
 ## 🎯 現在のステータス
 
-- **進行中フェーズ**: Phase 1 → Phase 2(移行中)
-- **次に着手するタスク**: **P1-08 + P2-01** ダッシュボード(`/pc/home`)を新コンポーネントで再構成
-- **完了タスク**: 7 / 43
+- **進行中フェーズ**: Phase 2(完了) → Phase 3 へ移行
+- **次に着手するタスク**: **P3-A-01** マイグレーション 0012 (ポイント管理)
+- **完了タスク**: 13 / 43
 - **最終更新**: 2026-05-10
-- **最終セッション ID**: S1
+- **最終セッション ID**: S2
 
 ---
 
@@ -33,15 +33,15 @@
 
 ### Phase 2: ダッシュボード再構成 + 獅子丸
 
-- ⬜ **P2-01** ダッシュボードレイアウト刷新
-- ⬜ **P2-02** KPI クエリ実装
-- ⬜ **P2-03** アラート集約クエリ
-- ⬜ **P2-04** 本日の稼働現場テーブル
-- ⬜ **P2-05** タイムライン
-- ⬜ **P2-06** 🦁 獅子丸サジェスト(ルールベース)
-- ⬜ **P2-07** 🦁 獅子丸の表情ロジック
-- ⬜ **P2-08** 通知ドロップダウン
-- ⬜ **P2-09** 既存ランキングページ位置づけ整理
+- ✅ **P2-01** ダッシュボードレイアウト刷新
+- ✅ **P2-02** KPI クエリ実装
+- ✅ **P2-03** アラート集約クエリ
+- ✅ **P2-04** 本日の稼働現場テーブル
+- ✅ **P2-05** タイムライン(audit_log ベース)
+- ✅ **P2-06** 🦁 獅子丸サジェスト(ルールベース)
+- ✅ **P2-07** 🦁 獅子丸の表情ロジック(5 mood)
+- ⬜ **P2-08** 通知ドロップダウン(P4 で実施予定 — 後回し)
+- ⬜ **P2-09** 既存ランキングページ位置づけ整理(P3-A 着手時に判断)
 
 ### Phase 3-A: ポイント管理
 
@@ -94,53 +94,35 @@
 
 ---
 
-## 🚀 次セッション(S2)でやること
+## 🚀 次セッション(S3)でやること
 
 ### 開始前チェック
 1. このファイル(`PROGRESS.md`)を最初に読む
-2. `MASTER-PLAN.md` で次タスクの詳細(P2-01〜P2-07 周辺)を確認
-3. `SESSION-LOG.md` の S1 を確認
+2. `MASTER-PLAN.md` で **P3-A**(ポイント管理)の詳細を確認
+3. `SESSION-LOG.md` の S2 を確認
 4. `git status` で前回未コミットがないか確認
 
-### S2 でやること(優先順)
+### S3 でやること(Phase 3-A: ポイント管理)
 
-**メイン: ダッシュボード(`/pc/home`)を完全再構成**
+**今後は Phase 3 から疑似 specialist 化(Task subagent_type: general-purpose)を導入する方針**(板澤様 確認済)。
+S3 では試験的に `orm-specialist` + `server-actions-specialist` の役割を 2 つ並列起動できるか試す。
 
-1. **P2-01**: 新レイアウト適用
-   - 既存の `/pc/home/page.tsx` を新コンポーネント(`KpiCard` / `AlertCard` / `HpBar` / `Tag` / `DataTable`)で置き換え
-   - 構成: KPI 4枚 → 獅子丸サジェスト → 要対応アラート → 本日の稼働現場 → グリッド2列(進行中現場 / 今日の活動)
+1. **P3-A-01**: マイグレーション 0012 (ポイント関連テーブル)
+   - `points_balances` / `points_ledger` / `point_rules` / `rewards` / `exchange_requests`
+   - RLS は自テナントのみ。spend / approve は office+ ロール
+   - SQL は `MASTER-PLAN.md` の P3-A-01 に詳細あり
+2. **P3-A-02**: シード(初期 point_rules + rewards)
+3. **P3-A-03**: Server Actions(awardPoints, requestExchange, approveExchange...)
+4. **P3-A-04**: 自動付与バッチ(pg_cron、後回し可)
+5. **P3-A-05**: `/pc/points` ページ
+6. **P3-A-06**: `/pc/points/rules` ページ
+7. **P3-A-07**: `/pc/points/exchange-requests` ページ
 
-2. **P2-02**: KPI クエリ実装
-   - 「本日の出来高達成率」: `report3_entries` の hours 集計 ÷ projects.daily_target(daily_target 列が無ければ追加 or 暫定で出勤者数×8h で代用)
-   - 「出勤中」: `report3_entries.work_date = today` の `count(distinct user_id)` / `profiles where is_active`
-   - 「安全コンボ」: 連続無事故日数(`incidents` テーブル無発生連続)
-   - 「今月の称号付与数」: 暫定 0(P3-B-01 で `titles_granted` テーブル追加後に対応)
-
-3. **P2-03**: アラート集約
-   - 期限切れ資格: `user_qualifications.expiry_date <= now() + interval '14 days'`
-   - 承認待ち: `report3_entries.requires_leader_approval = true and approved_at is null`
-   - 日報未提出: 出勤予定だが今日の `report3_entries` 無し
-   - サーバー関数 `getDashboardAlerts(tenantId)` で集約
-
-4. **P2-04**: 本日の稼働現場テーブル
-   - `projects` × `report3_entries` (today)
-   - 列: 現場名 / 担当 / 出勤 / 進捗 / 状態 / KY実施(safety_checks があれば、無ければ仮置き)
-
-5. **P2-06 + P2-07**: 獅子丸 サジェスト + 表情
-   - `<Shishimaru>` コンポーネント作成: `mood: "happy" | "warning" | "great" | "celebrate"`
-   - ルールベース `generateShishimaruAdvice(tenantId)`:
-     - 承認待ち > 5件 → "決裁が滞っておるじゃろ。早く片付けるとよいぞ" (warning)
-     - 期限切れ資格 > 0 → "資格更新の期限が迫っておる" (warning)
-     - 達成率 ≥ 100% → "本日も完璧じゃ!" (celebrate)
-     - 達成率 ≥ 80% → "順調じゃな" (great)
-     - その他 → "今日も頑張ろう" (happy)
-
-6. **P1-08 並行**: ダッシュボード以外で目立つページ(`/pc/reports`、`/pc/projects`)も新カードに差し替え
-
-### S2 完了の目安
-- `/pc/home` がデモ v4.0 に近い見た目になる
-- ビルド通過 + 既存テスト破壊なし
-- PROGRESS.md / SESSION-LOG.md 更新 + コミット
+### S3 完了の目安
+- マイグレーション 0012 が Supabase に適用される
+- `/pc/points` が表示される(ランキング + 報酬カタログ + 残高)
+- 管理者は手動で `awardPoints` を呼べる
+- ビルド通過 + PROGRESS.md / SESSION-LOG.md 更新 + コミット
 
 ---
 

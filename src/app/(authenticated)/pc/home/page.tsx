@@ -1,298 +1,237 @@
-import Link from "next/link";
 import { requireSession } from "@/server/auth/session";
-import { createClient } from "@/lib/supabase/server";
 import { formatJpFullDate } from "@/lib/format";
+import { KpiCard } from "@/components/ui/KpiCard";
+import { AlertCard } from "@/components/ui/AlertCard";
+import { Shishimaru } from "@/components/feature/Shishimaru";
+import { ActiveSitesTable } from "@/components/feature/ActiveSitesTable";
+import { ActivityTimeline } from "@/components/feature/ActivityTimeline";
+import {
+  getDashboardKpis,
+  getDashboardAlerts,
+  getActiveSitesToday,
+  getRecentActivity,
+} from "@/features/dashboard/queries";
+import { generateShishimaruAdvice } from "@/features/dashboard/shishimaru";
 
 export const dynamic = "force-dynamic";
 
 export default async function PcHomePage() {
   const session = await requireSession();
-  const supabase = await createClient();
 
-  const today = todayInTokyo();
-  const weekStart = startOfWeekJP();
-  const monthStart = startOfMonthJP();
-
-  const [
-    { count: todayCount },
-    { count: weekCount },
-    { count: needApprovalCount },
-    { data: recent },
-    { data: costAggregates },
-    { data: monthHoursData },
-  ] = await Promise.all([
-    supabase
-      .from("report3_entries")
-      .select("id", { count: "exact", head: true })
-      .eq("work_date", today),
-    supabase
-      .from("report3_entries")
-      .select("id", { count: "exact", head: true })
-      .gte("work_date", weekStart),
-    supabase
-      .from("report3_entries")
-      .select("id", { count: "exact", head: true })
-      .eq("requires_leader_approval", true)
-      .is("approved_at", null)
-      .is("rejected_at", null),
-    supabase
-      .from("report3_entries")
-      .select(
-        "id, work_date, submitted_at, requires_leader_approval, approved_at, rejected_at, project_id, projects(name), submitter:profiles!report3_entries_user_id_fkey(display_name)",
-      )
-      .order("submitted_at", { ascending: false })
-      .limit(15),
-    supabase
-      .from("project_cost_aggregates")
-      .select(
-        "project_id, total_hours, total_labor_cost_cents, projects(name, status)",
-      )
-      .order("total_labor_cost_cents", { ascending: false })
-      .limit(8),
-    // 今月の累計時間 / 累計人件費を計算するために、今月の日報を全部取得
-    supabase
-      .from("report3_entries")
-      .select("id, user_id, report3_rows(hours)")
-      .gte("work_date", monthStart),
+  // すべての集計クエリを並列実行
+  const [kpis, alerts, sites, activity] = await Promise.all([
+    getDashboardKpis(),
+    getDashboardAlerts(),
+    getActiveSitesToday(8),
+    getRecentActivity(8),
   ]);
 
-  // 今月の累計人件費 = 今月の各日報の hours × 該当 user の hourly_rate_cents の合計
-  const monthHours = (monthHoursData ?? []).reduce((sum, e) => {
-    const rows = (e.report3_rows as Array<{ hours: number }> | null) ?? [];
-    return sum + rows.reduce((s, r) => s + Number(r.hours), 0);
-  }, 0);
+  // 獅子丸のサジェスト
+  const advice = generateShishimaruAdvice({
+    kpis,
+    alertCount: alerts.length,
+    highSeverityAlertCount: alerts.filter((a) => a.severity === "p1").length,
+    expiringQualificationCount: alerts.filter((a) =>
+      a.title.includes("資格期限"),
+    ).length,
+  });
 
-  // ユーザーごとの時給を取得して人件費を概算
-  const userIds = Array.from(
-    new Set((monthHoursData ?? []).map((e) => e.user_id)),
-  );
-  let monthLaborYen = 0;
-  if (userIds.length > 0) {
-    const { data: rates } = await supabase
-      .from("profiles")
-      .select("id, hourly_rate_cents")
-      .in("id", userIds);
-    const rateMap = new Map(
-      (rates ?? []).map((r) => [r.id, r.hourly_rate_cents ?? 0]),
-    );
-    monthLaborYen = (monthHoursData ?? []).reduce((sum, e) => {
-      const rows = (e.report3_rows as Array<{ hours: number }> | null) ?? [];
-      const userHours = rows.reduce((s, r) => s + Number(r.hours), 0);
-      const rate = rateMap.get(e.user_id) ?? 0;
-      return sum + (userHours * rate) / 100; // cents → yen
-    }, 0);
-  }
-
+  // KPI 表示用
+  const attendanceRate =
+    kpis.activeMemberTotal > 0
+      ? Math.round((kpis.attendanceCount / kpis.activeMemberTotal) * 100)
+      : 0;
   const isExec = session.role === "ceo";
+  const greeting = greetingByHour();
 
   return (
-    <div className="px-6 py-6 max-w-6xl mx-auto">
-      <div className="mb-5">
-        <h1 className="text-xl font-extrabold text-navy">
-          {isExec ? "経営ダッシュボード" : "事務ホーム"}
-        </h1>
-        <p className="text-[12px] text-ink-2 mt-0.5">
-          {formatJpFullDate(new Date())}
-        </p>
+    <div className="px-6 py-6 max-w-7xl mx-auto">
+      {/* ページヘッダー */}
+      <div className="mb-5 flex items-end justify-between flex-wrap gap-2">
+        <div>
+          <h1 className="text-xl font-extrabold text-navy flex items-center gap-2">
+            <span aria-hidden>📊</span>
+            {isExec ? "経営ダッシュボード" : "事務ホーム"}
+          </h1>
+          <p className="text-[12px] text-ink-2 mt-0.5">
+            {formatJpFullDate(new Date())} ─ {greeting}、{session.displayName}さん
+          </p>
+        </div>
       </div>
 
-      {/* KPI 行 */}
+      {/* 獅子丸サジェスト(目立つ位置) */}
+      <div className="mb-4">
+        <Shishimaru
+          mood={advice.mood}
+          message={advice.message}
+          suggestion={advice.suggestion}
+        />
+      </div>
+
+      {/* KPI 4枚 */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
-        <div className="kpi-card kpi-blue">
-          <div className="text-[11px] text-ink-2 mb-1">本日の日報提出</div>
-          <div className="text-[26px] font-extrabold leading-none">
-            {todayCount ?? 0}
-          </div>
-          <div className="text-[11px] text-ink-3 mt-1">件</div>
-        </div>
-        <div className="kpi-card kpi-teal">
-          <div className="text-[11px] text-ink-2 mb-1">今週の日報提出</div>
-          <div className="text-[26px] font-extrabold leading-none">
-            {weekCount ?? 0}
-          </div>
-          <div className="text-[11px] text-ink-3 mt-1">件</div>
-        </div>
-        <div className="kpi-card kpi-amber">
-          <div className="text-[11px] text-ink-2 mb-1">未承認(要対応)</div>
-          <div className="text-[26px] font-extrabold leading-none">
-            {needApprovalCount ?? 0}
-          </div>
-          <div className="text-[11px] text-ink-3 mt-1">件</div>
-        </div>
-        <div className="kpi-card kpi-purple">
-          <div className="text-[11px] text-ink-2 mb-1">今月の人件費(概算)</div>
-          <div className="text-[24px] font-extrabold leading-none whitespace-nowrap">
-            ¥{Math.round(monthLaborYen).toLocaleString("ja-JP")}
-          </div>
-          <div className="text-[11px] text-ink-3 mt-1">
-            稼働 {monthHours.toFixed(1)} h
-          </div>
-        </div>
+        <KpiCard
+          icon="📋"
+          accent="blue"
+          label="本日の日報提出"
+          value={kpis.todayReports}
+          unit="件"
+          subText={`今週累計 ${kpis.weekReports} 件`}
+        />
+        <KpiCard
+          icon="👷"
+          accent="p3"
+          label="本日の出勤"
+          value={kpis.attendanceCount}
+          unit="名"
+          subText={`全${kpis.activeMemberTotal}名中(${attendanceRate}%)`}
+        />
+        <KpiCard
+          icon="🛡️"
+          accent="gold"
+          label="安全コンボ(全社)"
+          value={kpis.safetyComboDays}
+          unit="日"
+          subText="無事故継続日数"
+        />
+        <KpiCard
+          icon="⏱"
+          accent="p4"
+          label="今月の累計時間"
+          value={kpis.monthHours.toFixed(1)}
+          unit="h"
+          subText={`人件費 概算 ¥${Math.round(kpis.monthLaborYen).toLocaleString("ja-JP")}`}
+        />
       </div>
 
-      {/* 現場別 累計原価 */}
-      <section className="panel-pad mb-5">
-        <h2 className="panel-title">
-          <span aria-hidden>💰</span>
-          <span>現場別 累計人件費(REPORT3 自動集計)</span>
-        </h2>
-        {!costAggregates || costAggregates.length === 0 ? (
-          <p className="text-[12px] text-ink-3 py-4 text-center">
-            日報が提出されると自動で累計されます。
-          </p>
-        ) : (
-          <div className="overflow-x-auto -mx-2">
-            <table className="w-full text-[13px]">
-              <thead>
-                <tr className="text-left text-[11px] text-navy bg-blue-bg">
-                  <th className="py-2 px-3 font-bold">現場</th>
-                  <th className="py-2 px-3 font-bold text-right">累計時間</th>
-                  <th className="py-2 px-3 font-bold text-right">累計人件費</th>
-                </tr>
-              </thead>
-              <tbody>
-                {costAggregates.map((c) => {
-                  const projectName =
-                    (c.projects as { name?: string } | null)?.name ?? "—";
-                  const projectStatus =
-                    (c.projects as { status?: string } | null)?.status ??
-                    "active";
-                  const yen = Math.round(
-                    Number(c.total_labor_cost_cents) / 100,
-                  );
-                  return (
-                    <tr
-                      key={c.project_id}
-                      className="border-b border-line hover:bg-blue-bg/30"
-                    >
-                      <td className="py-2 px-3 font-bold flex items-center gap-2">
-                        {projectName}
-                        {projectStatus === "completed" && (
-                          <span className="pill-blue">完了</span>
-                        )}
-                      </td>
-                      <td className="py-2 px-3 text-right font-mono">
-                        {Number(c.total_hours).toFixed(1)} h
-                      </td>
-                      <td className="py-2 px-3 text-right font-mono font-bold">
-                        ¥{yen.toLocaleString("ja-JP")}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
+      {/* 要対応アラート(0件なら表示されない) */}
+      {alerts.length > 0 && (
+        <div className="mb-4">
+          <AlertCard items={alerts} />
+        </div>
+      )}
+
+      {/* 本日の稼働現場 */}
+      <section className="bg-panel border border-line rounded-panel mb-4 overflow-hidden">
+        <header className="px-4 py-3 border-b border-line flex items-center justify-between">
+          <h2 className="text-[14px] font-bold text-ink flex items-center gap-1.5">
+            <span aria-hidden>🏗️</span>
+            本日の稼働現場
+          </h2>
+          <span className="text-[10px] text-ink-3">
+            データ元: projects × report3_entries
+          </span>
+        </header>
+        <div className="p-2">
+          <ActiveSitesTable sites={sites} />
+        </div>
       </section>
 
-      {/* 直近提出 */}
-      <section className="panel-pad">
-        <h2 className="panel-title">
-          <span aria-hidden>📋</span>
-          <span>直近の作業日報(全社)</span>
-        </h2>
-
-        {!recent || recent.length === 0 ? (
-          <p className="text-[12px] text-ink-3 py-4 text-center">
-            まだ提出された日報はありません。
-          </p>
-        ) : (
-          <div className="overflow-x-auto -mx-2">
-            <table className="w-full text-[13px]">
-              <thead>
-                <tr className="text-left text-[11px] text-navy bg-blue-bg">
-                  <th className="py-2 px-3 font-bold">提出日時</th>
-                  <th className="py-2 px-3 font-bold">作業日</th>
-                  <th className="py-2 px-3 font-bold">作業員</th>
-                  <th className="py-2 px-3 font-bold">現場</th>
-                  <th className="py-2 px-3 font-bold">状態</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recent.map((r) => {
-                  const projectName =
-                    (r.projects as { name?: string } | null)?.name ?? "—";
-                  const userName =
-                    (r.submitter as { display_name?: string } | null)
-                      ?.display_name ?? "—";
-                  return (
-                    <tr
-                      key={r.id}
-                      className="border-b border-line hover:bg-blue-bg/30"
-                    >
-                      <td className="py-2 px-3 text-ink-2 whitespace-nowrap">
-                        <Link
-                          href={`/sp/report3/${r.id}`}
-                          className="hover:underline"
-                        >
-                          {new Date(r.submitted_at).toLocaleString("ja-JP", {
-                            month: "numeric",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </Link>
-                      </td>
-                      <td className="py-2 px-3 whitespace-nowrap">
-                        {r.work_date}
-                      </td>
-                      <td className="py-2 px-3">{userName}</td>
-                      <td className="py-2 px-3">{projectName}</td>
-                      <td className="py-2 px-3">
-                        {pickStatus(r)}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+      {/* 2列: 承認待ち件数表示 + 今日の活動タイムライン */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* 承認待ち概況 */}
+        <section className="bg-panel border border-line rounded-panel overflow-hidden">
+          <header className="px-4 py-3 border-b border-line flex items-center justify-between">
+            <h2 className="text-[14px] font-bold text-ink flex items-center gap-1.5">
+              <span aria-hidden>✓</span>
+              承認・処理キュー
+            </h2>
+          </header>
+          <div className="p-4 space-y-2.5">
+            <QueueRow
+              icon="📝"
+              label="日報の承認待ち"
+              count={kpis.needApprovalCount}
+              accent={kpis.needApprovalCount > 5 ? "p1" : kpis.needApprovalCount > 0 ? "p2" : "p3"}
+              href="/pc/approvals"
+            />
+            <QueueRow
+              icon="📋"
+              label="期限切れ間近の資格"
+              count={alerts.filter((a) => a.title.includes("資格期限")).length}
+              accent="p2"
+              href="/pc/qualifications"
+            />
+            <QueueRow
+              icon="⚠"
+              label="未対応のヒヤリハット"
+              count={alerts.filter((a) => a.title.includes("ヒヤリハット")).length}
+              accent="p1"
+              href="/pc/incidents"
+            />
           </div>
-        )}
-      </section>
+        </section>
+
+        {/* タイムライン */}
+        <section className="bg-panel border border-line rounded-panel overflow-hidden">
+          <header className="px-4 py-3 border-b border-line flex items-center justify-between">
+            <h2 className="text-[14px] font-bold text-ink flex items-center gap-1.5">
+              <span aria-hidden>⏱</span>
+              今日の活動タイムライン
+            </h2>
+            <span className="text-[10px] text-ink-3">audit_log</span>
+          </header>
+          <div className="p-4">
+            <ActivityTimeline items={activity} />
+          </div>
+        </section>
+      </div>
     </div>
   );
 }
 
-function pickStatus(r: {
-  approved_at: string | null;
-  rejected_at: string | null;
-  requires_leader_approval: boolean;
+function QueueRow({
+  icon,
+  label,
+  count,
+  accent,
+  href,
+}: {
+  icon: string;
+  label: string;
+  count: number;
+  accent: "p1" | "p2" | "p3";
+  href: string;
 }) {
-  if (r.rejected_at) return <span className="pill-red">差戻し</span>;
-  if (r.approved_at) return <span className="pill-teal">承認済</span>;
-  if (r.requires_leader_approval)
-    return <span className="pill-amber">要承認</span>;
-  return <span className="pill-blue">提出済</span>;
+  const accentBg = {
+    p1: "bg-p1/10 text-p1",
+    p2: "bg-p2/10 text-p2",
+    p3: "bg-p3/10 text-p3",
+  }[accent];
+
+  const isEmpty = count === 0;
+
+  return (
+    <a
+      href={href}
+      className={`flex items-center gap-3 p-3 rounded-btn border border-line hover:bg-panel2 transition-colors ${isEmpty ? "opacity-60" : ""}`}
+    >
+      <div
+        aria-hidden
+        className={`w-9 h-9 rounded-lg flex items-center justify-center text-[16px] ${accentBg}`}
+      >
+        {icon}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="text-[12px] font-bold text-ink">{label}</div>
+        <div className="text-[10px] text-ink-3">
+          {isEmpty ? "対応すべき項目はありません" : "クリックで対応画面へ"}
+        </div>
+      </div>
+      <div
+        className={`text-[24px] font-extrabold leading-none ${isEmpty ? "text-ink-3" : `text-${accent}`}`}
+      >
+        {count}
+      </div>
+    </a>
+  );
 }
 
-function todayInTokyo(): string {
-  const tokyo = new Date(
-    new Date().toLocaleString("en-US", { timeZone: "Asia/Tokyo" }),
-  );
-  const y = tokyo.getFullYear();
-  const m = String(tokyo.getMonth() + 1).padStart(2, "0");
-  const d = String(tokyo.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
-
-function startOfWeekJP(): string {
-  const tokyo = new Date(
-    new Date().toLocaleString("en-US", { timeZone: "Asia/Tokyo" }),
-  );
-  const day = tokyo.getDay() || 7;
-  if (day !== 1) tokyo.setDate(tokyo.getDate() - (day - 1));
-  const y = tokyo.getFullYear();
-  const m = String(tokyo.getMonth() + 1).padStart(2, "0");
-  const d = String(tokyo.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
-
-function startOfMonthJP(): string {
-  const tokyo = new Date(
-    new Date().toLocaleString("en-US", { timeZone: "Asia/Tokyo" }),
-  );
-  const y = tokyo.getFullYear();
-  const m = String(tokyo.getMonth() + 1).padStart(2, "0");
-  return `${y}-${m}-01`;
+function greetingByHour(): string {
+  const h = new Date().getHours();
+  if (h < 5) return "おそくまでお疲れさまです";
+  if (h < 11) return "おはようございます";
+  if (h < 17) return "お疲れさまです";
+  if (h < 22) return "お疲れさまです";
+  return "遅くまでお疲れさまです";
 }

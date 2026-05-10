@@ -4,6 +4,62 @@
 
 ---
 
+## S2 — ダッシュボード再構成 + 獅子丸マスコット導入 / 2026-05-10
+
+### コンテキスト
+- S1 で整備した共通コンポーネント(KpiCard / AlertCard / HpBar / Tag 等)を活用し、
+  `/pc/home` を全面再構成
+- ゲーミフィケーションは「現時点でのベストプラクティス」設計指針(失敗を罰しない、
+  実業務 KPI 連動、自己ベスト主導)に従って実装
+
+### このセッションで完了
+- **P2-01** ダッシュボードレイアウト刷新(獅子丸 → KPI 4枚 → アラート → 本日の稼働現場 → 承認キュー + 活動タイムライン)
+- **P2-02** KPI クエリ実装(`src/features/dashboard/queries.ts`)
+  - 本日の日報提出 / 本日の出勤 / 安全コンボ日数 / 今月の累計時間 + 人件費
+- **P2-03** アラート集約クエリ(資格期限切れ間近 / 承認待ち / 重大ヒヤリハット未対応)
+- **P2-04** 本日の稼働現場テーブル(`<ActiveSitesTable>`)
+- **P2-05** タイムライン(`<ActivityTimeline>`、audit_log ベース)
+- **P2-06** 🦁 獅子丸サジェストロジック(`src/features/dashboard/shishimaru.ts`)
+  - 8 段階の優先順位ルールで mood + message + suggestion を生成
+- **P2-07** 🦁 獅子丸の表情ロジック(5 mood: celebrate / great / happy / warning / thinking)
+  - 配色 + 左ボーダー + ラベルで mood を表現
+
+### 変更ファイル
+- `src/components/feature/Shishimaru.tsx` (新規)
+- `src/components/feature/ActiveSitesTable.tsx` (新規)
+- `src/components/feature/ActivityTimeline.tsx` (新規)
+- `src/features/dashboard/queries.ts` (新規)
+- `src/features/dashboard/shishimaru.ts` (新規)
+- `src/app/(authenticated)/pc/home/page.tsx` (全面リライト)
+
+### スキップしたタスク(P2 内)
+- **P2-08** 通知ドロップダウン → P4(演出仕上げ)で実施に変更
+- **P2-09** 既存ランキングページの位置づけ整理 → P3-A 着手時に判断
+
+### 動作確認
+- `npm run build` 通過 ✅(全62ルート)
+- 既存ページのスタイル退行なし
+
+### 直面した課題と解決
+- **TypeScript 型エラー**: Supabase の関係列(`project:projects(...)`)が
+  配列形式で返るケースがあり、型キャストで対応。`unknown` 経由で安全に。
+- **safety_combo の暫定実装**: incident_reports に記録がないテナントでは
+  「30 日連続無事故」を返す暫定値で対応。本格的には `incident_reports.occurred_at`
+  からの差分計算。
+
+### 次セッション(S3)へ申し送り
+- 着手タスク: **P3-A-01** マイグレーション 0012(ポイント管理)
+- Phase 3 から疑似 specialist 化の試験運用を開始
+- マイグレーション SQL は MASTER-PLAN.md の P3-A-01 に既に詳細あり
+- migration 0010 / 0011 がローカルリポジトリに無い問題(live Supabase には適用済み)
+  → 0012 を作る前に、現在の live DB スキーマを確認するか、暫定ベースで作って
+     後で sync するか判断が必要
+
+### コミット
+- 後述の Final commit にて
+
+---
+
 ## S1.6 — フォルダリネーム実行 + テンプレ由来ファイルのアーカイブ / 2026-05-10
 
 ### コンテキスト
