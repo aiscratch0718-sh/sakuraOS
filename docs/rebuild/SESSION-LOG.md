@@ -4,6 +4,57 @@
 
 ---
 
+## S1 — Phase 1 ビジュアル基盤 / 2026-05-10
+
+### コンテキスト
+- S0 の続き。板澤様より「ゲーミフィケーションは現時点でのベストプラクティスで実装、クライアント確認後に大幅修正の可能性あり」の指示
+- ゲーミフィケーション設計指針(6項目)を Decisions Log に記録
+
+### このセッションで完了
+- **P1-01** Tailwind config 拡張(`p1-p4`/gold/silver/bronze、glow shadows、keyframes/animations)
+- **P1-02** globals.css に `:root` トークン定義 + `prefers-reduced-motion` 対応
+- **P1-03** `<KpiCard>` コンポーネント(左4pxバー + 角アイコン + 値 + trend)
+- **P1-04** `<AlertCard>` `<AlertItem>`(0件で null)
+- **P1-05** `<ProgressBar>` `<HpBar>`(進捗率で自動配色)
+- **P1-06** `<DataTable>` `<DataTableBasic>` + `.data-table` クラス
+- **P1-07** `<Tag>` + pill-p1〜p4 / pill-gold/silver/bronze
+- `src/components/ui/index.ts` barrel export 追加
+
+### 変更ファイル
+- `tailwind.config.ts`
+- `src/app/globals.css`
+- `src/components/ui/KpiCard.tsx`(新規)
+- `src/components/ui/AlertCard.tsx`(新規)
+- `src/components/ui/ProgressBar.tsx`(新規)
+- `src/components/ui/HpBar.tsx`(新規)
+- `src/components/ui/DataTable.tsx`(新規)
+- `src/components/ui/Tag.tsx`(新規)
+- `src/components/ui/index.ts`(新規)
+- `docs/rebuild/PROGRESS.md`(更新)
+
+### 動作確認
+- `npm run build` 通過 ✅(全62ルートビルド成功)
+- 既存ページのスタイル退行なし(新トークンは追加のみ、既存トークンは無変更)
+
+### 検出した制約・前提
+- 既存 `kpi-card` クラス(globals.css)は上部3pxバー版。新 `<KpiCard>` は左4pxバー版で並存。
+  既存ページ(/pc/home 等)は旧クラスを使用中、S2 で順次差し替え予定。
+- 既存 `pill-blue/teal/amber/red/purple` と新 `pill-p1〜p4` が並存。意味的にほぼ同義(p1=red, p3=teal, p4=purple, p2=amber)。
+  リビルド過程で徐々に p1-p4 に統一していく方針。
+
+### 次セッション(S2)へ申し送り
+- 着手タスク: **P2-01 + P2-02 + P2-03 + P2-04 + P2-06 + P2-07**(ダッシュボード再構成)
+- `/pc/home/page.tsx` を読み込んで現状を把握 → 新コンポーネントベースに書き換え
+- 獅子丸コンポーネント `src/components/ui/Shishimaru.tsx` を新規作成
+- ルールベース `generateShishimaruAdvice` を `src/features/dashboard/actions.ts` に追加
+- KPI / アラート集約のサーバーサイド関数を `src/features/dashboard/queries.ts` に追加
+
+### コミット
+- 計画ファイル群: `11dc676`
+- Phase 1 実装: 後述の Final commit
+
+---
+
 ## S0 — 計画策定 / 2026-05-10
 
 ### コンテキスト

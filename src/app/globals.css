@@ -3,6 +3,46 @@
 @tailwind utilities;
 
 @layer base {
+  /* === デザイントークン (デモ v4.0 由来 + 既存) ===
+     CSS変数経由で動的テーマ切替、コンポーネント側からも参照可能 */
+  :root {
+    /* Gamification palette */
+    --p1: #d9415a;
+    --p1-light: #fdeef1;
+    --p1-glow: rgba(217, 65, 90, 0.3);
+    --p2: #c47a00;
+    --p2-light: #fef5e4;
+    --p2-glow: rgba(196, 122, 0, 0.3);
+    --p3: #0a8f6e;
+    --p3-light: #e4f7f2;
+    --p3-glow: rgba(10, 143, 110, 0.3);
+    --p4: #5b3fa8;
+    --p4-light: #f0eafb;
+    --p4-glow: rgba(91, 63, 168, 0.3);
+    --gold: #ffd700;
+    --silver: #c0c0c0;
+    --bronze: #cd7f32;
+
+    /* Surfaces */
+    --ink: #1a2a3a;
+    --ink-rich: #1a2740;
+    --sub: #4a5e7a;
+    --muted: #8099ba;
+    --border: #d8e8f5;
+    --bg: #f6f9fc;
+    --panel: #ebf2fb;
+
+    /* Shadows */
+    --shadow-sm: 0 2px 8px rgba(11, 31, 69, 0.06);
+    --shadow-md: 0 8px 24px rgba(11, 31, 69, 0.1);
+    --shadow-lg: 0 24px 80px rgba(0, 0, 0, 0.4);
+
+    /* Radii */
+    --radius: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+  }
+
   html {
     -webkit-text-size-adjust: 100%;
   }
@@ -20,6 +60,17 @@
     outline: 2px solid #2568c8;
     outline-offset: 2px;
     border-radius: 4px;
+  }
+
+  /* prefers-reduced-motion 対応 */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
@@ -83,7 +134,9 @@
     font-family: inherit;
   }
 
-  /* === KPI card (PC dashboard) === */
+  /* === KPI card (PC dashboard, 旧スタイル: 上部3pxバー) ===
+     新規実装は <KpiCard> コンポーネントを優先(左4pxバー版)。
+     既存ページの互換のためここに残す */
   .kpi-card {
     @apply panel relative overflow-hidden p-4 transition-all hover:shadow-cardHover hover:-translate-y-0.5;
   }
@@ -100,4 +153,64 @@
   .kpi-card.kpi-amber::before { background: #d88000; }
   .kpi-card.kpi-red::before { background: #e03030; }
   .kpi-card.kpi-purple::before { background: #7040c8; }
+
+  /* === ゲーミフィケーション用 pill === */
+  .pill-p1 {
+    @apply pill bg-p1-light text-p1;
+  }
+  .pill-p2 {
+    @apply pill bg-p2-light text-p2;
+  }
+  .pill-p3 {
+    @apply pill bg-p3-light text-p3;
+  }
+  .pill-p4 {
+    @apply pill bg-p4-light text-p4;
+  }
+  .pill-gold {
+    @apply pill text-[#7a5c00];
+    background: rgba(255, 215, 0, 0.15);
+  }
+  .pill-silver {
+    @apply pill text-[#5a6068];
+    background: rgba(192, 192, 192, 0.2);
+  }
+  .pill-bronze {
+    @apply pill text-[#7a4f1f];
+    background: rgba(205, 127, 50, 0.15);
+  }
+
+  /* === データテーブル (デモ準拠) === */
+  .data-table {
+    @apply w-full border-collapse text-[13px];
+  }
+  .data-table th {
+    @apply text-left px-3 py-2.5 font-bold text-[11px] text-ink-3 uppercase tracking-wider;
+    @apply border-b-2 border-line bg-graybg;
+  }
+  .data-table td {
+    @apply px-3 py-2.5 border-b border-line text-ink align-middle;
+  }
+  .data-table tbody tr {
+    @apply transition-colors;
+  }
+  .data-table tbody tr:hover td {
+    @apply bg-blue-bg/40;
+  }
+
+  /* === 進捗バー === */
+  .progress-bar-bg {
+    @apply h-2 bg-panel2 rounded-full overflow-hidden;
+  }
+  .progress-bar-fill {
+    @apply h-full rounded-full transition-all duration-700 ease-out;
+  }
+
+  /* === 注釈ブロック (wf-note 風、本番ではデバッグ/管理者向け) === */
+  .wf-note {
+    @apply flex items-start gap-1.5 px-3 py-2 rounded-btn text-[11px];
+    background: #fff9e6;
+    border: 1.5px dashed var(--p2);
+    color: #7a4800;
+  }
 }
