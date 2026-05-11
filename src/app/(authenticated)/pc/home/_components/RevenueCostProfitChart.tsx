@@ -23,7 +23,7 @@ export function RevenueCostProfitChart() {
   const max = 160;
   const W = 430;
   const H = 155;
-  const PAD = { l: 46, r: 10, t: 12, b: 26 };
+  const PAD = { l: 62, r: 10, t: 12, b: 26 };
   const innerW = W - PAD.l - PAD.r;
   const innerH = H - PAD.t - PAD.b;
   const barGroupW = innerW / data.length;
