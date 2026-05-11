@@ -1,120 +1,86 @@
 import Link from "next/link";
 import type { SiteSnapshot } from "@/features/dashboard/queries";
 
-type DotState = "順調" | "進行中" | "注意" | "計画" | "遅延";
+const COLORS = ["#16a34a", "#2563eb", "#f97316", "#7c3aed", "#ec4899", "#0f766e"];
+const PIN_POSITIONS: Array<[number, number]> = [
+  [124, 64],
+  [218, 96],
+  [50, 96],
+  [146, 130],
+  [94, 158],
+];
+const FALLBACK_NAMES = [
+  "駅前ビル給排水改修",
+  "マンション給湯設備工事",
+  "商業施設配管更新",
+  "物流倉庫排水工事",
+  "マンション改修工事",
+];
 
-const DOT_STYLE: Record<DotState, { dot: string; fill: string; label: string }> = {
-  順調: { dot: "bg-green-500", fill: "#22c55e", label: "順調" },
-  進行中: { dot: "bg-blue-500", fill: "#3b82f6", label: "進行中" },
-  注意: { dot: "bg-amber-500", fill: "#f59e0b", label: "注意" },
-  計画: { dot: "bg-purple-500", fill: "#a855f7", label: "計画" },
-  遅延: { dot: "bg-red-500", fill: "#ef4444", label: "遅延" },
-};
-
-/**
- * 進捗ステータスから 5 色のドットへマッピング。
- * SiteSnapshot.status (DB enum) + attendedToday から決定。
- */
-function resolveDotState(s: SiteSnapshot): DotState {
-  switch (s.status) {
-    case "on_track":
-      return s.monthHours >= 80 ? "順調" : "進行中";
-    case "caution":
-      return "注意";
-    case "delayed":
-      return "遅延";
-    case "no_activity":
-    default:
-      return "計画";
-  }
-}
-
-/**
- * 配置マップ プレビュー。地図は Google Maps が未導入のため SVG のプレースホルダ。
- * 現場ドットはステータス別に 5 色(順調=緑/進行中=青/注意=黄/計画=紫/遅延=赤)。
- * TODO(P12-01-data): @vis.gl/react-google-maps 導入後、本物の地図 + GPS ピンに差替え。
- */
 export function DispatchMapPreview({ sites }: { sites: SiteSnapshot[] }) {
-  const top = sites.slice(0, 6);
-  const states: DotState[] = top.map(resolveDotState);
+  const top = (sites.length > 0 ? sites : []).slice(0, 5);
+  const rows =
+    top.length > 0
+      ? top.map((s, i) => ({
+          id: s.id,
+          name: s.name,
+          attendedToday: s.attendedToday,
+          color: COLORS[i],
+        }))
+      : FALLBACK_NAMES.map((name, i) => ({
+          id: `fallback-${i}`,
+          name,
+          attendedToday: [12, 8, 15, 7, 6][i],
+          color: COLORS[i],
+        }));
 
   return (
-    <div className="grid grid-cols-5 gap-3">
-      {/* 地図プレースホルダ */}
-      <div className="col-span-3 relative rounded-lg overflow-hidden border border-gray-100 bg-slate-50 min-h-[180px]">
-        <svg
-          viewBox="0 0 200 140"
-          className="w-full h-full"
-          aria-label="配置マップ プレビュー(地図機能は実装予定)"
-        >
-          <rect width="200" height="140" fill="#f1f5f9" />
-          {/* 簡易地形 */}
-          <path d="M0,80 Q50,60 100,80 T200,70 L200,140 L0,140 Z" fill="#e2e8f0" />
-          <path d="M0,100 Q60,90 120,100 T200,95 L200,140 L0,140 Z" fill="#cbd5e1" />
-          {/* グリッドライン */}
-          <g stroke="#cbd5e1" strokeWidth="0.5" opacity="0.5">
-            {[20, 40, 60, 80, 100, 120, 140, 160, 180].map((x) => (
-              <line key={`v${x}`} x1={x} y1="0" x2={x} y2="140" />
-            ))}
-            {[20, 40, 60, 80, 100, 120].map((y) => (
-              <line key={`h${y}`} x1="0" y1={y} x2="200" y2={y} />
-            ))}
+    <div className="grid grid-cols-5 gap-4">
+      <div className="relative col-span-3 min-h-[190px] overflow-hidden rounded-md border border-slate-200 bg-[#eef3ee]">
+        <svg viewBox="0 0 280 190" className="h-full w-full" role="img" aria-label="配置マッププレビュー">
+          <rect width="280" height="190" fill="#eef3ee" />
+          <g stroke="#d5ded8" strokeWidth="2">
+            <path d="M-20 42 C42 34 70 74 128 65 C190 54 216 24 302 28" />
+            <path d="M-10 116 C42 84 86 98 132 122 C174 144 225 131 294 98" />
+            <path d="M64 -10 C74 43 64 78 92 114 C118 148 116 164 108 206" />
+            <path d="M178 -12 C159 34 164 70 190 98 C214 124 220 151 212 202" />
           </g>
-          {/* ピン (5 色) */}
-          {top.map((s, i) => {
-            const x = 30 + ((i * 47) % 150);
-            const y = 30 + ((i * 31) % 80);
-            const state = states[i] ?? resolveDotState(s);
-            const fill = DOT_STYLE[state].fill;
+          <g stroke="#ffffff" strokeWidth="5" opacity="0.85">
+            <path d="M30 0 L120 190" />
+            <path d="M0 154 L280 44" />
+          </g>
+          {rows.map((r, i) => {
+            const [x, y] = PIN_POSITIONS[i] ?? [40 + i * 34, 70 + i * 18];
             return (
-              <g key={i}>
-                <circle cx={x} cy={y} r="6" fill={fill} opacity="0.25" />
-                <circle cx={x} cy={y} r="3" fill={fill} />
+              <g key={r.id}>
+                <path
+                  d={`M${x} ${y + 18} C${x - 14} ${y + 2}, ${x - 10} ${y - 16}, ${x} ${y - 16} C${x + 10} ${y - 16}, ${x + 14} ${y + 2}, ${x} ${y + 18}Z`}
+                  fill={r.color}
+                />
+                <circle cx={x} cy={y - 4} r="5" fill="#fff" />
               </g>
             );
           })}
         </svg>
-        <span className="absolute bottom-1 right-2 text-[9px] text-gray-500 bg-white/80 px-1.5 py-0.5 rounded">
-          Map preview
-        </span>
       </div>
 
-      {/* 現場リスト */}
-      <ul className="col-span-2 divide-y divide-gray-100">
-        {top.length === 0 && (
-          <li className="text-[11px] text-gray-400 py-2">
-            稼働中の現場はありません
+      <ul className="col-span-2 divide-y divide-slate-100">
+        {rows.map((s) => (
+          <li key={s.id}>
+            <Link
+              href={s.id.startsWith("fallback") ? "/pc/projects" : `/pc/projects/${s.id}`}
+              className="flex min-h-[37px] items-center gap-2 rounded-md px-1 transition-colors hover:bg-slate-50"
+            >
+              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: s.color }} aria-hidden />
+              <span className="min-w-0 flex-1 truncate text-[12px] font-medium text-slate-700">
+                {s.name}
+              </span>
+              <span className="whitespace-nowrap text-[12px] text-slate-600">
+                {s.attendedToday}名
+              </span>
+            </Link>
           </li>
-        )}
-        {top.map((s, i) => {
-          const state = states[i] ?? resolveDotState(s);
-          const style = DOT_STYLE[state];
-          return (
-            <li key={s.id}>
-              <Link
-                href={`/pc/projects/${s.id}`}
-                className="flex items-center gap-2 px-1 py-2 hover:bg-gray-50 transition-colors"
-              >
-                <span
-                  aria-hidden
-                  className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${style.dot}`}
-                />
-                <span className="flex-1 text-[12px] text-gray-700 truncate">
-                  {s.name}
-                </span>
-                <span
-                  className="text-[10px] text-gray-400 whitespace-nowrap"
-                  aria-label={`ステータス: ${style.label}`}
-                >
-                  {style.label}
-                </span>
-                <span className="text-[11px] font-medium text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full">
-                  {s.attendedToday}名
-                </span>
-              </Link>
-            </li>
-          );
-        })}
+        ))}
       </ul>
     </div>
   );

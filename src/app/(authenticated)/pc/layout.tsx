@@ -11,7 +11,7 @@ function roleLabel(role: string): string {
     case "office":
       return "事務";
     case "ceo":
-      return "経営層";
+      return "管理者";
     case "system":
       return "システム";
     default:
@@ -26,7 +26,6 @@ export default async function PcLayout({
 }) {
   const session = await requireSession();
 
-  // テナント名 + ロゴをサイドバー表示用に取得
   const sb = await createClient();
   const { data: tenant } = await sb
     .from("tenants")
@@ -35,16 +34,16 @@ export default async function PcLayout({
     .maybeSingle();
 
   return (
-    <div className="flex">
+    <div className="flex min-h-screen bg-slate-50">
       <Sidebar
         role={session.role}
         displayName={session.displayName}
         roleLabel={roleLabel(session.role)}
-        tenantName={tenant?.name ?? "SAKURA OS"}
-        tagline="建設業務管理"
+        tenantName={tenant?.name ?? "REPORT3"}
+        tagline="業務管理システム"
         logoUrl={tenant?.logo_url ?? null}
       />
-      <div className="flex-1 min-w-0">{children}</div>
+      <div className="min-w-0 flex-1">{children}</div>
     </div>
   );
 }

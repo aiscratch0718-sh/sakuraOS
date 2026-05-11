@@ -7,59 +7,34 @@ type Notice = {
   level: "info" | "important";
 };
 
-/**
- * お知らせパネル。
- * TODO(P12-01-data): notices テーブル + 既読管理。現状は暫定モック。
- */
 export function NoticesPanel({ notices }: { notices?: Notice[] }) {
   const data: Notice[] = notices ?? [
     {
       id: "1",
-      date: "2026-05-09",
-      title: "【重要】システムメンテナンスのお知らせ(6/1 22:00〜翌5:00)",
+      date: "2026/05/28",
+      title: "システムメンテナンスのお知らせ（6/1 22:00〜翌5:00）",
       level: "important",
-    },
-    {
-      id: "2",
-      date: "2026-05-07",
-      title: "REPORT3 入力フローの更新について",
-      level: "info",
-    },
-    {
-      id: "3",
-      date: "2026-05-02",
-      title: "5月の安全衛生月間 開始のご案内",
-      level: "info",
     },
   ];
 
   return (
-    <div>
-      <ul className="divide-y divide-gray-100">
+    <div className="flex h-full items-center">
+      <ul className="min-w-0 flex-1">
         {data.map((n) => (
-          <li key={n.id} className="py-2.5 flex items-center gap-2">
-            <span className="text-[11px] text-gray-400 tabular-nums w-20 flex-shrink-0">
-              {n.date}
-            </span>
+          <li key={n.id} className="flex items-center gap-4">
+            <span className="w-24 flex-shrink-0 text-[13px] text-slate-500">{n.date}</span>
             {n.level === "important" && (
-              <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-red-50 text-red-700 flex-shrink-0">
-                重要
+              <span className="flex-shrink-0 rounded border border-red-200 bg-red-50 px-2 py-0.5 text-[12px] font-bold text-red-700">
+                【重要】
               </span>
             )}
-            <span className="flex-1 text-[12px] text-gray-800 truncate">
-              {n.title}
-            </span>
+            <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-slate-800">{n.title}</span>
           </li>
         ))}
       </ul>
-      <div className="text-right pt-2">
-        <Link
-          href="/pc/notices"
-          className="text-[11px] text-gray-500 hover:text-gray-700"
-        >
-          すべてのお知らせを見る →
-        </Link>
-      </div>
+      <Link href="/pc/notices" className="ml-4 flex-shrink-0 text-[12px] font-bold text-blue-700">
+        すべてのお知らせを見る ›
+      </Link>
     </div>
   );
 }

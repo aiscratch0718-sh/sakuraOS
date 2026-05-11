@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CheckCircle2 } from "lucide-react";
 
 type TaskState = "urgent" | "warn" | "active" | "done";
 
@@ -12,91 +13,79 @@ type TaskRow = {
 };
 
 const TAG_STYLE: Record<TaskRow["tag"], string> = {
-  必須: "bg-red-50 text-red-700",
-  確認: "bg-amber-50 text-amber-700",
-  対応: "bg-blue-50 text-blue-700",
-  情報: "bg-gray-100 text-gray-600",
+  必須: "border-red-300 text-red-600",
+  確認: "border-orange-300 text-orange-600",
+  対応: "border-blue-300 text-blue-600",
+  情報: "border-slate-300 text-slate-600",
 };
 
-const STATE_STYLE: Record<TaskState, { label: string; cls: string }> = {
-  urgent: { label: "緊急", cls: "bg-red-50 text-red-700" },
-  warn: { label: "要対応", cls: "bg-amber-50 text-amber-700" },
-  active: { label: "進行中", cls: "bg-blue-50 text-blue-700" },
-  done: { label: "完了", cls: "bg-green-50 text-green-700" },
+const ICON_STYLE: Record<TaskState, string> = {
+  urgent: "text-red-500",
+  warn: "text-orange-500",
+  active: "text-blue-500",
+  done: "text-slate-400",
 };
 
-/**
- * 今日のやることリスト(参照画像準拠 4 行)。
- * TODO(P12-01-data): tasks テーブル + 承認/期限切れ集計から本実装。
- */
 export function TodayTasksList({ tasks }: { tasks?: TaskRow[] }) {
   const rows: TaskRow[] = tasks ?? [
     {
       tag: "必須",
-      label: "REPORT3 提出",
+      label: "REPORT3を入力する",
       count: 9,
-      note: "期限あり",
+      note: "未入力",
       state: "urgent",
       href: "/sp/report3",
     },
     {
       tag: "確認",
-      label: "承認待ち案件",
+      label: "承認待ちを確認する",
       count: 18,
       state: "warn",
       href: "/pc/approvals",
     },
     {
       tag: "対応",
-      label: "未請求案件",
+      label: "未請求の見積・請求を確認する",
       count: 7,
       state: "active",
       href: "/pc/invoices",
     },
     {
       tag: "情報",
-      label: "クエスト未達成",
+      label: "クエストを進めてXPを獲得しよう",
       count: 2,
+      note: "進行中",
       state: "done",
-      href: "/pc/badges",
+      href: "/pc/quests-badges",
     },
   ];
 
   return (
-    <ul className="divide-y divide-gray-100">
-      {rows.map((t, i) => {
-        const state = STATE_STYLE[t.state];
-        return (
-          <li key={i}>
-            <Link
-              href={t.href}
-              className="flex items-center gap-2.5 py-2.5 px-1 hover:bg-gray-50 transition-colors"
+    <ul className="divide-y divide-slate-100">
+      {rows.map((t) => (
+        <li key={t.label}>
+          <Link
+            href={t.href}
+            className="flex min-h-[42px] items-center gap-3 rounded-md px-1 transition-colors hover:bg-slate-50"
+          >
+            <CheckCircle2
+              className={`h-[18px] w-[18px] flex-shrink-0 ${ICON_STYLE[t.state]}`}
+              aria-hidden
+            />
+            <span
+              className={`rounded border px-2 py-0.5 text-[11px] font-bold ${TAG_STYLE[t.tag]}`}
             >
-              <span
-                className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${TAG_STYLE[t.tag]}`}
-              >
-                {t.tag}
-              </span>
-              <div className="flex-1 min-w-0">
-                <div className="text-[12px] text-gray-900 truncate">{t.label}</div>
-                {t.note && (
-                  <div className="text-[10px] text-gray-400">{t.note}</div>
-                )}
-              </div>
-              <span
-                className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${state.cls}`}
-                aria-label={`状態: ${state.label}`}
-              >
-                {state.label}
-              </span>
-              <span className="text-[12px] font-semibold text-gray-900 tabular-nums">
-                {t.count}
-                <span className="text-[10px] text-gray-400 ml-0.5">件</span>
-              </span>
-            </Link>
-          </li>
-        );
-      })}
+              {t.tag}
+            </span>
+            <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-slate-800">
+              {t.label}
+            </span>
+            <span className="whitespace-nowrap text-[12px] text-slate-500">
+              {t.note} {t.count}件
+            </span>
+          </Link>
+        </li>
+      ))}
     </ul>
   );
 }

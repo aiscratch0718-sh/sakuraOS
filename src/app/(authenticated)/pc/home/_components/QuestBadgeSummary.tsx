@@ -1,16 +1,12 @@
 import Link from "next/link";
+import { Award, ShieldCheck, Star } from "lucide-react";
 
 const BADGES = [
-  { id: "input-master", name: "入力マスター", color: "bg-blue-50 text-blue-700" },
-  { id: "cost-king", name: "原価番長", color: "bg-amber-50 text-amber-700" },
-  { id: "safety-leader", name: "安全リーダー", color: "bg-teal-50 text-teal-700" },
+  { id: "input-master", name: "入力マスター", note: "REPORT3を連続入力", icon: Star, color: "text-orange-500" },
+  { id: "cost-king", name: "原価番長", note: "原価入力を10件達成", icon: Award, color: "text-violet-500" },
+  { id: "safety-leader", name: "安全リーダー", note: "安全チェック報告3件達成", icon: ShieldCheck, color: "text-emerald-600" },
 ];
 
-/**
- * クエスト・バッジ サマリー(参照画像 下段右)。
- * XP / 次レベルまでの残 XP / クエスト進捗 + 期限を表示。
- * TODO(P12-01-data): user_xp / quests / user_badges から本実装。現状はモック。
- */
 export function QuestBadgeSummary({
   level = 18,
   currentXp = 7850,
@@ -33,90 +29,56 @@ export function QuestBadgeSummary({
   const questPct = Math.min(100, Math.round((questProgress / questGoal) * 100));
 
   return (
-    <div className="space-y-3">
-      {/* 自分の XP */}
-      <div>
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-[11px] text-gray-500">あなたの XP</span>
-          <span className="text-[12px] font-bold text-gray-900">Lv.{level}</span>
+    <div className="grid h-full grid-cols-3 gap-3">
+      <div className="rounded-md bg-white p-4 shadow-sm">
+        <div className="text-[12px] font-bold text-slate-700">あなたのXP</div>
+        <div className="mt-5 text-[13px] font-bold text-slate-800">Lv. {level}</div>
+        <div className="mt-2 text-[24px] font-black text-slate-950">
+          {currentXp.toLocaleString("ja-JP")}
+          <span className="text-[11px] font-medium text-slate-500"> / {nextLevelXp.toLocaleString("ja-JP")} XP</span>
         </div>
-        <div
-          role="progressbar"
-          aria-valuenow={currentXp}
-          aria-valuemin={0}
-          aria-valuemax={nextLevelXp}
-          aria-label={`Lv.${level} の経験値 ${currentXp} / ${nextLevelXp}`}
-          className="h-2 rounded-full bg-gray-100 overflow-hidden"
-        >
-          <div
-            className="h-full bg-gradient-to-r from-amber-400 to-orange-400 rounded-full"
-            style={{ width: `${xpPct}%` }}
-          />
+        <div className="mt-3 h-2 overflow-hidden rounded-full bg-rose-100">
+          <div className="h-full rounded-full bg-rose-500" style={{ width: `${xpPct}%` }} />
         </div>
-        <div className="flex items-center justify-between mt-0.5">
-          <span className="text-[10px] text-gray-500 tabular-nums">
-            {currentXp.toLocaleString("ja-JP")} / {nextLevelXp.toLocaleString("ja-JP")} XP
-          </span>
-          <span className="text-[10px] text-gray-500 tabular-nums">
-            次のレベルまで{" "}
-            <span className="font-medium text-gray-700">
-              {xpRemaining.toLocaleString("ja-JP")}
-            </span>{" "}
-            XP
-          </span>
+        <div className="mt-6 text-[11px] text-slate-600">
+          次のレベルまで {xpRemaining.toLocaleString("ja-JP")} XP
         </div>
       </div>
 
-      {/* チームクエスト */}
-      <div>
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-[12px] font-medium text-gray-800">
-            {questLabel}
-          </span>
-          <span className="text-[11px] text-gray-500">期限 {questDeadline}</span>
+      <div className="rounded-md bg-white p-4 shadow-sm">
+        <div className="text-[12px] font-bold text-slate-700">チームクエスト進捗</div>
+        <div className="mt-5 text-[15px] font-black text-slate-950">{questLabel}</div>
+        <p className="mt-1 text-[11px] text-slate-500">今月中にヒヤリハット報告を20件集めよう</p>
+        <div className="mt-3 text-[22px] font-black text-slate-950">
+          {questProgress}
+          <span className="text-[12px] font-medium text-slate-500"> / {questGoal}件</span>
         </div>
-        <div
-          role="progressbar"
-          aria-valuenow={questProgress}
-          aria-valuemin={0}
-          aria-valuemax={questGoal}
-          aria-label={`${questLabel} ${questProgress} / ${questGoal}`}
-          className="h-2 rounded-full bg-gray-100 overflow-hidden"
-        >
-          <div
-            className="h-full bg-teal-500 rounded-full"
-            style={{ width: `${questPct}%` }}
-          />
+        <div className="mt-2 h-2 overflow-hidden rounded-full bg-rose-100">
+          <div className="h-full rounded-full bg-rose-500" style={{ width: `${questPct}%` }} />
         </div>
-        <div className="text-[11px] text-gray-700 mt-0.5 tabular-nums">
-          {questProgress} / {questGoal} 件
-        </div>
+        <div className="mt-5 text-[11px] text-slate-600">期限：{questDeadline}</div>
       </div>
 
-      {/* バッジ */}
-      <div>
-        <div className="text-[11px] text-gray-500 mb-1.5">
-          最近獲得したバッジ
+      <div className="rounded-md bg-white p-4 shadow-sm">
+        <div className="text-[12px] font-bold text-slate-700">最近獲得したバッジ</div>
+        <div className="mt-3 space-y-3">
+          {BADGES.map((b) => {
+            const Icon = b.icon;
+            return (
+              <div key={b.id} className="flex items-center gap-3">
+                <Icon className={`h-7 w-7 ${b.color}`} aria-hidden />
+                <div className="min-w-0">
+                  <div className="truncate text-[12px] font-bold text-slate-900">{b.name}</div>
+                  <div className="truncate text-[10px] text-slate-500">{b.note}</div>
+                </div>
+              </div>
+            );
+          })}
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          {BADGES.map((b) => (
-            <div
-              key={b.id}
-              className={`px-2 py-1 rounded-full text-[11px] font-medium ${b.color}`}
-              title={b.name}
-            >
-              {b.name}
-            </div>
-          ))}
-        </div>
+        <Link href="/pc/quests-badges" className="mt-4 block text-right text-[12px] font-bold text-blue-700">
+          すべてのバッジを見る ›
+        </Link>
       </div>
-
-      <Link
-        href="/pc/badges"
-        className="block text-right text-[11px] text-gray-500 hover:text-gray-700"
-      >
-        すべてのバッジを見る →
-      </Link>
     </div>
   );
 }

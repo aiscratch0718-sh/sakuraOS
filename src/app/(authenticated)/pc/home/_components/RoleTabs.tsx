@@ -14,37 +14,36 @@ const ORDER: Array<Exclude<UserRole, "system">> = [
   "worker",
 ];
 
-/**
- * 現在のロール表示タブ。セッション値で選択状態を切替。
- * TODO(P12-02-role-switch): system ロール限定の擬似ロール切替を有効化。
- */
 export function RoleTabs({ role }: { role: UserRole }) {
-  // system は管理者扱いで表示
   const active = role === "system" ? "ceo" : role;
+
   return (
-    <div
-      role="tablist"
-      aria-label="現在のロール"
-      className="inline-flex items-center gap-1 p-1 rounded-pill bg-graybg"
-    >
-      {ORDER.map((r) => {
-        const isActive = r === active;
-        return (
-          <span
-            key={r}
-            role="tab"
-            aria-selected={isActive}
-            className={`px-3 py-1 rounded-pill text-[11px] font-bold transition-colors ${
-              isActive
-                ? "bg-navy text-white"
-                : "text-ink-3 cursor-not-allowed"
-            }`}
-            title={isActive ? "現在のロール" : "切替は将来実装予定"}
-          >
-            {ROLE_LABEL[r]}
-          </span>
-        );
-      })}
+    <div className="flex items-center gap-2 text-[12px] font-medium text-slate-700">
+      <span>現在のロール：</span>
+      <div
+        role="tablist"
+        aria-label="現在のロール"
+        className="inline-flex items-center overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"
+      >
+        {ORDER.map((r) => {
+          const isActive = r === active;
+          return (
+            <span
+              key={r}
+              role="tab"
+              aria-selected={isActive}
+              className={`min-w-[86px] border-r border-slate-200 px-4 py-2 text-center text-[12px] font-bold transition-colors last:border-r-0 ${
+                isActive
+                  ? "bg-blue-700 text-white shadow-inner"
+                  : "cursor-not-allowed bg-white text-slate-700"
+              }`}
+              title={isActive ? "現在のロール" : "切替は今後実装予定"}
+            >
+              {ROLE_LABEL[r]}
+            </span>
+          );
+        })}
+      </div>
     </div>
   );
 }
