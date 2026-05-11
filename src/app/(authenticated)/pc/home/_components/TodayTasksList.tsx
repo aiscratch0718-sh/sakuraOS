@@ -66,7 +66,7 @@ export function TodayTasksList({ tasks }: { tasks?: TaskRow[] }) {
         <li key={t.label}>
           <Link
             href={t.href}
-            className="flex min-h-[42px] items-center gap-3 rounded-md px-1 transition-colors hover:bg-slate-50"
+            className="flex min-h-[40px] items-center gap-3 rounded-md px-1 transition-colors hover:bg-slate-50"
           >
             <CheckCircle2
               className={`h-[18px] w-[18px] flex-shrink-0 ${ICON_STYLE[t.state]}`}

@@ -29,7 +29,13 @@ export function QuestBadgeSummary({
   const questPct = Math.min(100, Math.round((questProgress / questGoal) * 100));
 
   return (
-    <div className="grid h-full grid-cols-3 gap-3">
+    <div
+      className="relative grid h-full grid-cols-3 gap-3 overflow-hidden rounded-md p-1"
+      style={{
+        backgroundImage:
+          "radial-gradient(circle at 6% 8%, rgba(244,63,94,.28) 0 2px, transparent 3px), radial-gradient(circle at 25% 18%, rgba(59,130,246,.20) 0 2px, transparent 3px), radial-gradient(circle at 44% 4%, rgba(250,204,21,.35) 0 2px, transparent 3px), radial-gradient(circle at 68% 12%, rgba(16,185,129,.22) 0 2px, transparent 3px), radial-gradient(circle at 91% 7%, rgba(168,85,247,.18) 0 2px, transparent 3px)",
+      }}
+    >
       <div className="rounded-md bg-white p-4 shadow-sm">
         <div className="text-[12px] font-bold text-slate-700">あなたのXP</div>
         <div className="mt-5 text-[13px] font-bold text-slate-800">Lv. {level}</div>

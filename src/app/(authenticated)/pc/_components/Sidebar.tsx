@@ -213,13 +213,13 @@ export function Sidebar({
   return (
     <aside
       aria-label="サイドナビゲーション"
-      className="sticky top-0 hidden h-screen w-[240px] shrink-0 flex-col border-r border-slate-200 bg-white md:flex"
+      className="sticky top-0 hidden h-screen w-[220px] shrink-0 flex-col border-r border-slate-200 bg-white md:flex"
     >
-      <div className="border-b border-slate-100 px-5 py-5">
+      <div className="border-b border-slate-100 px-4 py-5">
         <div className="flex items-center gap-2 text-blue-700">
-          <Building2 className="h-7 w-7" strokeWidth={2.2} aria-hidden />
+          <Building2 className="h-7 w-7" strokeWidth={2.35} aria-hidden />
           <div>
-            <div className="text-[26px] font-black leading-none tracking-normal">
+            <div className="text-[25px] font-black leading-none tracking-normal">
               {brandName}
             </div>
             <div className="mt-1 text-[12px] font-bold text-slate-700">
@@ -230,7 +230,7 @@ export function Sidebar({
       </div>
 
       <nav role="navigation" className="sidebar-scroll flex-1 overflow-y-auto py-4">
-        <ul className="space-y-1 px-4">
+        <ul className="space-y-1 px-3.5">
           {visibleNav.map((item) => (
             <NavLink key={item.href} item={item} active={item.match(pathname)} />
           ))}
@@ -286,7 +286,7 @@ function NavLink({
       <Link
         href={item.href}
         aria-current={active ? "page" : undefined}
-        className={`flex min-h-[42px] items-center gap-3 rounded-md px-3 text-[15px] transition-colors ${
+        className={`flex min-h-[38px] items-center gap-3 rounded-md px-3 text-[14px] transition-colors ${
           active ? activeClass : inactiveClass
         }`}
       >
@@ -339,7 +339,7 @@ function SidebarFooter({
   }, [open]);
 
   return (
-    <div className="relative flex items-center gap-3 border-t border-slate-100 px-5 py-4">
+    <div className="relative flex items-center gap-3 border-t border-slate-100 px-4 py-4">
       <div
         className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-slate-200 text-[13px] font-bold text-slate-600"
         aria-hidden

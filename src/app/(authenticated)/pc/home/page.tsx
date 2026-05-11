@@ -52,7 +52,7 @@ export default async function PcHomePage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <header className="sticky top-0 z-20 flex min-h-[80px] items-center justify-between gap-4 border-b border-slate-200 bg-white/95 px-8 backdrop-blur">
+      <header className="sticky top-0 z-20 flex min-h-[78px] items-center justify-between gap-4 border-b border-slate-200 bg-white/95 px-8 backdrop-blur">
         <div>
           <h1 className="text-[26px] font-black leading-tight tracking-normal text-slate-950">
             ホーム
@@ -92,10 +92,10 @@ export default async function PcHomePage() {
         </div>
       </header>
 
-      <main className="px-8 py-6">
+      <main className="px-8 py-5">
         <section
           aria-label="主要 KPI"
-          className="mb-4 grid grid-cols-1 gap-4 xl:grid-cols-4 md:grid-cols-2"
+          className="mb-3 grid grid-cols-1 gap-5 xl:grid-cols-4 md:grid-cols-2"
         >
           <KpiCard
             accent="blue"
@@ -158,7 +158,7 @@ export default async function PcHomePage() {
 
         <section
           aria-label="今日の業務と進捗"
-          className="mb-4 grid grid-cols-12 gap-4"
+          className="mb-3 grid grid-cols-12 gap-3"
         >
           <div className="col-span-12 xl:col-span-4">
             <PanelCard
@@ -219,7 +219,7 @@ export default async function PcHomePage() {
 
         <section
           aria-label="お知らせとよく使うリンク"
-          className="grid grid-cols-12 gap-4"
+          className="grid grid-cols-12 gap-5"
         >
           <div className="col-span-12 xl:col-span-5">
             <PanelCard title="お知らせ" compact>
@@ -254,12 +254,12 @@ function PanelCard({
 }) {
   return (
     <section
-      className={`flex h-full ${compact ? "min-h-[96px]" : "min-h-[236px]"} flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] ${
-        accent === "pink" ? "bg-rose-50/40" : ""
+      className={`flex h-full ${compact ? "min-h-[80px]" : "min-h-[256px]"} flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] ${
+        accent === "pink" ? "border-rose-100 bg-rose-50/50" : ""
       }`}
     >
-      <header className="flex min-h-[48px] items-center justify-between border-b border-slate-200 px-4">
-        <h2 className="text-[18px] font-black tracking-normal text-slate-950">
+      <header className="flex min-h-[47px] items-center justify-between border-b border-slate-200 px-4">
+        <h2 className="text-[17px] font-black tracking-normal text-slate-950">
           {title}
         </h2>
         {href && (
@@ -272,7 +272,7 @@ function PanelCard({
           </Link>
         )}
       </header>
-      <div className="flex-1 p-4 text-[13px]">{children}</div>
+      <div className="flex-1 p-3 text-[13px]">{children}</div>
     </section>
   );
 }

@@ -11,6 +11,7 @@ export function MiniDonut({
   color = "#2568c8", // blue.DEFAULT
   trackColor = "#e8f0f8", // bg
   label,
+  showValue = false,
 }: {
   value: number;
   size?: number;
@@ -18,6 +19,7 @@ export function MiniDonut({
   color?: string;
   trackColor?: string;
   label?: string;
+  showValue?: boolean;
 }) {
   const clamped = Math.max(0, Math.min(100, value));
   const r = (size - stroke) / 2;
@@ -58,9 +60,11 @@ export function MiniDonut({
           transform={`rotate(-90 ${size / 2} ${size / 2})`}
         />
       </svg>
-      <span className="absolute text-[14px] font-extrabold text-navy">
-        {clamped}%
-      </span>
+      {showValue && (
+        <span className="absolute text-[14px] font-extrabold text-navy">
+          {clamped}%
+        </span>
+      )}
     </div>
   );
 }
