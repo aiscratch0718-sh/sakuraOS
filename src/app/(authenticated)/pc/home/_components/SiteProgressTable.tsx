@@ -26,7 +26,7 @@ export function SiteProgressTable({ rows }: { rows?: SiteProgressRow[] }) {
       {data.map((r) => {
         const delta = r.progressPct - r.plannedPct;
         return (
-          <li key={r.id} className="py-1">
+          <li key={r.id} className="py-0.5">
             <div className="flex items-center gap-1.5">
               {/* 現場名 + 工種 */}
               <div className="min-w-0 flex-1">

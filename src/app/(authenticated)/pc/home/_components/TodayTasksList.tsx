@@ -66,21 +66,21 @@ export function TodayTasksList({ tasks }: { tasks?: TaskRow[] }) {
         <li key={t.label}>
           <Link
             href={t.href}
-            className="flex min-h-[40px] items-center gap-3 rounded-md px-1 transition-colors hover:bg-slate-50"
+            className="flex min-h-[32px] items-center gap-1.5 rounded-md px-1 transition-colors hover:bg-slate-50"
           >
             <CheckCircle2
-              className={`h-[18px] w-[18px] flex-shrink-0 ${ICON_STYLE[t.state]}`}
+              className={`h-[14px] w-[14px] flex-shrink-0 ${ICON_STYLE[t.state]}`}
               aria-hidden
             />
             <span
-              className={`rounded border px-2 py-0.5 text-[11px] font-bold ${TAG_STYLE[t.tag]}`}
+              className={`flex-shrink-0 rounded border px-1.5 py-0 text-[10px] font-bold ${TAG_STYLE[t.tag]}`}
             >
               {t.tag}
             </span>
-            <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-slate-800">
+            <span className="min-w-0 flex-1 truncate text-[11px] font-medium text-slate-800">
               {t.label}
             </span>
-            <span className="whitespace-nowrap text-[12px] text-slate-500">
+            <span className="whitespace-nowrap text-[10px] text-slate-500">
               {t.note} {t.count}件
             </span>
           </Link>

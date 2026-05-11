@@ -74,7 +74,7 @@ export function ApprovalQueueTable({ rows }: { rows?: ApprovalRow[] }) {
   return (
     <ul className="divide-y divide-slate-100 text-[11px] text-slate-700">
       {data.map((r) => (
-        <li key={r.id} className="flex items-center gap-1.5 py-1">
+        <li key={r.id} className="flex items-center gap-1.5 py-0.5">
           {/* 左: 種別 badge */}
           <span
             className={`inline-block w-9 flex-shrink-0 whitespace-nowrap rounded border px-1 py-0.5 text-center text-[10px] font-bold ${KIND_STYLE[r.kind]}`}
