@@ -245,13 +245,14 @@
      in that narrow desktop band so it renders at the same density as 100%. */
   @media (min-width: 900px) and (max-width: 1400px) {
     .pc-dashboard-viewport {
-      overflow-x: hidden;
+      height: 100vh;
+      overflow: hidden;
     }
 
     .pc-dashboard-frame {
-      width: 166.667%;
-      min-height: 166.667vh;
-      transform: scale(0.6);
+      width: 178.572%;
+      min-height: 178.572vh;
+      transform: scale(0.56);
       transform-origin: top left;
     }
 
@@ -321,6 +322,79 @@
 
     .dashboard-panel-body {
       padding: 10px;
+    }
+
+    .dashboard-map-preview {
+      gap: 10px;
+    }
+
+    .dashboard-map-canvas {
+      min-height: 160px;
+    }
+
+    .dashboard-revenue-legend {
+      margin-bottom: 6px;
+    }
+
+    .dashboard-revenue-chart-svg {
+      max-height: 170px;
+    }
+
+    .dashboard-quest-summary {
+      gap: 8px;
+    }
+
+    .dashboard-quest-card {
+      padding: 12px;
+    }
+
+    .pc-sidebar {
+      width: 240px;
+    }
+
+    .pc-sidebar-brand {
+      padding: 22px 18px;
+    }
+
+    .pc-sidebar-logo-icon {
+      width: 32px;
+      height: 32px;
+    }
+
+    .pc-sidebar-logo-text {
+      font-size: 30px;
+    }
+
+    .pc-sidebar-tagline {
+      font-size: 13px;
+    }
+
+    .pc-sidebar-nav {
+      overflow: hidden;
+      padding-top: 18px;
+      padding-bottom: 12px;
+    }
+
+    .pc-sidebar-list {
+      padding-left: 14px;
+      padding-right: 14px;
+    }
+
+    .pc-sidebar-link {
+      min-height: 42px;
+      gap: 12px;
+      padding-left: 14px;
+      padding-right: 14px;
+      font-size: 16px;
+    }
+
+    .pc-sidebar-link-icon {
+      width: 22px;
+      height: 22px;
+    }
+
+    .pc-sidebar-footer {
+      padding: 14px 16px;
     }
   }
 }

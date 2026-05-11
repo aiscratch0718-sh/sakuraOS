@@ -35,8 +35,8 @@ export function DispatchMapPreview({ sites }: { sites: SiteSnapshot[] }) {
         }));
 
   return (
-    <div className="grid grid-cols-5 gap-4">
-      <div className="relative col-span-3 min-h-[196px] overflow-hidden rounded-md border border-slate-200 bg-[#eef3ee]">
+    <div className="dashboard-map-preview grid grid-cols-5 gap-4">
+      <div className="dashboard-map-canvas relative col-span-3 min-h-[196px] overflow-hidden rounded-md border border-slate-200 bg-[#eef3ee]">
         <svg viewBox="0 0 280 190" className="h-full w-full" role="img" aria-label="配置マッププレビュー">
           <rect width="280" height="190" fill="#eef3ee" />
           <g opacity="0.45">

@@ -36,8 +36,8 @@ export function RevenueCostProfitChart() {
   });
 
   return (
-    <div className="w-full">
-      <div className="mb-3 flex items-center justify-center gap-5 text-[12px] font-medium text-slate-700">
+    <div className="dashboard-revenue-chart w-full">
+      <div className="dashboard-revenue-legend mb-3 flex items-center justify-center gap-5 text-[12px] font-medium text-slate-700">
         <span className="flex items-center gap-1.5">
           <span className="h-2.5 w-4 rounded-sm bg-blue-600" aria-hidden />
           売上（千円）
@@ -53,7 +53,7 @@ export function RevenueCostProfitChart() {
       </div>
       <svg
         viewBox={`0 0 ${W} ${H}`}
-        className="h-auto w-full"
+        className="dashboard-revenue-chart-svg h-auto w-full"
         role="img"
         aria-label="月次の売上・原価・利益グラフ"
       >

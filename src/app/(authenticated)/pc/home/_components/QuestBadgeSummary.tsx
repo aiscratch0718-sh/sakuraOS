@@ -30,13 +30,13 @@ export function QuestBadgeSummary({
 
   return (
     <div
-      className="relative grid h-full grid-cols-3 gap-3 overflow-hidden rounded-md p-1"
+      className="dashboard-quest-summary relative grid h-full grid-cols-3 gap-3 overflow-hidden rounded-md p-1"
       style={{
         backgroundImage:
           "radial-gradient(circle at 6% 8%, rgba(244,63,94,.28) 0 2px, transparent 3px), radial-gradient(circle at 25% 18%, rgba(59,130,246,.20) 0 2px, transparent 3px), radial-gradient(circle at 44% 4%, rgba(250,204,21,.35) 0 2px, transparent 3px), radial-gradient(circle at 68% 12%, rgba(16,185,129,.22) 0 2px, transparent 3px), radial-gradient(circle at 91% 7%, rgba(168,85,247,.18) 0 2px, transparent 3px)",
       }}
     >
-      <div className="rounded-md bg-white p-4 shadow-sm">
+      <div className="dashboard-quest-card rounded-md bg-white p-4 shadow-sm">
         <div className="text-[12px] font-bold text-slate-700">あなたのXP</div>
         <div className="mt-5 text-[13px] font-bold text-slate-800">Lv. {level}</div>
         <div className="mt-2 text-[24px] font-black text-slate-950">
@@ -51,7 +51,7 @@ export function QuestBadgeSummary({
         </div>
       </div>
 
-      <div className="rounded-md bg-white p-4 shadow-sm">
+      <div className="dashboard-quest-card rounded-md bg-white p-4 shadow-sm">
         <div className="text-[12px] font-bold text-slate-700">チームクエスト進捗</div>
         <div className="mt-5 text-[15px] font-black text-slate-950">{questLabel}</div>
         <p className="mt-1 text-[11px] text-slate-500">今月中にヒヤリハット報告を20件集めよう</p>
@@ -65,7 +65,7 @@ export function QuestBadgeSummary({
         <div className="mt-5 text-[11px] text-slate-600">期限：{questDeadline}</div>
       </div>
 
-      <div className="rounded-md bg-white p-4 shadow-sm">
+      <div className="dashboard-quest-card rounded-md bg-white p-4 shadow-sm">
         <div className="text-[12px] font-bold text-slate-700">最近獲得したバッジ</div>
         <div className="mt-3 space-y-3">
           {BADGES.map((b) => {
