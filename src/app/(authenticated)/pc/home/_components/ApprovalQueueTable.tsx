@@ -77,7 +77,7 @@ export function ApprovalQueueTable({ rows }: { rows?: ApprovalRow[] }) {
         <caption className="sr-only">承認待ち一覧</caption>
         <thead className="text-slate-500">
           <tr className="text-left">
-            <th scope="col" className="px-2 pb-2 font-bold">種別</th>
+            <th scope="col" className="whitespace-nowrap px-2 pb-2 font-bold">種別</th>
             <th scope="col" className="px-2 pb-2 font-bold">案件名</th>
             <th scope="col" className="px-2 pb-2 font-bold">申請者</th>
             <th scope="col" className="px-2 pb-2 text-right font-bold">金額</th>
@@ -87,8 +87,8 @@ export function ApprovalQueueTable({ rows }: { rows?: ApprovalRow[] }) {
         <tbody className="divide-y divide-slate-100">
           {data.map((r) => (
             <tr key={r.id} className="transition-colors hover:bg-slate-50">
-              <td className="px-2 py-1">
-                <span className={`rounded border px-2 py-0.5 text-[11px] font-bold ${KIND_STYLE[r.kind]}`}>
+              <td className="whitespace-nowrap px-2 py-1">
+                <span className={`inline-block whitespace-nowrap rounded border px-1.5 py-0.5 text-[10px] font-bold ${KIND_STYLE[r.kind]}`}>
                   {r.kind}
                 </span>
               </td>

@@ -74,7 +74,7 @@ export function KpiCard({
 
   return (
     <div
-      className={`dashboard-kpi-card relative h-[108px] overflow-hidden rounded-lg border bg-white px-3.5 py-2 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-shadow hover:shadow-md ${a.borderColor}`}
+      className={`dashboard-kpi-card relative h-[128px] overflow-hidden rounded-lg border bg-white px-3.5 py-2 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-shadow hover:shadow-md ${a.borderColor}`}
     >
       <div className="mb-1 flex items-center gap-1.5">
         <h3 className={`text-[11px] font-bold ${a.titleColor}`}>{label}</h3>
