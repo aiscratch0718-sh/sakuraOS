@@ -168,7 +168,7 @@ export default async function PcHomePage() {
           aria-label="今日の業務と進捗"
           className="dashboard-panel-grid mb-1.5 grid auto-rows-[170px] grid-cols-12 gap-2"
         >
-          <div className="col-span-12 lg:col-span-4">
+          <div className="col-span-12 min-h-0 lg:col-span-4">
             <PanelCard
               title="今日のやること"
               href="/pc/tasks"
@@ -177,12 +177,12 @@ export default async function PcHomePage() {
               <TodayTasksList />
             </PanelCard>
           </div>
-          <div className="col-span-12 lg:col-span-4">
+          <div className="col-span-12 min-h-0 lg:col-span-4">
             <PanelCard title="承認待ち一覧" href="/pc/approvals" hrefLabel="すべて見る">
               <ApprovalQueueTable />
             </PanelCard>
           </div>
-          <div className="col-span-12 lg:col-span-4">
+          <div className="col-span-12 min-h-0 lg:col-span-4">
             {canSeeMap ? (
               <PanelCard
                 title="配置マップ（稼働中の現場）"
@@ -199,14 +199,14 @@ export default async function PcHomePage() {
           </div>
 
           {canSeeSiteProgress && (
-            <div className="col-span-12 lg:col-span-4">
+            <div className="col-span-12 min-h-0 lg:col-span-4">
               <PanelCard title="現場別進捗" href="/pc/projects" hrefLabel="すべて見る">
                 <SiteProgressTable />
               </PanelCard>
             </div>
           )}
           {canSeeRevenue && (
-            <div className="col-span-12 lg:col-span-4">
+            <div className="col-span-12 min-h-0 lg:col-span-4">
               <PanelCard
                 title="売上・原価・利益（今期累計）"
                 href="/pc/reports/finance"
@@ -217,7 +217,7 @@ export default async function PcHomePage() {
             </div>
           )}
           {canSeeMap && (
-            <div className="col-span-12 lg:col-span-4">
+            <div className="col-span-12 min-h-0 lg:col-span-4">
               <PanelCard title="クエスト・バッジ">
                 <QuestBadgeSummary />
               </PanelCard>
@@ -229,12 +229,12 @@ export default async function PcHomePage() {
           aria-label="お知らせとよく使うリンク"
           className="dashboard-bottom-grid grid flex-1 auto-rows-fr grid-cols-12 gap-2"
         >
-          <div className="col-span-12 h-full lg:col-span-5">
+          <div className="col-span-12 h-full min-h-0 lg:col-span-5">
             <PanelCard title="お知らせ" compact>
               <NoticesPanel />
             </PanelCard>
           </div>
-          <div className="col-span-12 h-full lg:col-span-7">
+          <div className="col-span-12 h-full min-h-0 lg:col-span-7">
             <PanelCard title="よく使うリンク" compact>
               <QuickLinksFooter />
             </PanelCard>
@@ -262,7 +262,7 @@ function PanelCard({
 }) {
   return (
     <section
-      className={`dashboard-panel ${compact ? "dashboard-panel-compact min-h-[64px]" : "min-h-[164px]"} flex h-full flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] ${
+      className={`dashboard-panel ${compact ? "dashboard-panel-compact min-h-[64px]" : "min-h-0"} flex h-full flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] ${
         accent === "pink" ? "border-rose-100 bg-rose-50/50" : ""
       }`}
     >
