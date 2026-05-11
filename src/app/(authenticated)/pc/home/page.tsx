@@ -51,7 +51,7 @@ export default async function PcHomePage() {
     role === "leader" || role === "office" || role === "ceo" || role === "system";
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="flex min-h-screen flex-col bg-slate-50">
       <header className="dashboard-home-header sticky top-0 z-20 flex min-h-[78px] items-center justify-between gap-4 border-b border-slate-200 bg-white/95 px-8 backdrop-blur">
         <div>
           <h1 className="text-[26px] font-black leading-tight tracking-normal text-slate-950">
@@ -92,7 +92,7 @@ export default async function PcHomePage() {
         </div>
       </header>
 
-      <main className="dashboard-home-main px-8 py-5">
+      <main className="dashboard-home-main flex flex-1 flex-col px-8 py-5">
         <section
           aria-label="主要 KPI"
           className="dashboard-kpi-grid mb-3 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4"
@@ -219,7 +219,7 @@ export default async function PcHomePage() {
 
         <section
           aria-label="お知らせとよく使うリンク"
-          className="dashboard-bottom-grid grid grid-cols-12 gap-5"
+          className="dashboard-bottom-grid grid flex-1 grid-cols-12 gap-5"
         >
           <div className="col-span-12 lg:col-span-5">
             <PanelCard title="お知らせ" compact>

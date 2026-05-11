@@ -122,13 +122,14 @@ export async function getDashboardKpis(): Promise<DashboardKpis> {
     }, 0);
   }
 
-  // デモ用 fallback: DB に実データが一切ない場合は参照画像準拠のデモ値を返す。
+  // デモ用 fallback: 業務トランザクションが一切ない場合は参照画像準拠のデモ値を返す。
+  // activeMemberTotal(profiles 件数)は判定に含めない。マスタにユーザーがいても
+  // 実日報・出勤・承認待ちがゼロならデモ状態とみなす。
   // 実データが投入されたら自動的に実値に切り替わる(本実装 P12-01-data まで暫定)。
   const isEmpty =
     (todayReports ?? 0) === 0 &&
-    (activeMemberTotal ?? 0) === 0 &&
-    (needApprovalCount ?? 0) === 0 &&
-    attendanceCount === 0;
+    attendanceCount === 0 &&
+    (needApprovalCount ?? 0) === 0;
   if (isEmpty) {
     return {
       todayReports: 9,
