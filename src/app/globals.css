@@ -239,4 +239,17 @@
     border: 1.5px dashed var(--p2);
     color: #7a4800;
   }
+
+  /*
+   * Windows 150% display scaling makes a 1920px monitor behave like a
+   * roughly 1280px CSS viewport. Keep the 100% desktop design unchanged,
+   * but scale the PC dashboard frame down only in that narrow desktop band.
+   */
+  @media (min-width: 900px) and (max-width: 1400px) {
+    .pc-dashboard-dpi-fit {
+      width: 138.8889%;
+      min-height: 138.8889vh;
+      zoom: 0.72;
+    }
+  }
 }

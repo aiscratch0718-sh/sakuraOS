@@ -34,7 +34,7 @@ export default async function PcLayout({
     .maybeSingle();
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="pc-dashboard-dpi-fit flex min-h-screen bg-slate-50">
       <Sidebar
         role={session.role}
         displayName={session.displayName}
