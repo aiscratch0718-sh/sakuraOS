@@ -27,7 +27,7 @@ export function ApprovalQueueTable({ rows }: { rows?: ApprovalRow[] }) {
     {
       id: "a1",
       kind: "原価",
-      projectName: "駅前ビル給排水改修",
+      projectName: "仙台駅前ビル給排水改修",
       applicant: "田中 現場主任",
       amountYen: 320000,
       elapsed: "2時間前",
@@ -36,7 +36,7 @@ export function ApprovalQueueTable({ rows }: { rows?: ApprovalRow[] }) {
     {
       id: "a2",
       kind: "残業",
-      projectName: "マンション給湯設備工事",
+      projectName: "泉中央マンション給湯設備",
       applicant: "鈴木 技術",
       amountYen: 18000,
       elapsed: "4時間前",
@@ -45,7 +45,7 @@ export function ApprovalQueueTable({ rows }: { rows?: ApprovalRow[] }) {
     {
       id: "a3",
       kind: "工具",
-      projectName: "工場排水管更新",
+      projectName: "石巻市商業施設配管更新",
       applicant: "高橋 リーダー",
       amountYen: 45000,
       elapsed: "6時間前",
@@ -54,7 +54,7 @@ export function ApprovalQueueTable({ rows }: { rows?: ApprovalRow[] }) {
     {
       id: "a4",
       kind: "経費",
-      projectName: "商業施設配管点検",
+      projectName: "多賀城市物流倉庫排水工事",
       applicant: "伊藤 事務",
       amountYen: 12500,
       elapsed: "1日前",
@@ -63,7 +63,7 @@ export function ApprovalQueueTable({ rows }: { rows?: ApprovalRow[] }) {
     {
       id: "a5",
       kind: "見積",
-      projectName: "集合住宅給水設備",
+      projectName: "名取市マンション改修工事",
       applicant: "渡辺 営業",
       amountYen: 1250000,
       elapsed: "1日前",

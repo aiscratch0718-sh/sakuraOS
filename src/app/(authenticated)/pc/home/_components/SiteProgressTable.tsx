@@ -14,11 +14,11 @@ export function SiteProgressTable({ rows }: { rows?: SiteProgressRow[] }) {
   // 配管工事業向けモック(さくら株式会社の業態 = 配管・給排水・給湯設備・改修)
   // TODO(P12-01-data): 本実装まで暫定。projects テーブルから取得に置き換える
   const data: SiteProgressRow[] = rows ?? [
-    { id: "p1", name: "駅前ビル給排水改修", workType: "給排水工事", progressPct: 65, plannedPct: 60, quality: "good" },
-    { id: "p2", name: "マンション給湯設備工事", workType: "給湯設備工事", progressPct: 42, plannedPct: 45, quality: "warn" },
-    { id: "p3", name: "商業施設配管更新", workType: "排水管工事", progressPct: 71, plannedPct: 65, quality: "good" },
-    { id: "p4", name: "物流倉庫排水工事", workType: "配管点検工事", progressPct: 28, plannedPct: 30, quality: "good" },
-    { id: "p5", name: "マンション改修工事", workType: "改修工事", progressPct: 88, plannedPct: 80, quality: "good" },
+    { id: "p1", name: "仙台駅前ビル給排水改修", workType: "給排水工事", progressPct: 65, plannedPct: 60, quality: "good" },
+    { id: "p2", name: "泉中央マンション給湯設備", workType: "給湯設備工事", progressPct: 42, plannedPct: 45, quality: "warn" },
+    { id: "p3", name: "石巻市商業施設配管更新", workType: "排水管工事", progressPct: 71, plannedPct: 65, quality: "good" },
+    { id: "p4", name: "多賀城市物流倉庫排水工事", workType: "配管点検工事", progressPct: 28, plannedPct: 30, quality: "good" },
+    { id: "p5", name: "名取市マンション改修工事", workType: "改修工事", progressPct: 88, plannedPct: 80, quality: "good" },
   ];
 
   return (

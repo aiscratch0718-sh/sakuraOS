@@ -9,12 +9,24 @@ const PIN_POSITIONS: Array<[number, number]> = [
   [146, 130],
   [94, 158],
 ];
-const FALLBACK_NAMES = [
-  "駅前ビル給排水改修",
-  "マンション給湯設備工事",
-  "商業施設配管更新",
-  "物流倉庫排水工事",
-  "マンション改修工事",
+
+/**
+ * 宮城県内の現場モックデータ。
+ * クライアント(さくら株式会社)の主要稼働エリア = 仙台市 + 県内主要都市。
+ * coords は将来 Google Maps JavaScript API でピン描画する際に使用予定
+ * (P12-01-map TODO)。現状の iframe 埋込では使われない。
+ */
+const FALLBACK_SITES: Array<{
+  name: string;
+  attendedToday: number;
+  lat: number;
+  lng: number;
+}> = [
+  { name: "仙台駅前ビル給排水改修", attendedToday: 12, lat: 38.2606, lng: 140.8819 },
+  { name: "泉中央マンション給湯設備", attendedToday: 8, lat: 38.3119, lng: 140.8852 },
+  { name: "石巻市商業施設配管更新", attendedToday: 15, lat: 38.4346, lng: 141.3025 },
+  { name: "多賀城市物流倉庫排水工事", attendedToday: 7, lat: 38.2974, lng: 140.989 },
+  { name: "名取市マンション改修工事", attendedToday: 6, lat: 38.1734, lng: 140.883 },
 ];
 
 export function DispatchMapPreview({ sites }: { sites: SiteSnapshot[] }) {
@@ -27,10 +39,10 @@ export function DispatchMapPreview({ sites }: { sites: SiteSnapshot[] }) {
           attendedToday: s.attendedToday,
           color: COLORS[i],
         }))
-      : FALLBACK_NAMES.map((name, i) => ({
+      : FALLBACK_SITES.map((s, i) => ({
           id: `fallback-${i}`,
-          name,
-          attendedToday: [12, 8, 15, 7, 6][i],
+          name: s.name,
+          attendedToday: s.attendedToday,
           color: COLORS[i],
         }));
 
@@ -40,9 +52,11 @@ export function DispatchMapPreview({ sites }: { sites: SiteSnapshot[] }) {
           TODO(P12-01-map): 本実装で Google Maps JavaScript API + 自社 5 色ピン
           (各 site の座標で実描画)に切替。現状はクライアントデモ用の見栄え重視。 */}
       <div className="dashboard-map-canvas relative col-span-1 h-full overflow-hidden rounded-md border border-slate-200">
+        {/* 仙台中心、z=9 で宮城県全域が見える ビュー
+            5 サイトの実位置:仙台駅 / 泉中央 / 石巻 / 多賀城 / 名取 */}
         <iframe
-          title="配置マップ(東京エリア)"
-          src="https://maps.google.com/maps?q=Tokyo+Station&t=&z=11&ie=UTF8&iwloc=&output=embed"
+          title="配置マップ(宮城県)"
+          src="https://maps.google.com/maps?q=38.27,140.95&t=&z=9&ie=UTF8&iwloc=&output=embed"
           className="h-full w-full border-0"
           loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"
