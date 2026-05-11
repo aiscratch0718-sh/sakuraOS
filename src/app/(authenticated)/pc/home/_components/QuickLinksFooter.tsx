@@ -11,12 +11,12 @@ const LINKS = [
 export function QuickLinksFooter() {
   return (
     <nav aria-label="よく使うリンク" className="flex h-full items-center">
-      <ul className="grid w-full grid-cols-5 gap-5">
+      <ul className="grid w-full grid-cols-5 gap-2">
         {LINKS.map((l) => (
           <li key={l.href}>
             <Link
               href={l.href}
-              className="flex min-h-[32px] items-center justify-center rounded-md border border-blue-200 bg-blue-50 px-3 text-[13px] font-bold text-blue-700 transition-colors hover:bg-blue-100"
+              className="flex min-h-[32px] items-center justify-center whitespace-nowrap rounded-md border border-blue-200 bg-blue-50 px-2 text-[12px] font-bold text-blue-700 transition-colors hover:bg-blue-100"
             >
               {l.label}
             </Link>
