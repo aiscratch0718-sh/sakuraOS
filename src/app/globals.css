@@ -240,16 +240,63 @@
     color: #7a4800;
   }
 
-  /*
-   * Windows 150% display scaling makes a 1920px monitor behave like a
-   * roughly 1280px CSS viewport. Keep the 100% desktop design unchanged,
-   * but scale the PC dashboard frame down only in that narrow desktop band.
-   */
+  /* Windows 150% scaling on a 1920px monitor exposes about 1280 CSS px.
+     Keep the 100% desktop design unchanged; only compact spacing in that band. */
   @media (min-width: 900px) and (max-width: 1400px) {
-    .pc-dashboard-dpi-fit {
-      width: 138.8889%;
-      min-height: 138.8889vh;
-      zoom: 0.72;
+    .pc-dashboard-dpi-fit > aside {
+      width: 180px;
+    }
+
+    .pc-dashboard-dpi-fit > aside nav {
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
+
+    .pc-dashboard-dpi-fit > aside nav ul {
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+
+    .pc-dashboard-dpi-fit > aside a[aria-current],
+    .pc-dashboard-dpi-fit > aside nav a {
+      min-height: 34px;
+      gap: 8px;
+      padding-left: 10px;
+      padding-right: 10px;
+      font-size: 13px;
+    }
+
+    .pc-dashboard-dpi-fit > div > header {
+      min-height: 64px;
+      padding-left: 14px;
+      padding-right: 14px;
+    }
+
+    .pc-dashboard-dpi-fit > div > header h1 {
+      font-size: 24px;
+    }
+
+    .pc-dashboard-dpi-fit > div > header p {
+      font-size: 12px;
+    }
+
+    .pc-dashboard-dpi-fit main {
+      padding: 12px;
+    }
+
+    .pc-dashboard-dpi-fit main > section {
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .pc-dashboard-dpi-fit main > section[aria-label="お知らせとよく使うリンク"] {
+      margin-bottom: 0;
+    }
+
+    .pc-dashboard-dpi-fit [role="tablist"] span {
+      min-width: 74px;
+      padding-left: 10px;
+      padding-right: 10px;
     }
   }
 }
