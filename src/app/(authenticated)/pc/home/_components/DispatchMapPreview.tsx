@@ -36,8 +36,20 @@ export function DispatchMapPreview({ sites }: { sites: SiteSnapshot[] }) {
 
   return (
     <div className="dashboard-map-preview grid h-full grid-cols-2 gap-2">
-      {/* 地図 SVG: 街路グリッド + ブロック + 河川 + ピン */}
-      <div className="dashboard-map-canvas relative col-span-1 h-full overflow-hidden rounded-md border border-slate-200 bg-[#f3f0e7]">
+      {/* 地図: Google Maps iframe 埋込(API キー不要)
+          TODO(P12-01-map): 本実装で Google Maps JavaScript API + 自社 5 色ピン
+          (各 site の座標で実描画)に切替。現状はクライアントデモ用の見栄え重視。 */}
+      <div className="dashboard-map-canvas relative col-span-1 h-full overflow-hidden rounded-md border border-slate-200">
+        <iframe
+          title="配置マップ(東京エリア)"
+          src="https://maps.google.com/maps?q=Tokyo+Station&t=&z=11&ie=UTF8&iwloc=&output=embed"
+          className="h-full w-full border-0"
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+        />
+        {/* レガシー SVG プレビュー(iframe 読込中のフォールバック背景には使わず、
+            今後 API キー実装時に削除予定の参考コードとして下記コメントブロック保持) */}
+        {false && (
         <svg
           viewBox="0 0 280 250"
           preserveAspectRatio="xMidYMid slice"
@@ -145,6 +157,7 @@ export function DispatchMapPreview({ sites }: { sites: SiteSnapshot[] }) {
             );
           })}
         </svg>
+        )}
       </div>
 
       {/* 右側: 現場一覧 */}
