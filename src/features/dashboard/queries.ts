@@ -122,6 +122,26 @@ export async function getDashboardKpis(): Promise<DashboardKpis> {
     }, 0);
   }
 
+  // デモ用 fallback: DB に実データが一切ない場合は参照画像準拠のデモ値を返す。
+  // 実データが投入されたら自動的に実値に切り替わる(本実装 P12-01-data まで暫定)。
+  const isEmpty =
+    (todayReports ?? 0) === 0 &&
+    (activeMemberTotal ?? 0) === 0 &&
+    (needApprovalCount ?? 0) === 0 &&
+    attendanceCount === 0;
+  if (isEmpty) {
+    return {
+      todayReports: 9,
+      weekReports: 38,
+      attendanceCount: 39,
+      activeMemberTotal: 50, // → inputRate = round(39/50*100) = 78%
+      needApprovalCount: 18,
+      safetyComboDays: 30,
+      monthHours: 1240,
+      monthLaborYen: 4_500_000,
+    };
+  }
+
   return {
     todayReports: todayReports ?? 0,
     weekReports: weekReports ?? 0,

@@ -11,12 +11,14 @@ export type SiteProgressRow = {
 };
 
 export function SiteProgressTable({ rows }: { rows?: SiteProgressRow[] }) {
+  // 配管工事業向けモック(さくら株式会社の業態 = 配管・給排水・給湯設備・改修)
+  // TODO(P12-01-data): 本実装まで暫定。projects テーブルから取得に置き換える
   const data: SiteProgressRow[] = rows ?? [
-    { id: "p1", name: "駅前ビル給排水改修", workType: "躯体工事", progressPct: 65, plannedPct: 60, quality: "good" },
-    { id: "p2", name: "マンション給湯設備工事", workType: "外構工事", progressPct: 42, plannedPct: 45, quality: "warn" },
-    { id: "p3", name: "商業施設配管更新", workType: "内装工事", progressPct: 71, plannedPct: 65, quality: "good" },
-    { id: "p4", name: "物流倉庫排水工事", workType: "基礎工事", progressPct: 28, plannedPct: 30, quality: "good" },
-    { id: "p5", name: "マンション改修工事", workType: "設備工事", progressPct: 88, plannedPct: 80, quality: "good" },
+    { id: "p1", name: "駅前ビル給排水改修", workType: "給排水工事", progressPct: 65, plannedPct: 60, quality: "good" },
+    { id: "p2", name: "マンション給湯設備工事", workType: "給湯設備工事", progressPct: 42, plannedPct: 45, quality: "warn" },
+    { id: "p3", name: "商業施設配管更新", workType: "排水管工事", progressPct: 71, plannedPct: 65, quality: "good" },
+    { id: "p4", name: "物流倉庫排水工事", workType: "配管点検工事", progressPct: 28, plannedPct: 30, quality: "good" },
+    { id: "p5", name: "マンション改修工事", workType: "改修工事", progressPct: 88, plannedPct: 80, quality: "good" },
   ];
 
   return (
@@ -56,8 +58,9 @@ export function SiteProgressTable({ rows }: { rows?: SiteProgressRow[] }) {
                   </div>
                 </td>
                 <td className="whitespace-nowrap px-2 py-2 text-right tabular-nums">{r.plannedPct}%</td>
-                <td className={`whitespace-nowrap px-2 py-2 text-right font-bold tabular-nums ${delta >= 0 ? "text-red-600" : "text-emerald-600"}`}>
-                  {delta > 0 ? `+${delta}%` : `${delta}%`}
+                {/* 予定より進んでいれば green、遅れていれば red(±0 は中間色) */}
+                <td className={`whitespace-nowrap px-2 py-2 text-right font-bold tabular-nums ${delta > 0 ? "text-emerald-600" : delta < 0 ? "text-red-600" : "text-slate-500"}`}>
+                  {delta > 0 ? `+${delta}%` : delta < 0 ? `${delta}%` : "±0%"}
                 </td>
                 <td className="px-2 py-2 text-center text-emerald-600">
                   <ShieldCheck className="mx-auto h-4 w-4" aria-hidden />

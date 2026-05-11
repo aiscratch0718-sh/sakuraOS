@@ -6,7 +6,8 @@ export type ApprovalRow = {
   projectName: string;
   applicant: string;
   amountYen: number;
-  date: string;
+  /** 申請からの経過時間表記(例: "2時間前", "4時間前", "1日前")。参照画像準拠 */
+  elapsed: string;
   href: string;
 };
 
@@ -20,6 +21,8 @@ const KIND_STYLE: Record<ApprovalRow["kind"], string> = {
 };
 
 export function ApprovalQueueTable({ rows }: { rows?: ApprovalRow[] }) {
+  // 参照画像準拠: 申請日 → 経過時間表記、5行で構成
+  // TODO(P12-01-data): 本実装まで暫定。approvals テーブルから取得に置き換える
   const data: ApprovalRow[] = rows ?? [
     {
       id: "a1",
@@ -27,7 +30,7 @@ export function ApprovalQueueTable({ rows }: { rows?: ApprovalRow[] }) {
       projectName: "駅前ビル給排水改修",
       applicant: "田中 現場主任",
       amountYen: 320000,
-      date: "05/28",
+      elapsed: "2時間前",
       href: "/pc/approvals",
     },
     {
@@ -36,7 +39,7 @@ export function ApprovalQueueTable({ rows }: { rows?: ApprovalRow[] }) {
       projectName: "マンション給湯設備工事",
       applicant: "鈴木 技術",
       amountYen: 18000,
-      date: "05/28",
+      elapsed: "4時間前",
       href: "/pc/approvals",
     },
     {
@@ -45,7 +48,7 @@ export function ApprovalQueueTable({ rows }: { rows?: ApprovalRow[] }) {
       projectName: "工場排水管更新",
       applicant: "高橋 リーダー",
       amountYen: 45000,
-      date: "05/27",
+      elapsed: "6時間前",
       href: "/pc/approvals",
     },
     {
@@ -54,7 +57,7 @@ export function ApprovalQueueTable({ rows }: { rows?: ApprovalRow[] }) {
       projectName: "商業施設配管点検",
       applicant: "伊藤 事務",
       amountYen: 12500,
-      date: "05/27",
+      elapsed: "1日前",
       href: "/pc/approvals",
     },
     {
@@ -63,7 +66,7 @@ export function ApprovalQueueTable({ rows }: { rows?: ApprovalRow[] }) {
       projectName: "集合住宅給水設備",
       applicant: "渡辺 営業",
       amountYen: 1250000,
-      date: "05/27",
+      elapsed: "1日前",
       href: "/pc/approvals",
     },
   ];
@@ -78,7 +81,7 @@ export function ApprovalQueueTable({ rows }: { rows?: ApprovalRow[] }) {
             <th scope="col" className="px-2 pb-2 font-bold">案件名</th>
             <th scope="col" className="px-2 pb-2 font-bold">申請者</th>
             <th scope="col" className="px-2 pb-2 text-right font-bold">金額</th>
-            <th scope="col" className="px-2 pb-2 text-right font-bold">申請日</th>
+            <th scope="col" className="px-2 pb-2 text-right font-bold">経過時間</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
@@ -98,8 +101,8 @@ export function ApprovalQueueTable({ rows }: { rows?: ApprovalRow[] }) {
               <td className="whitespace-nowrap px-2 py-2 text-right font-semibold text-slate-900">
                 ¥{r.amountYen.toLocaleString("ja-JP")}
               </td>
-              <td className="whitespace-nowrap px-2 py-2 text-right tabular-nums">
-                {r.date}
+              <td className="whitespace-nowrap px-2 py-2 text-right text-[11px] text-slate-400">
+                {r.elapsed}
               </td>
             </tr>
           ))}

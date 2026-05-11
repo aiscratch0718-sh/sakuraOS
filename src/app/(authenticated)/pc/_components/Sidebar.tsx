@@ -205,7 +205,13 @@ export function Sidebar({
   tagline = "業務管理システム",
 }: SidebarProps) {
   const pathname = usePathname();
-  const isDev = role === "system";
+  // 開発者メニュー(SP リンク群)の表示条件:
+  //   1) role === "system"(従来通り)
+  //   2) かつ Vercel 本番ビルドでない(NODE_ENV !== "production")
+  //      → クライアントデモ用 URL で system ロールにログインしても露出させない
+  //      → ローカル npm run dev では従来通り表示される
+  const isDev =
+    role === "system" && process.env.NODE_ENV !== "production";
   const visibleNav = NAV_ITEMS.filter((it) => !it.show || it.show(role));
   const initials = displayName.slice(0, 1).toUpperCase();
   const brandName = tenantName.includes("REPORT3") ? tenantName : "REPORT3";
