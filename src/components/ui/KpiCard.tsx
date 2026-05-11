@@ -74,9 +74,9 @@ export function KpiCard({
 
   return (
     <div
-      className={`dashboard-kpi-card relative h-[136px] overflow-hidden rounded-lg border bg-white px-3.5 py-2.5 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-shadow hover:shadow-md ${a.borderColor}`}
+      className={`dashboard-kpi-card relative flex h-[114px] flex-col overflow-hidden rounded-lg border bg-white px-3.5 py-2 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-shadow hover:shadow-md ${a.borderColor}`}
     >
-      <div className="mb-1 flex items-center gap-1.5">
+      <div className="mb-0.5 flex items-center gap-1.5">
         <h3 className={`text-[11px] font-bold ${a.titleColor}`}>{label}</h3>
         <button
           type="button"
@@ -88,7 +88,7 @@ export function KpiCard({
         </button>
       </div>
 
-      <div className="mb-1 flex min-h-[32px] items-center justify-between gap-2">
+      <div className="mb-0.5 flex min-h-[28px] items-center justify-between gap-2">
         <div className="text-[22px] font-black leading-none tracking-normal text-slate-950">
           {value}
           {unit && (
@@ -99,13 +99,13 @@ export function KpiCard({
       </div>
 
       {subText && (
-        <div className="mb-0.5 truncate text-[10px] leading-snug text-slate-600">
+        <div className="truncate text-[10px] leading-tight text-slate-600">
           {subText}
         </div>
       )}
 
       {(trend || href) && (
-        <div className="flex items-center justify-between border-t border-slate-100 pt-1">
+        <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-1">
           <div className="flex items-center gap-1 text-[10px]">
             {trend && (
               <>

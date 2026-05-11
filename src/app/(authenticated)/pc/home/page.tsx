@@ -111,7 +111,7 @@ export default async function PcHomePage() {
                 (KPI #1 全体の blue アクセントと統一) */}
             <MiniDonut
               value={inputRate}
-              size={56}
+              size={48}
               stroke={5}
               color="#2568c8"
               trackColor="#dbeafe"
