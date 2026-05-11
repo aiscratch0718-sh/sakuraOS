@@ -266,7 +266,7 @@ function PanelCard({
         accent === "pink" ? "border-rose-100 bg-rose-50/50" : ""
       }`}
     >
-      <header className="dashboard-panel-header flex min-h-[32px] items-center justify-between border-b border-slate-200 px-3">
+      <header className="dashboard-panel-header flex min-h-[28px] items-center justify-between border-b border-slate-200 px-3">
         <h2 className="text-[12px] font-black tracking-normal text-slate-950">
           {title}
         </h2>
