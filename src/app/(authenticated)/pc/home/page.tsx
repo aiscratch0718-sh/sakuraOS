@@ -107,14 +107,14 @@ export default async function PcHomePage() {
             href="/pc/reports"
             hrefLabel="詳細へ"
           >
-            {/* 参照画像準拠: 入力率ドーナツは達成感を演出する緑系で描画
-                (KPI タイトル/リンクの blue アクセントとは独立) */}
+            {/* 参照画像準拠: 入力率ドーナツは青系
+                (KPI #1 全体の blue アクセントと統一) */}
             <MiniDonut
               value={inputRate}
               size={82}
               stroke={7}
-              color="#10b981"
-              trackColor="#d1fae5"
+              color="#2568c8"
+              trackColor="#dbeafe"
             />
           </KpiCard>
 

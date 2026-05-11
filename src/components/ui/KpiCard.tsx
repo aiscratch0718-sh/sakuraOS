@@ -121,8 +121,8 @@ export function KpiCard({
                         : "font-bold text-slate-500"
                   }
                 >
-                  {trend.dir === "up" ? "↑" : trend.dir === "down" ? "↓" : "→"}{" "}
-                  {trend.value}
+                  {trend.value}{" "}
+                  {trend.dir === "up" ? "↑" : trend.dir === "down" ? "↓" : "→"}
                 </span>
               </>
             )}
