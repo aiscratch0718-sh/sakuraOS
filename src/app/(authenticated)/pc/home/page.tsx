@@ -199,6 +199,7 @@ export default async function PcHomePage() {
             )}
           </div>
 
+          {/* 下段: 現場別進捗 / クエスト・バッジ / 売上・原価・利益(畠中様指示で中央と右を入替) */}
           {canSeeSiteProgress && (
             <div className="col-span-12 min-h-0 lg:col-span-4">
               <PanelCard title="現場別進捗" href="/pc/projects" hrefLabel="すべて見る">
@@ -206,21 +207,21 @@ export default async function PcHomePage() {
               </PanelCard>
             </div>
           )}
-          {canSeeRevenue && (
-            <div className="col-span-12 min-h-0 lg:col-span-4">
-              <PanelCard
-                title="売上・原価・利益（今期累計）"
-                href="/pc/reports/finance"
-                hrefLabel="詳細へ"
-              >
-                <RevenueCostProfitChart />
-              </PanelCard>
-            </div>
-          )}
           {canSeeMap && (
             <div className="col-span-12 min-h-0 lg:col-span-4">
               <PanelCard title="クエスト・バッジ">
                 <QuestBadgeSummary />
+              </PanelCard>
+            </div>
+          )}
+          {canSeeRevenue && (
+            <div className="col-span-12 min-h-0 lg:col-span-4">
+              <PanelCard
+                title="売上・原価・利益(今期累計)"
+                href="/pc/reports/finance"
+                hrefLabel="詳細へ"
+              >
+                <RevenueCostProfitChart />
               </PanelCard>
             </div>
           )}
