@@ -72,42 +72,33 @@ export function ApprovalQueueTable({ rows }: { rows?: ApprovalRow[] }) {
   ];
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-[11px] text-slate-700">
-        <caption className="sr-only">承認待ち一覧</caption>
-        <thead className="text-slate-500">
-          <tr className="text-left">
-            <th scope="col" className="whitespace-nowrap px-2 pb-2 font-bold">種別</th>
-            <th scope="col" className="px-2 pb-2 font-bold">案件名</th>
-            <th scope="col" className="px-2 pb-2 font-bold">申請者</th>
-            <th scope="col" className="px-2 pb-2 text-right font-bold">金額</th>
-            <th scope="col" className="px-2 pb-2 text-right font-bold">経過時間</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-100">
-          {data.map((r) => (
-            <tr key={r.id} className="transition-colors hover:bg-slate-50">
-              <td className="whitespace-nowrap px-2 py-1">
-                <span className={`inline-block whitespace-nowrap rounded border px-1.5 py-0.5 text-[10px] font-bold ${KIND_STYLE[r.kind]}`}>
-                  {r.kind}
-                </span>
-              </td>
-              <td className="max-w-[180px] px-2 py-1 text-slate-900">
-                <Link href={r.href} className="block truncate hover:underline">
-                  {r.projectName}
-                </Link>
-              </td>
-              <td className="whitespace-nowrap px-2 py-1">{r.applicant}</td>
-              <td className="whitespace-nowrap px-2 py-1 text-right font-semibold text-slate-900">
-                ¥{r.amountYen.toLocaleString("ja-JP")}
-              </td>
-              <td className="whitespace-nowrap px-2 py-1 text-right text-[11px] text-slate-400">
-                {r.elapsed}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <ul className="divide-y divide-slate-100 text-[11px] text-slate-700">
+      {data.map((r) => (
+        <li key={r.id} className="flex items-center gap-1.5 py-1">
+          {/* 左: 種別 badge */}
+          <span
+            className={`inline-block w-9 flex-shrink-0 whitespace-nowrap rounded border px-1 py-0.5 text-center text-[10px] font-bold ${KIND_STYLE[r.kind]}`}
+          >
+            {r.kind}
+          </span>
+          {/* 中央: 案件名(1 行目) + 申請者・経過時間(2 行目) */}
+          <div className="min-w-0 flex-1">
+            <Link
+              href={r.href}
+              className="block truncate text-[11px] font-medium text-slate-900 hover:underline"
+            >
+              {r.projectName}
+            </Link>
+            <div className="truncate text-[10px] text-slate-500">
+              {r.applicant} · {r.elapsed}
+            </div>
+          </div>
+          {/* 右: 金額 */}
+          <span className="whitespace-nowrap text-right text-[11px] font-bold text-slate-900">
+            ¥{r.amountYen.toLocaleString("ja-JP")}
+          </span>
+        </li>
+      ))}
+    </ul>
   );
 }
