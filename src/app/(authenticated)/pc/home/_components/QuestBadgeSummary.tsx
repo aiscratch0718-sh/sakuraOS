@@ -30,58 +30,58 @@ export function QuestBadgeSummary({
 
   return (
     <div
-      className="dashboard-quest-summary relative grid h-full grid-cols-3 gap-3 overflow-hidden rounded-md p-1"
+      className="dashboard-quest-summary relative grid h-full grid-cols-3 gap-1.5 overflow-hidden rounded-md p-0.5"
       style={{
         backgroundImage:
           "radial-gradient(circle at 6% 8%, rgba(244,63,94,.28) 0 2px, transparent 3px), radial-gradient(circle at 25% 18%, rgba(59,130,246,.20) 0 2px, transparent 3px), radial-gradient(circle at 44% 4%, rgba(250,204,21,.35) 0 2px, transparent 3px), radial-gradient(circle at 68% 12%, rgba(16,185,129,.22) 0 2px, transparent 3px), radial-gradient(circle at 91% 7%, rgba(168,85,247,.18) 0 2px, transparent 3px)",
       }}
     >
-      <div className="dashboard-quest-card rounded-md bg-white p-4 shadow-sm">
-        <div className="text-[12px] font-bold text-slate-700">あなたのXP</div>
-        <div className="mt-5 text-[13px] font-bold text-slate-800">Lv. {level}</div>
-        <div className="mt-2 text-[24px] font-black text-slate-950">
+      <div className="dashboard-quest-card rounded-md bg-white p-2 shadow-sm">
+        <div className="text-[11px] font-bold text-slate-700">あなたのXP</div>
+        <div className="mt-1 text-[12px] font-bold text-slate-800">Lv. {level}</div>
+        <div className="mt-1 text-[20px] font-black leading-none text-slate-950">
           {currentXp.toLocaleString("ja-JP")}
-          <span className="text-[11px] font-medium text-slate-500"> / {nextLevelXp.toLocaleString("ja-JP")} XP</span>
+          <span className="text-[10px] font-medium text-slate-500"> / {nextLevelXp.toLocaleString("ja-JP")} XP</span>
         </div>
-        <div className="mt-3 h-2 overflow-hidden rounded-full bg-rose-100">
+        <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-rose-100">
           <div className="h-full rounded-full bg-rose-500" style={{ width: `${xpPct}%` }} />
         </div>
-        <div className="mt-6 text-[11px] text-slate-600">
+        <div className="mt-1.5 text-[10px] text-slate-600">
           次のレベルまで {xpRemaining.toLocaleString("ja-JP")} XP
         </div>
       </div>
 
-      <div className="dashboard-quest-card rounded-md bg-white p-4 shadow-sm">
-        <div className="text-[12px] font-bold text-slate-700">チームクエスト進捗</div>
-        <div className="mt-5 text-[15px] font-black text-slate-950">{questLabel}</div>
-        <p className="mt-1 text-[11px] text-slate-500">今月中にヒヤリハット報告を20件集めよう</p>
-        <div className="mt-3 text-[22px] font-black text-slate-950">
+      <div className="dashboard-quest-card rounded-md bg-white p-2 shadow-sm">
+        <div className="text-[11px] font-bold text-slate-700">チームクエスト進捗</div>
+        <div className="mt-1 text-[12px] font-black text-slate-950">{questLabel}</div>
+        <p className="mt-0.5 text-[10px] leading-tight text-slate-500">ヒヤリハット報告 20 件</p>
+        <div className="mt-1 text-[18px] font-black leading-none text-slate-950">
           {questProgress}
-          <span className="text-[12px] font-medium text-slate-500"> / {questGoal}件</span>
+          <span className="text-[11px] font-medium text-slate-500"> / {questGoal}件</span>
         </div>
-        <div className="mt-2 h-2 overflow-hidden rounded-full bg-rose-100">
+        <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-rose-100">
           <div className="h-full rounded-full bg-rose-500" style={{ width: `${questPct}%` }} />
         </div>
-        <div className="mt-5 text-[11px] text-slate-600">期限：{questDeadline}</div>
+        <div className="mt-1.5 text-[10px] text-slate-600">期限：{questDeadline}</div>
       </div>
 
-      <div className="dashboard-quest-card rounded-md bg-white p-4 shadow-sm">
-        <div className="text-[12px] font-bold text-slate-700">最近獲得したバッジ</div>
-        <div className="mt-3 space-y-3">
+      <div className="dashboard-quest-card rounded-md bg-white p-2 shadow-sm">
+        <div className="text-[11px] font-bold text-slate-700">最近獲得したバッジ</div>
+        <div className="mt-1 space-y-1">
           {BADGES.map((b) => {
             const Icon = b.icon;
             return (
-              <div key={b.id} className="flex items-center gap-3">
-                <Icon className={`h-7 w-7 ${b.color}`} aria-hidden />
+              <div key={b.id} className="flex items-center gap-1.5">
+                <Icon className={`h-5 w-5 flex-shrink-0 ${b.color}`} aria-hidden />
                 <div className="min-w-0">
-                  <div className="truncate text-[12px] font-bold text-slate-900">{b.name}</div>
-                  <div className="truncate text-[10px] text-slate-500">{b.note}</div>
+                  <div className="truncate text-[11px] font-bold leading-tight text-slate-900">{b.name}</div>
+                  <div className="truncate text-[9px] leading-tight text-slate-500">{b.note}</div>
                 </div>
               </div>
             );
           })}
         </div>
-        <Link href="/pc/quests-badges" className="mt-4 block text-right text-[12px] font-bold text-blue-700">
+        <Link href="/pc/quests-badges" className="mt-1 block text-right text-[10px] font-bold text-blue-700">
           すべてのバッジを見る ›
         </Link>
       </div>

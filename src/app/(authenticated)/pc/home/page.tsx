@@ -166,7 +166,7 @@ export default async function PcHomePage() {
 
         <section
           aria-label="今日の業務と進捗"
-          className="dashboard-panel-grid mb-1.5 grid grid-cols-12 gap-2"
+          className="dashboard-panel-grid mb-1.5 grid auto-rows-[178px] grid-cols-12 gap-2"
         >
           <div className="col-span-12 lg:col-span-4">
             <PanelCard

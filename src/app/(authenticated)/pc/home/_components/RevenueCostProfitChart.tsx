@@ -22,8 +22,8 @@ export function RevenueCostProfitChart() {
   const data = MOCK;
   const max = 160;
   const W = 430;
-  const H = 210;
-  const PAD = { l: 42, r: 10, t: 18, b: 30 };
+  const H = 150;
+  const PAD = { l: 42, r: 10, t: 12, b: 22 };
   const innerW = W - PAD.l - PAD.r;
   const innerH = H - PAD.t - PAD.b;
   const barGroupW = innerW / data.length;
@@ -37,7 +37,7 @@ export function RevenueCostProfitChart() {
 
   return (
     <div className="dashboard-revenue-chart w-full">
-      <div className="dashboard-revenue-legend mb-3 flex items-center justify-center gap-5 text-[12px] font-medium text-slate-700">
+      <div className="dashboard-revenue-legend mb-1 flex items-center justify-center gap-4 text-[11px] font-medium text-slate-700">
         <span className="flex items-center gap-1.5">
           <span className="h-2.5 w-4 rounded-sm bg-blue-600" aria-hidden />
           売上（千円）

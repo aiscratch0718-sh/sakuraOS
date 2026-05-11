@@ -36,7 +36,7 @@ export function DispatchMapPreview({ sites }: { sites: SiteSnapshot[] }) {
 
   return (
     <div className="dashboard-map-preview grid grid-cols-5 gap-4">
-      <div className="dashboard-map-canvas relative col-span-3 min-h-[196px] overflow-hidden rounded-md border border-slate-200 bg-[#eef3ee]">
+      <div className="dashboard-map-canvas relative col-span-3 min-h-[120px] overflow-hidden rounded-md border border-slate-200 bg-[#eef3ee]">
         <svg viewBox="0 0 280 190" className="h-full w-full" role="img" aria-label="配置マッププレビュー">
           <rect width="280" height="190" fill="#eef3ee" />
           <g opacity="0.45">
@@ -81,7 +81,7 @@ export function DispatchMapPreview({ sites }: { sites: SiteSnapshot[] }) {
           <li key={s.id}>
             <Link
               href={s.id.startsWith("fallback") ? "/pc/projects" : `/pc/projects/${s.id}`}
-              className="flex min-h-[39px] items-center gap-2 rounded-md px-1 transition-colors hover:bg-slate-50"
+              className="flex min-h-[24px] items-center gap-2 rounded-md px-1 transition-colors hover:bg-slate-50"
             >
               <span className="h-2 w-2 rounded-full" style={{ backgroundColor: s.color }} aria-hidden />
               <span className="min-w-0 flex-1 truncate text-[12px] font-medium text-slate-700">
