@@ -241,62 +241,18 @@
   }
 
   /* Windows 150% scaling on a 1920px monitor exposes about 1280 CSS px.
-     Keep the 100% desktop design unchanged; only compact spacing in that band. */
+     Keep the 100% desktop design unchanged; scale the dashboard frame only
+     in that narrow desktop band while the viewport clips the expanded layout. */
   @media (min-width: 900px) and (max-width: 1400px) {
-    .pc-dashboard-dpi-fit > aside {
-      width: 180px;
+    .pc-dashboard-viewport {
+      overflow-x: hidden;
     }
 
-    .pc-dashboard-dpi-fit > aside nav {
-      padding-top: 10px;
-      padding-bottom: 10px;
-    }
-
-    .pc-dashboard-dpi-fit > aside nav ul {
-      padding-left: 10px;
-      padding-right: 10px;
-    }
-
-    .pc-dashboard-dpi-fit > aside a[aria-current],
-    .pc-dashboard-dpi-fit > aside nav a {
-      min-height: 34px;
-      gap: 8px;
-      padding-left: 10px;
-      padding-right: 10px;
-      font-size: 13px;
-    }
-
-    .pc-dashboard-dpi-fit > div > header {
-      min-height: 64px;
-      padding-left: 14px;
-      padding-right: 14px;
-    }
-
-    .pc-dashboard-dpi-fit > div > header h1 {
-      font-size: 24px;
-    }
-
-    .pc-dashboard-dpi-fit > div > header p {
-      font-size: 12px;
-    }
-
-    .pc-dashboard-dpi-fit main {
-      padding: 12px;
-    }
-
-    .pc-dashboard-dpi-fit main > section {
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .pc-dashboard-dpi-fit main > section[aria-label="お知らせとよく使うリンク"] {
-      margin-bottom: 0;
-    }
-
-    .pc-dashboard-dpi-fit [role="tablist"] span {
-      min-width: 74px;
-      padding-left: 10px;
-      padding-right: 10px;
+    .pc-dashboard-frame {
+      width: 133.3334%;
+      min-height: 133.3334vh;
+      transform: scale(0.75);
+      transform-origin: top left;
     }
   }
 }

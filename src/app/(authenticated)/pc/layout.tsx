@@ -34,16 +34,18 @@ export default async function PcLayout({
     .maybeSingle();
 
   return (
-    <div className="pc-dashboard-dpi-fit flex min-h-screen bg-slate-50">
-      <Sidebar
-        role={session.role}
-        displayName={session.displayName}
-        roleLabel={roleLabel(session.role)}
-        tenantName={tenant?.name ?? "REPORT3"}
-        tagline="業務管理システム"
-        logoUrl={tenant?.logo_url ?? null}
-      />
-      <div className="min-w-0 flex-1">{children}</div>
+    <div className="pc-dashboard-viewport min-h-screen bg-slate-50">
+      <div className="pc-dashboard-frame flex min-h-screen bg-slate-50">
+        <Sidebar
+          role={session.role}
+          displayName={session.displayName}
+          roleLabel={roleLabel(session.role)}
+          tenantName={tenant?.name ?? "REPORT3"}
+          tagline="業務管理システム"
+          logoUrl={tenant?.logo_url ?? null}
+        />
+        <div className="min-w-0 flex-1">{children}</div>
+      </div>
     </div>
   );
 }
