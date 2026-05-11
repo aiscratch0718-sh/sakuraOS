@@ -241,17 +241,17 @@
   }
 
   /* Windows 150% scaling on a 1920px monitor exposes about 1280 CSS px.
-     Keep the 100% desktop design unchanged; scale the dashboard frame only
-     in that narrow desktop band while the viewport clips the expanded layout. */
+     Keep the 100% desktop design unchanged; counter-scale the dashboard frame
+     in that narrow desktop band so it renders at the same density as 100%. */
   @media (min-width: 900px) and (max-width: 1400px) {
     .pc-dashboard-viewport {
       overflow-x: hidden;
     }
 
     .pc-dashboard-frame {
-      width: 133.3334%;
-      min-height: 133.3334vh;
-      transform: scale(0.75);
+      width: 150%;
+      min-height: 150vh;
+      transform: scale(0.6667);
       transform-origin: top left;
     }
   }

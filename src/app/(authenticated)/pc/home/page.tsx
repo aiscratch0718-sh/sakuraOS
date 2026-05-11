@@ -95,7 +95,7 @@ export default async function PcHomePage() {
       <main className="px-8 py-5">
         <section
           aria-label="主要 KPI"
-          className="mb-3 grid grid-cols-1 gap-5 xl:grid-cols-4 md:grid-cols-2"
+          className="mb-3 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4"
         >
           <KpiCard
             accent="blue"
@@ -160,7 +160,7 @@ export default async function PcHomePage() {
           aria-label="今日の業務と進捗"
           className="mb-3 grid grid-cols-12 gap-3"
         >
-          <div className="col-span-12 xl:col-span-4">
+          <div className="col-span-12 lg:col-span-4">
             <PanelCard
               title="今日のやること"
               href="/pc/tasks"
@@ -169,12 +169,12 @@ export default async function PcHomePage() {
               <TodayTasksList />
             </PanelCard>
           </div>
-          <div className="col-span-12 xl:col-span-4">
+          <div className="col-span-12 lg:col-span-4">
             <PanelCard title="承認待ち一覧" href="/pc/approvals" hrefLabel="すべて見る">
               <ApprovalQueueTable />
             </PanelCard>
           </div>
-          <div className="col-span-12 xl:col-span-4">
+          <div className="col-span-12 lg:col-span-4">
             {canSeeMap ? (
               <PanelCard
                 title="配置マップ（稼働中の現場）"
@@ -191,14 +191,14 @@ export default async function PcHomePage() {
           </div>
 
           {canSeeSiteProgress && (
-            <div className="col-span-12 xl:col-span-4">
+            <div className="col-span-12 lg:col-span-4">
               <PanelCard title="現場別進捗" href="/pc/projects" hrefLabel="すべて見る">
                 <SiteProgressTable />
               </PanelCard>
             </div>
           )}
           {canSeeRevenue && (
-            <div className="col-span-12 xl:col-span-4">
+            <div className="col-span-12 lg:col-span-4">
               <PanelCard
                 title="売上・原価・利益（今期累計）"
                 href="/pc/reports/finance"
@@ -209,7 +209,7 @@ export default async function PcHomePage() {
             </div>
           )}
           {canSeeMap && (
-            <div className="col-span-12 xl:col-span-4">
+            <div className="col-span-12 lg:col-span-4">
               <PanelCard title="クエスト・バッジ" accent="pink">
                 <QuestBadgeSummary />
               </PanelCard>
@@ -221,12 +221,12 @@ export default async function PcHomePage() {
           aria-label="お知らせとよく使うリンク"
           className="grid grid-cols-12 gap-5"
         >
-          <div className="col-span-12 xl:col-span-5">
+          <div className="col-span-12 lg:col-span-5">
             <PanelCard title="お知らせ" compact>
               <NoticesPanel />
             </PanelCard>
           </div>
-          <div className="col-span-12 xl:col-span-7">
+          <div className="col-span-12 lg:col-span-7">
             <PanelCard title="よく使うリンク" compact>
               <QuickLinksFooter />
             </PanelCard>
