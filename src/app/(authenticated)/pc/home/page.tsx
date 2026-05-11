@@ -107,7 +107,15 @@ export default async function PcHomePage() {
             href="/pc/reports"
             hrefLabel="詳細へ"
           >
-            <MiniDonut value={inputRate} size={82} stroke={7} />
+            {/* 参照画像準拠: 入力率ドーナツは達成感を演出する緑系で描画
+                (KPI タイトル/リンクの blue アクセントとは独立) */}
+            <MiniDonut
+              value={inputRate}
+              size={82}
+              stroke={7}
+              color="#10b981"
+              trackColor="#d1fae5"
+            />
           </KpiCard>
 
           <KpiCard
@@ -210,7 +218,7 @@ export default async function PcHomePage() {
           )}
           {canSeeMap && (
             <div className="col-span-12 lg:col-span-4">
-              <PanelCard title="クエスト・バッジ" accent="pink">
+              <PanelCard title="クエスト・バッジ">
                 <QuestBadgeSummary />
               </PanelCard>
             </div>
@@ -219,14 +227,14 @@ export default async function PcHomePage() {
 
         <section
           aria-label="お知らせとよく使うリンク"
-          className="dashboard-bottom-grid grid flex-1 grid-cols-12 gap-5"
+          className="dashboard-bottom-grid grid flex-1 auto-rows-fr grid-cols-12 gap-5"
         >
-          <div className="col-span-12 lg:col-span-5">
+          <div className="col-span-12 h-full lg:col-span-5">
             <PanelCard title="お知らせ" compact>
               <NoticesPanel />
             </PanelCard>
           </div>
-          <div className="col-span-12 lg:col-span-7">
+          <div className="col-span-12 h-full lg:col-span-7">
             <PanelCard title="よく使うリンク" compact>
               <QuickLinksFooter />
             </PanelCard>
