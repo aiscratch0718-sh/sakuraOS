@@ -168,7 +168,8 @@ export default async function PcHomePage() {
           aria-label="今日の業務と進捗"
           className="dashboard-panel-grid mb-1.5 grid grid-cols-12 gap-2 [grid-template-rows:180px_260px]"
         >
-          <div className="col-span-12 min-h-0 lg:col-span-4">
+          {/* 上段: 3 / 5 / 4(今日のやること狭め、承認待ち広く、配置マップ中) */}
+          <div className="col-span-12 min-h-0 lg:col-span-3">
             <PanelCard
               title="今日のやること"
               href="/pc/tasks"
@@ -177,7 +178,7 @@ export default async function PcHomePage() {
               <TodayTasksList />
             </PanelCard>
           </div>
-          <div className="col-span-12 min-h-0 lg:col-span-4">
+          <div className="col-span-12 min-h-0 lg:col-span-5">
             <PanelCard title="承認待ち一覧" href="/pc/approvals" hrefLabel="すべて見る">
               <ApprovalQueueTable />
             </PanelCard>
@@ -185,7 +186,7 @@ export default async function PcHomePage() {
           <div className="col-span-12 min-h-0 lg:col-span-4">
             {canSeeMap ? (
               <PanelCard
-                title="配置マップ（稼働中の現場）"
+                title="配置マップ（稼働中の現場)"
                 href="/pc/dispatch-map"
                 hrefLabel="すべて見る"
               >
