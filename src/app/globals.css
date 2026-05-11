@@ -249,9 +249,9 @@
     }
 
     .pc-dashboard-frame {
-      width: 150%;
-      min-height: 150vh;
-      transform: scale(0.6667);
+      width: 166.667%;
+      min-height: 166.667vh;
+      transform: scale(0.6);
       transform-origin: top left;
     }
 
