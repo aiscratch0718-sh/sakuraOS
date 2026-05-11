@@ -35,8 +35,8 @@ export function DispatchMapPreview({ sites }: { sites: SiteSnapshot[] }) {
         }));
 
   return (
-    <div className="dashboard-map-preview grid h-full grid-cols-5 gap-2">
-      <div className="dashboard-map-canvas relative col-span-2 min-h-[120px] overflow-hidden rounded-md border border-slate-200 bg-[#eef3ee]">
+    <div className="dashboard-map-preview grid h-full grid-cols-2 gap-2">
+      <div className="dashboard-map-canvas relative col-span-1 h-full overflow-hidden rounded-md border border-slate-200 bg-[#eef3ee]">
         <svg viewBox="0 0 280 190" className="h-full w-full" role="img" aria-label="配置マッププレビュー">
           <rect width="280" height="190" fill="#eef3ee" />
           <g opacity="0.45">
@@ -76,7 +76,7 @@ export function DispatchMapPreview({ sites }: { sites: SiteSnapshot[] }) {
         </svg>
       </div>
 
-      <ul className="col-span-3 divide-y divide-slate-100">
+      <ul className="col-span-1 divide-y divide-slate-100">
         {rows.map((s) => (
           <li key={s.id}>
             <Link
