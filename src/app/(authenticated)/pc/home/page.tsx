@@ -111,8 +111,8 @@ export default async function PcHomePage() {
                 (KPI #1 全体の blue アクセントと統一) */}
             <MiniDonut
               value={inputRate}
-              size={68}
-              stroke={6}
+              size={56}
+              stroke={5}
               color="#2568c8"
               trackColor="#dbeafe"
             />
@@ -168,7 +168,7 @@ export default async function PcHomePage() {
           aria-label="今日の業務と進捗"
           className="dashboard-panel-grid mb-1.5 grid grid-cols-12 gap-2"
         >
-          <div className="col-span-12 h-[180px] min-h-0 lg:col-span-4">
+          <div className="col-span-12 h-[164px] min-h-0 lg:col-span-4">
             <PanelCard
               title="今日のやること"
               href="/pc/tasks"
@@ -177,12 +177,12 @@ export default async function PcHomePage() {
               <TodayTasksList />
             </PanelCard>
           </div>
-          <div className="col-span-12 h-[180px] min-h-0 lg:col-span-4">
+          <div className="col-span-12 h-[164px] min-h-0 lg:col-span-4">
             <PanelCard title="承認待ち一覧" href="/pc/approvals" hrefLabel="すべて見る">
               <ApprovalQueueTable />
             </PanelCard>
           </div>
-          <div className="col-span-12 h-[180px] min-h-0 lg:col-span-4">
+          <div className="col-span-12 h-[164px] min-h-0 lg:col-span-4">
             {canSeeMap ? (
               <PanelCard
                 title="配置マップ（稼働中の現場）"
@@ -199,14 +199,14 @@ export default async function PcHomePage() {
           </div>
 
           {canSeeSiteProgress && (
-            <div className="col-span-12 h-[180px] min-h-0 lg:col-span-4">
+            <div className="col-span-12 h-[164px] min-h-0 lg:col-span-4">
               <PanelCard title="現場別進捗" href="/pc/projects" hrefLabel="すべて見る">
                 <SiteProgressTable />
               </PanelCard>
             </div>
           )}
           {canSeeRevenue && (
-            <div className="col-span-12 h-[180px] min-h-0 lg:col-span-4">
+            <div className="col-span-12 h-[164px] min-h-0 lg:col-span-4">
               <PanelCard
                 title="売上・原価・利益（今期累計）"
                 href="/pc/reports/finance"
@@ -217,7 +217,7 @@ export default async function PcHomePage() {
             </div>
           )}
           {canSeeMap && (
-            <div className="col-span-12 h-[180px] min-h-0 lg:col-span-4">
+            <div className="col-span-12 h-[164px] min-h-0 lg:col-span-4">
               <PanelCard title="クエスト・バッジ">
                 <QuestBadgeSummary />
               </PanelCard>
@@ -266,21 +266,21 @@ function PanelCard({
         accent === "pink" ? "border-rose-100 bg-rose-50/50" : ""
       }`}
     >
-      <header className="dashboard-panel-header flex min-h-[36px] items-center justify-between border-b border-slate-200 px-3">
-        <h2 className="text-[14px] font-black tracking-normal text-slate-950">
+      <header className="dashboard-panel-header flex min-h-[32px] items-center justify-between border-b border-slate-200 px-3">
+        <h2 className="text-[12px] font-black tracking-normal text-slate-950">
           {title}
         </h2>
         {href && (
           <Link
             href={href}
-            className="flex items-center gap-1 text-[12px] font-bold text-blue-700 hover:text-blue-800"
+            className="flex items-center gap-1 text-[10px] font-bold text-blue-700 hover:text-blue-800"
           >
             {hrefLabel ?? "すべて見る"}
             <span aria-hidden>›</span>
           </Link>
         )}
       </header>
-      <div className="dashboard-panel-body flex-1 overflow-hidden p-2 text-[12px]">{children}</div>
+      <div className="dashboard-panel-body flex-1 overflow-hidden p-2 text-[11px]">{children}</div>
     </section>
   );
 }

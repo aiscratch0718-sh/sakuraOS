@@ -74,10 +74,10 @@ export function KpiCard({
 
   return (
     <div
-      className={`dashboard-kpi-card relative h-[124px] overflow-hidden rounded-lg border bg-white px-4 py-2.5 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-shadow hover:shadow-md ${a.borderColor}`}
+      className={`dashboard-kpi-card relative h-[108px] overflow-hidden rounded-lg border bg-white px-3.5 py-2 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-shadow hover:shadow-md ${a.borderColor}`}
     >
       <div className="mb-1 flex items-center gap-1.5">
-        <h3 className={`text-[13px] font-bold ${a.titleColor}`}>{label}</h3>
+        <h3 className={`text-[11px] font-bold ${a.titleColor}`}>{label}</h3>
         <button
           type="button"
           aria-label={`${label}の説明`}
@@ -88,25 +88,25 @@ export function KpiCard({
         </button>
       </div>
 
-      <div className="mb-1 flex min-h-[40px] items-center justify-between gap-2">
-        <div className="text-[28px] font-black leading-none tracking-normal text-slate-950">
+      <div className="mb-1 flex min-h-[32px] items-center justify-between gap-2">
+        <div className="text-[22px] font-black leading-none tracking-normal text-slate-950">
           {value}
           {unit && (
-            <span className="ml-0.5 text-[16px] font-extrabold">{unit}</span>
+            <span className="ml-0.5 text-[13px] font-extrabold">{unit}</span>
           )}
         </div>
         {children && <div className="flex-shrink-0">{children}</div>}
       </div>
 
       {subText && (
-        <div className="mb-1 truncate text-[11px] leading-snug text-slate-600">
+        <div className="mb-0.5 truncate text-[10px] leading-snug text-slate-600">
           {subText}
         </div>
       )}
 
       {(trend || href) && (
         <div className="flex items-center justify-between border-t border-slate-100 pt-1">
-          <div className="flex items-center gap-1 text-[12px]">
+          <div className="flex items-center gap-1 text-[10px]">
             {trend && (
               <>
                 <span className="text-slate-600">
@@ -130,7 +130,7 @@ export function KpiCard({
           {href && (
             <Link
               href={href}
-              className="flex items-center gap-1 text-[12px] font-bold text-blue-700 hover:text-blue-800"
+              className="flex items-center gap-1 text-[10px] font-bold text-blue-700 hover:text-blue-800"
             >
               {hrefLabel ?? "詳細へ"}
               <span aria-hidden>›</span>

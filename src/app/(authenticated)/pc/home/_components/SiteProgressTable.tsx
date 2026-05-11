@@ -23,7 +23,7 @@ export function SiteProgressTable({ rows }: { rows?: SiteProgressRow[] }) {
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-[12px] text-slate-700">
+      <table className="w-full text-[11px] text-slate-700">
         <caption className="sr-only">現場別進捗</caption>
         <thead className="text-slate-500">
           <tr className="text-left">

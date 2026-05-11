@@ -73,7 +73,7 @@ export function ApprovalQueueTable({ rows }: { rows?: ApprovalRow[] }) {
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-[12px] text-slate-700">
+      <table className="w-full text-[11px] text-slate-700">
         <caption className="sr-only">承認待ち一覧</caption>
         <thead className="text-slate-500">
           <tr className="text-left">
