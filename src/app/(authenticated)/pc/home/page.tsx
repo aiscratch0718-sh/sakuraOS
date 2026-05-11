@@ -51,7 +51,7 @@ export default async function PcHomePage() {
     role === "leader" || role === "office" || role === "ceo" || role === "system";
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50">
+    <div className="flex min-h-screen flex-1 flex-col bg-slate-50">
       <header className="dashboard-home-header sticky top-0 z-20 flex min-h-[78px] items-center justify-between gap-4 border-b border-slate-200 bg-white/95 px-8 backdrop-blur">
         <div>
           <h1 className="text-[26px] font-black leading-tight tracking-normal text-slate-950">

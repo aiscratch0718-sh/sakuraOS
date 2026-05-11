@@ -44,7 +44,7 @@ export default async function PcLayout({
           tagline="業務管理システム"
           logoUrl={tenant?.logo_url ?? null}
         />
-        <div className="min-w-0 flex-1">{children}</div>
+        <div className="flex min-w-0 flex-1 flex-col">{children}</div>
       </div>
     </div>
   );
