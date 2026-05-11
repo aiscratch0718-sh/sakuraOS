@@ -22,8 +22,8 @@ export function RevenueCostProfitChart() {
   const data = MOCK;
   const max = 160;
   const W = 430;
-  const H = 150;
-  const PAD = { l: 42, r: 10, t: 12, b: 22 };
+  const H = 155;
+  const PAD = { l: 46, r: 10, t: 12, b: 26 };
   const innerW = W - PAD.l - PAD.r;
   const innerH = H - PAD.t - PAD.b;
   const barGroupW = innerW / data.length;
@@ -62,7 +62,7 @@ export function RevenueCostProfitChart() {
           return (
             <g key={v}>
               <line x1={PAD.l} y1={y} x2={W - PAD.r} y2={y} stroke="#e2e8f0" strokeWidth="1" />
-              <text x={PAD.l - 8} y={y + 3} fontSize="10" fill="#64748b" textAnchor="end">
+              <text x={PAD.l - 8} y={y + 4} fontSize="14" fill="#64748b" textAnchor="end">
                 {v.toLocaleString("ja-JP")},000
               </text>
             </g>
@@ -77,7 +77,7 @@ export function RevenueCostProfitChart() {
             <g key={d.month}>
               <rect x={xBase} y={PAD.t + innerH - revH} width={barW} height={revH} fill="#2563eb" rx="1.5" />
               <rect x={xBase + barW + 3} y={PAD.t + innerH - costH} width={barW} height={costH} fill="#f97316" rx="1.5" />
-              <text x={PAD.l + barGroupW * i + barGroupW / 2} y={H - 8} fontSize="10" fill="#64748b" textAnchor="middle">
+              <text x={PAD.l + barGroupW * i + barGroupW / 2} y={H - 8} fontSize="14" fill="#64748b" textAnchor="middle">
                 {d.month}
               </text>
             </g>
