@@ -36,58 +36,138 @@ export function DispatchMapPreview({ sites }: { sites: SiteSnapshot[] }) {
 
   return (
     <div className="dashboard-map-preview grid h-full grid-cols-2 gap-2">
-      <div className="dashboard-map-canvas relative col-span-1 h-full overflow-hidden rounded-md border border-slate-200 bg-[#eef3ee]">
-        <svg viewBox="0 0 280 190" className="h-full w-full" role="img" aria-label="配置マッププレビュー">
-          <rect width="280" height="190" fill="#eef3ee" />
-          <g opacity="0.45">
-            <path d="M0,142 C48,126 84,142 130,132 C184,120 218,132 280,108 L280,190 L0,190 Z" fill="#dbe7df" />
-            <path d="M0,52 C46,42 83,56 128,45 C180,32 224,38 280,24 L280,0 L0,0 Z" fill="#f5efe4" />
+      {/* 地図 SVG: 街路グリッド + ブロック + 河川 + ピン */}
+      <div className="dashboard-map-canvas relative col-span-1 h-full overflow-hidden rounded-md border border-slate-200 bg-[#f3f0e7]">
+        <svg
+          viewBox="0 0 280 250"
+          preserveAspectRatio="xMidYMid slice"
+          className="h-full w-full"
+          role="img"
+          aria-label="配置マッププレビュー"
+        >
+          {/* 地図の基底色(用紙風ベージュ) */}
+          <rect width="280" height="250" fill="#f3f0e7" />
+
+          {/* 公園/緑地(柔らかい緑エリア) */}
+          <path d="M0 0 L75 0 L70 38 L55 60 L25 70 L0 65 Z" fill="#dfeacd" opacity="0.85" />
+          <path d="M195 165 L255 175 L268 215 L240 245 L200 240 L195 200 Z" fill="#dfeacd" opacity="0.85" />
+
+          {/* 河川(柔らかい青、緩いカーブ) */}
+          <path
+            d="M-10 195 C 60 170 110 220 165 195 C 215 175 260 215 295 195 L 295 220 C 260 240 215 200 165 220 C 110 245 60 195 -10 220 Z"
+            fill="#cfe2f3"
+            opacity="0.85"
+          />
+
+          {/* ブロック(建物区画、薄いグレー矩形) */}
+          <g fill="#e6e1d4" opacity="0.7">
+            <rect x="20" y="20" width="40" height="22" rx="1" />
+            <rect x="68" y="20" width="32" height="22" rx="1" />
+            <rect x="108" y="20" width="44" height="22" rx="1" />
+            <rect x="160" y="20" width="36" height="22" rx="1" />
+            <rect x="204" y="20" width="56" height="22" rx="1" />
+
+            <rect x="20" y="50" width="32" height="28" rx="1" />
+            <rect x="60" y="50" width="44" height="28" rx="1" />
+            <rect x="160" y="50" width="50" height="28" rx="1" />
+            <rect x="220" y="50" width="40" height="28" rx="1" />
+
+            <rect x="20" y="88" width="40" height="32" rx="1" />
+            <rect x="68" y="88" width="32" height="20" rx="1" />
+            <rect x="108" y="88" width="50" height="32" rx="1" />
+            <rect x="220" y="88" width="40" height="32" rx="1" />
+
+            <rect x="20" y="130" width="32" height="40" rx="1" />
+            <rect x="60" y="130" width="44" height="24" rx="1" />
+            <rect x="112" y="130" width="40" height="40" rx="1" />
+            <rect x="160" y="130" width="36" height="24" rx="1" />
+            <rect x="220" y="130" width="40" height="28" rx="1" />
           </g>
-          <g stroke="#ccd9d2" strokeWidth="1" opacity="0.75">
-            {[20, 46, 72, 98, 124, 150, 176, 202, 228, 254].map((x) => (
-              <path key={`v${x}`} d={`M${x} -8 C${x - 8} 38 ${x + 9} 74 ${x - 3} 116 C${x - 12} 146 ${x + 4} 170 ${x} 202`} />
-            ))}
-            {[20, 44, 68, 92, 116, 140, 164].map((y) => (
-              <path key={`h${y}`} d={`M-10 ${y} C54 ${y - 9} 94 ${y + 12} 146 ${y + 2} C200 ${y - 9} 236 ${y + 2} 292 ${y - 5}`} />
-            ))}
+
+          {/* 街路グリッド(主要道路、白) */}
+          <g stroke="#ffffff" strokeWidth="4" fill="none">
+            {/* 横方向の主要道 */}
+            <line x1="0" y1="46" x2="280" y2="46" />
+            <line x1="0" y1="82" x2="280" y2="82" />
+            <line x1="0" y1="124" x2="280" y2="124" />
+            <line x1="0" y1="174" x2="280" y2="174" />
+            {/* 縦方向の主要道 */}
+            <line x1="62" y1="0" x2="62" y2="250" />
+            <line x1="106" y1="0" x2="106" y2="250" />
+            <line x1="156" y1="0" x2="156" y2="250" />
+            <line x1="214" y1="0" x2="214" y2="250" />
           </g>
-          <g stroke="#ffffff" strokeWidth="5" opacity="0.95">
-            <path d="M-20 42 C42 34 70 74 128 65 C190 54 216 24 302 28" />
-            <path d="M-10 116 C42 84 86 98 132 122 C174 144 225 131 294 98" />
-            <path d="M64 -10 C74 43 64 78 92 114 C118 148 116 164 108 206" />
-            <path d="M178 -12 C159 34 164 70 190 98 C214 124 220 151 212 202" />
+
+          {/* 街路グリッド外周線(薄いグレーで道のエッジ表現) */}
+          <g stroke="#d4cfc1" strokeWidth="0.5" fill="none" opacity="0.7">
+            <line x1="0" y1="44" x2="280" y2="44" />
+            <line x1="0" y1="48" x2="280" y2="48" />
+            <line x1="0" y1="80" x2="280" y2="80" />
+            <line x1="0" y1="84" x2="280" y2="84" />
+            <line x1="0" y1="122" x2="280" y2="122" />
+            <line x1="0" y1="126" x2="280" y2="126" />
+            <line x1="60" y1="0" x2="60" y2="250" />
+            <line x1="64" y1="0" x2="64" y2="250" />
+            <line x1="104" y1="0" x2="104" y2="250" />
+            <line x1="108" y1="0" x2="108" y2="250" />
+            <line x1="154" y1="0" x2="154" y2="250" />
+            <line x1="158" y1="0" x2="158" y2="250" />
+            <line x1="212" y1="0" x2="212" y2="250" />
+            <line x1="216" y1="0" x2="216" y2="250" />
           </g>
-          <g stroke="#c6d2d6" strokeWidth="1.2" opacity="0.85">
-            <path d="M30 0 L120 190" />
-            <path d="M0 154 L280 44" />
+
+          {/* 細街路(細い白の小路) */}
+          <g stroke="#ffffff" strokeWidth="1.5" fill="none" opacity="0.8">
+            <line x1="0" y1="62" x2="280" y2="62" />
+            <line x1="0" y1="100" x2="280" y2="100" />
+            <line x1="0" y1="148" x2="280" y2="148" />
+            <line x1="86" y1="0" x2="86" y2="250" />
+            <line x1="184" y1="0" x2="184" y2="250" />
+            <line x1="240" y1="0" x2="240" y2="250" />
           </g>
+
+          {/* ピン(現場マーカー、Google Maps 風) */}
           {rows.map((r, i) => {
             const [x, y] = PIN_POSITIONS[i] ?? [40 + i * 34, 70 + i * 18];
             return (
-              <g key={r.id} filter="drop-shadow(0 3px 3px rgba(15,23,42,.18))">
+              <g
+                key={r.id}
+                filter="drop-shadow(0 2px 2px rgba(15,23,42,.22))"
+              >
+                {/* ピンの形:しずく */}
                 <path
-                  d={`M${x} ${y + 18} C${x - 14} ${y + 2}, ${x - 10} ${y - 16}, ${x} ${y - 16} C${x + 10} ${y - 16}, ${x + 14} ${y + 2}, ${x} ${y + 18}Z`}
+                  d={`M${x} ${y + 16} C${x - 13} ${y + 2}, ${x - 10} ${y - 14}, ${x} ${y - 14} C${x + 10} ${y - 14}, ${x + 13} ${y + 2}, ${x} ${y + 16}Z`}
                   fill={r.color}
                 />
-                <circle cx={x} cy={y - 4} r="5" fill="#fff" />
+                {/* 中央の白丸 */}
+                <circle cx={x} cy={y - 4} r="4.5" fill="#fff" />
               </g>
             );
           })}
         </svg>
       </div>
 
+      {/* 右側: 現場一覧 */}
       <ul className="col-span-1 divide-y divide-slate-100">
         {rows.map((s) => (
           <li key={s.id}>
             <Link
-              href={s.id.startsWith("fallback") ? "/pc/projects" : `/pc/projects/${s.id}`}
+              href={
+                s.id.startsWith("fallback")
+                  ? "/pc/projects"
+                  : `/pc/projects/${s.id}`
+              }
               className="flex min-h-[24px] items-center gap-2 rounded-md px-1 transition-colors hover:bg-slate-50"
             >
-              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: s.color }} aria-hidden />
-              <span className="min-w-0 flex-1 truncate text-[12px] font-medium text-slate-700">
+              <span
+                className="h-2 w-2 flex-shrink-0 rounded-full"
+                style={{ backgroundColor: s.color }}
+                aria-hidden
+              />
+              <span className="min-w-0 flex-1 truncate text-[11px] font-medium text-slate-700">
                 {s.name}
               </span>
-              <span className="whitespace-nowrap text-[12px] text-slate-600">
+              <span className="whitespace-nowrap text-[11px] text-slate-600">
                 {s.attendedToday}名
               </span>
             </Link>
