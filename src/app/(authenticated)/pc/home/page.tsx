@@ -111,8 +111,8 @@ export default async function PcHomePage() {
                 (KPI #1 全体の blue アクセントと統一) */}
             <MiniDonut
               value={inputRate}
-              size={82}
-              stroke={7}
+              size={60}
+              stroke={6}
               color="#2568c8"
               trackColor="#dbeafe"
             />
@@ -166,7 +166,7 @@ export default async function PcHomePage() {
 
         <section
           aria-label="今日の業務と進捗"
-          className="dashboard-panel-grid mb-1.5 grid auto-rows-[178px] grid-cols-12 gap-2"
+          className="dashboard-panel-grid mb-1.5 grid auto-rows-[170px] grid-cols-12 gap-2"
         >
           <div className="col-span-12 lg:col-span-4">
             <PanelCard
