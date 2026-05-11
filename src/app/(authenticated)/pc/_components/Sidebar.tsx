@@ -52,10 +52,10 @@ const NAV_ITEMS: NavItem[] = [
     show: allRoles,
   },
   {
-    href: "/sp/report3/new",
+    href: "/pc/report3/new",
     label: "REPORT3入力",
     icon: ClipboardEdit,
-    match: (p) => p.startsWith("/sp/report3"),
+    match: (p) => p.startsWith("/pc/report3") || p.startsWith("/sp/report3"),
     show: allRoles,
   },
   {
