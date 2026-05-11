@@ -52,7 +52,7 @@ export default async function PcHomePage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <header className="sticky top-0 z-20 flex min-h-[78px] items-center justify-between gap-4 border-b border-slate-200 bg-white/95 px-8 backdrop-blur">
+      <header className="dashboard-home-header sticky top-0 z-20 flex min-h-[78px] items-center justify-between gap-4 border-b border-slate-200 bg-white/95 px-8 backdrop-blur">
         <div>
           <h1 className="text-[26px] font-black leading-tight tracking-normal text-slate-950">
             ホーム
@@ -92,10 +92,10 @@ export default async function PcHomePage() {
         </div>
       </header>
 
-      <main className="px-8 py-5">
+      <main className="dashboard-home-main px-8 py-5">
         <section
           aria-label="主要 KPI"
-          className="mb-3 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4"
+          className="dashboard-kpi-grid mb-3 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4"
         >
           <KpiCard
             accent="blue"
@@ -158,7 +158,7 @@ export default async function PcHomePage() {
 
         <section
           aria-label="今日の業務と進捗"
-          className="mb-3 grid grid-cols-12 gap-3"
+          className="dashboard-panel-grid mb-3 grid grid-cols-12 gap-3"
         >
           <div className="col-span-12 lg:col-span-4">
             <PanelCard
@@ -219,7 +219,7 @@ export default async function PcHomePage() {
 
         <section
           aria-label="お知らせとよく使うリンク"
-          className="grid grid-cols-12 gap-5"
+          className="dashboard-bottom-grid grid grid-cols-12 gap-5"
         >
           <div className="col-span-12 lg:col-span-5">
             <PanelCard title="お知らせ" compact>
@@ -254,11 +254,11 @@ function PanelCard({
 }) {
   return (
     <section
-      className={`flex h-full ${compact ? "min-h-[80px]" : "min-h-[256px]"} flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] ${
+      className={`dashboard-panel ${compact ? "dashboard-panel-compact min-h-[80px]" : "min-h-[256px]"} flex h-full flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] ${
         accent === "pink" ? "border-rose-100 bg-rose-50/50" : ""
       }`}
     >
-      <header className="flex min-h-[47px] items-center justify-between border-b border-slate-200 px-4">
+      <header className="dashboard-panel-header flex min-h-[47px] items-center justify-between border-b border-slate-200 px-4">
         <h2 className="text-[17px] font-black tracking-normal text-slate-950">
           {title}
         </h2>
@@ -272,7 +272,7 @@ function PanelCard({
           </Link>
         )}
       </header>
-      <div className="flex-1 p-3 text-[13px]">{children}</div>
+      <div className="dashboard-panel-body flex-1 p-3 text-[13px]">{children}</div>
     </section>
   );
 }
