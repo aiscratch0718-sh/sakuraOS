@@ -219,24 +219,24 @@ export function Sidebar({
   return (
     <aside
       aria-label="サイドナビゲーション"
-      className="pc-sidebar sticky top-0 hidden h-screen w-[220px] shrink-0 flex-col border-r border-slate-200 bg-white md:flex"
+      className="pc-sidebar sticky top-0 hidden h-screen w-[192px] shrink-0 flex-col border-r border-slate-200 bg-white md:flex"
     >
-      <div className="pc-sidebar-brand border-b border-slate-100 px-4 py-5">
+      <div className="pc-sidebar-brand border-b border-slate-100 px-3 py-3">
         <div className="flex items-center gap-2 text-blue-700">
-          <Building2 className="pc-sidebar-logo-icon h-7 w-7" strokeWidth={2.35} aria-hidden />
+          <Building2 className="pc-sidebar-logo-icon h-6 w-6" strokeWidth={2.35} aria-hidden />
           <div>
-            <div className="pc-sidebar-logo-text text-[25px] font-black leading-none tracking-normal">
+            <div className="pc-sidebar-logo-text text-[20px] font-black leading-none tracking-normal">
               {brandName}
             </div>
-            <div className="pc-sidebar-tagline mt-1 text-[12px] font-bold text-slate-700">
+            <div className="pc-sidebar-tagline mt-0.5 text-[10px] font-bold text-slate-700">
               {tagline}
             </div>
           </div>
         </div>
       </div>
 
-      <nav role="navigation" className="sidebar-scroll pc-sidebar-nav flex-1 overflow-y-auto py-4">
-        <ul className="pc-sidebar-list space-y-1 px-3.5">
+      <nav role="navigation" className="sidebar-scroll pc-sidebar-nav flex-1 overflow-y-auto py-2">
+        <ul className="pc-sidebar-list space-y-0.5 px-2.5">
           {visibleNav.map((item) => (
             <NavLink key={item.href} item={item} active={item.match(pathname)} />
           ))}
@@ -292,7 +292,7 @@ function NavLink({
       <Link
         href={item.href}
         aria-current={active ? "page" : undefined}
-        className={`pc-sidebar-link flex min-h-[38px] items-center gap-3 rounded-md px-3 text-[14px] transition-colors ${
+        className={`pc-sidebar-link flex min-h-[32px] items-center gap-2.5 rounded-md px-2.5 text-[13px] transition-colors ${
           active ? activeClass : inactiveClass
         }`}
       >
@@ -345,9 +345,9 @@ function SidebarFooter({
   }, [open]);
 
   return (
-    <div className="pc-sidebar-footer relative flex items-center gap-3 border-t border-slate-100 px-4 py-4">
+    <div className="pc-sidebar-footer relative flex items-center gap-2 border-t border-slate-100 px-3 py-2.5">
       <div
-        className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-slate-200 text-[13px] font-bold text-slate-600"
+        className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-slate-200 text-[12px] font-bold text-slate-600"
         aria-hidden
       >
         {initials}

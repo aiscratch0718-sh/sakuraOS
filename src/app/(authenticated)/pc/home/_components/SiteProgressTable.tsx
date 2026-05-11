@@ -41,13 +41,13 @@ export function SiteProgressTable({ rows }: { rows?: SiteProgressRow[] }) {
             const delta = r.progressPct - r.plannedPct;
             return (
               <tr key={r.id} className="transition-colors hover:bg-slate-50">
-                <td className="max-w-[170px] px-2 py-2 text-slate-900">
+                <td className="max-w-[170px] px-2 py-1 text-slate-900">
                   <Link href={`/pc/projects/${r.id}`} className="block truncate hover:underline">
                     {r.name}
                   </Link>
                 </td>
-                <td className="whitespace-nowrap px-2 py-2">{r.workType}</td>
-                <td className="px-2 py-2">
+                <td className="whitespace-nowrap px-2 py-1">{r.workType}</td>
+                <td className="px-2 py-1">
                   <div className="flex items-center gap-2">
                     <span className="w-8 text-right font-bold tabular-nums text-slate-800">
                       {r.progressPct}%
@@ -57,15 +57,15 @@ export function SiteProgressTable({ rows }: { rows?: SiteProgressRow[] }) {
                     </div>
                   </div>
                 </td>
-                <td className="whitespace-nowrap px-2 py-2 text-right tabular-nums">{r.plannedPct}%</td>
+                <td className="whitespace-nowrap px-2 py-1 text-right tabular-nums">{r.plannedPct}%</td>
                 {/* 予定より進んでいれば green、遅れていれば red(±0 は中間色) */}
-                <td className={`whitespace-nowrap px-2 py-2 text-right font-bold tabular-nums ${delta > 0 ? "text-emerald-600" : delta < 0 ? "text-red-600" : "text-slate-500"}`}>
+                <td className={`whitespace-nowrap px-2 py-1 text-right font-bold tabular-nums ${delta > 0 ? "text-emerald-600" : delta < 0 ? "text-red-600" : "text-slate-500"}`}>
                   {delta > 0 ? `+${delta}%` : delta < 0 ? `${delta}%` : "±0%"}
                 </td>
-                <td className="px-2 py-2 text-center text-emerald-600">
+                <td className="px-2 py-1 text-center text-emerald-600">
                   <ShieldCheck className="mx-auto h-4 w-4" aria-hidden />
                 </td>
-                <td className={`px-2 py-2 text-center ${r.quality === "good" ? "text-emerald-600" : "text-amber-500"}`}>
+                <td className={`px-2 py-1 text-center ${r.quality === "good" ? "text-emerald-600" : "text-amber-500"}`}>
                   <ShieldCheck className="mx-auto h-4 w-4" aria-hidden />
                 </td>
               </tr>

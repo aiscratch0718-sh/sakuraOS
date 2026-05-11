@@ -52,38 +52,38 @@ export default async function PcHomePage() {
 
   return (
     <div className="flex min-h-screen flex-1 flex-col bg-slate-50">
-      <header className="dashboard-home-header sticky top-0 z-20 flex min-h-[64px] items-center justify-between gap-4 border-b border-slate-200 bg-white/95 px-8 backdrop-blur">
-        <div>
-          <h1 className="text-[26px] font-black leading-tight tracking-normal text-slate-950">
+      <header className="dashboard-home-header sticky top-0 z-20 flex min-h-[52px] items-center justify-between gap-4 border-b border-slate-200 bg-white/95 px-6 backdrop-blur">
+        <div className="min-w-0 shrink">
+          <h1 className="text-[20px] font-black leading-tight tracking-normal text-slate-950">
             ホーム
           </h1>
-          <p className="mt-1 text-[14px] text-slate-600">
+          <p className="mt-0.5 text-[12px] text-slate-600">
             業務の全体状況を確認し、今日の行動を始めましょう。
           </p>
         </div>
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-3">
           <RoleTabs role={role} />
           <div className="flex items-center gap-4 text-slate-900">
             <button
               type="button"
               aria-label="検索"
-              className="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-slate-100"
+              className="flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-slate-100"
             >
-              <Search className="h-6 w-6" aria-hidden />
+              <Search className="h-5 w-5" aria-hidden />
             </button>
             <button
               type="button"
               aria-label="ヘルプ"
-              className="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-slate-100"
+              className="flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-slate-100"
             >
-              <CircleHelp className="h-6 w-6" aria-hidden />
+              <CircleHelp className="h-5 w-5" aria-hidden />
             </button>
             <button
               type="button"
               aria-label="通知"
               className="relative flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-slate-100"
             >
-              <Bell className="h-6 w-6" aria-hidden />
+              <Bell className="h-5 w-5" aria-hidden />
               <span className="absolute -right-0.5 top-0 rounded-full bg-rose-600 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
                 12
               </span>
@@ -92,10 +92,10 @@ export default async function PcHomePage() {
         </div>
       </header>
 
-      <main className="dashboard-home-main flex flex-1 flex-col px-8 py-3">
+      <main className="dashboard-home-main flex flex-1 flex-col px-6 py-2">
         <section
           aria-label="主要 KPI"
-          className="dashboard-kpi-grid mb-2 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4"
+          className="dashboard-kpi-grid mb-1.5 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4"
         >
           <KpiCard
             accent="blue"
@@ -166,7 +166,7 @@ export default async function PcHomePage() {
 
         <section
           aria-label="今日の業務と進捗"
-          className="dashboard-panel-grid mb-2 grid grid-cols-12 gap-3"
+          className="dashboard-panel-grid mb-1.5 grid grid-cols-12 gap-2"
         >
           <div className="col-span-12 lg:col-span-4">
             <PanelCard
@@ -227,7 +227,7 @@ export default async function PcHomePage() {
 
         <section
           aria-label="お知らせとよく使うリンク"
-          className="dashboard-bottom-grid grid flex-1 auto-rows-fr grid-cols-12 gap-5"
+          className="dashboard-bottom-grid grid flex-1 auto-rows-fr grid-cols-12 gap-2"
         >
           <div className="col-span-12 h-full lg:col-span-5">
             <PanelCard title="お知らせ" compact>
@@ -262,12 +262,12 @@ function PanelCard({
 }) {
   return (
     <section
-      className={`dashboard-panel ${compact ? "dashboard-panel-compact min-h-[80px]" : "min-h-[200px]"} flex h-full flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] ${
+      className={`dashboard-panel ${compact ? "dashboard-panel-compact min-h-[64px]" : "min-h-[164px]"} flex h-full flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] ${
         accent === "pink" ? "border-rose-100 bg-rose-50/50" : ""
       }`}
     >
-      <header className="dashboard-panel-header flex min-h-[47px] items-center justify-between border-b border-slate-200 px-4">
-        <h2 className="text-[17px] font-black tracking-normal text-slate-950">
+      <header className="dashboard-panel-header flex min-h-[36px] items-center justify-between border-b border-slate-200 px-3">
+        <h2 className="text-[14px] font-black tracking-normal text-slate-950">
           {title}
         </h2>
         {href && (
@@ -280,7 +280,7 @@ function PanelCard({
           </Link>
         )}
       </header>
-      <div className="dashboard-panel-body flex-1 p-3 text-[13px]">{children}</div>
+      <div className="dashboard-panel-body flex-1 overflow-hidden p-2 text-[12px]">{children}</div>
     </section>
   );
 }

@@ -87,21 +87,21 @@ export function ApprovalQueueTable({ rows }: { rows?: ApprovalRow[] }) {
         <tbody className="divide-y divide-slate-100">
           {data.map((r) => (
             <tr key={r.id} className="transition-colors hover:bg-slate-50">
-              <td className="px-2 py-2">
+              <td className="px-2 py-1">
                 <span className={`rounded border px-2 py-0.5 text-[11px] font-bold ${KIND_STYLE[r.kind]}`}>
                   {r.kind}
                 </span>
               </td>
-              <td className="max-w-[180px] px-2 py-2 text-slate-900">
+              <td className="max-w-[180px] px-2 py-1 text-slate-900">
                 <Link href={r.href} className="block truncate hover:underline">
                   {r.projectName}
                 </Link>
               </td>
-              <td className="whitespace-nowrap px-2 py-2">{r.applicant}</td>
-              <td className="whitespace-nowrap px-2 py-2 text-right font-semibold text-slate-900">
+              <td className="whitespace-nowrap px-2 py-1">{r.applicant}</td>
+              <td className="whitespace-nowrap px-2 py-1 text-right font-semibold text-slate-900">
                 ¥{r.amountYen.toLocaleString("ja-JP")}
               </td>
-              <td className="whitespace-nowrap px-2 py-2 text-right text-[11px] text-slate-400">
+              <td className="whitespace-nowrap px-2 py-1 text-right text-[11px] text-slate-400">
                 {r.elapsed}
               </td>
             </tr>

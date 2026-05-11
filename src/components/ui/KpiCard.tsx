@@ -74,7 +74,7 @@ export function KpiCard({
 
   return (
     <div
-      className={`dashboard-kpi-card relative min-h-[132px] overflow-hidden rounded-lg border bg-white px-4 py-3 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-shadow hover:shadow-md ${a.borderColor}`}
+      className={`dashboard-kpi-card relative min-h-[108px] overflow-hidden rounded-lg border bg-white px-4 py-2.5 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-shadow hover:shadow-md ${a.borderColor}`}
     >
       <div className="mb-2 flex items-center gap-1.5">
         <h3 className={`text-[14px] font-bold ${a.titleColor}`}>{label}</h3>
@@ -88,7 +88,7 @@ export function KpiCard({
         </button>
       </div>
 
-      <div className="mb-2 flex min-h-[54px] items-center justify-between gap-3">
+      <div className="mb-1.5 flex min-h-[46px] items-center justify-between gap-3">
         <div className="text-[31px] font-black leading-none tracking-normal text-slate-950">
           {value}
           {unit && (
@@ -99,13 +99,13 @@ export function KpiCard({
       </div>
 
       {subText && (
-        <div className="mb-2 text-[12px] leading-snug text-slate-600">
+        <div className="mb-1.5 text-[12px] leading-snug text-slate-600">
           {subText}
         </div>
       )}
 
       {(trend || href) && (
-        <div className="flex items-center justify-between border-t border-slate-100 pt-2">
+        <div className="flex items-center justify-between border-t border-slate-100 pt-1.5">
           <div className="flex items-center gap-1 text-[12px]">
             {trend && (
               <>
