@@ -164,67 +164,80 @@ export default async function PcHomePage() {
           />
         </section>
 
+        {/* panel-grid を 3 列の column-based flex 構造に。
+            各列が独立した row 高さを持つことで、右列だけ「配置マップ広め + 売上短め」を実現。
+            上段(今日のやること/承認待ち/配置マップ)col-span 3/5/4
+            下段(現場別進捗/クエスト・バッジ/売上原価利益)col-span 3/5/4(下段も合わせる) */}
         <section
           aria-label="今日の業務と進捗"
-          className="dashboard-panel-grid mb-1.5 grid grid-cols-12 gap-2 [grid-template-rows:180px_260px]"
+          className="dashboard-panel-grid mb-1.5 grid grid-cols-12 gap-2"
         >
-          {/* 上段: 3 / 5 / 4(今日のやること狭め、承認待ち広く、配置マップ中) */}
-          <div className="col-span-12 min-h-0 lg:col-span-3">
-            <PanelCard
-              title="今日のやること"
-              href="/pc/tasks"
-              hrefLabel="すべてのタスクを見る"
-            >
-              <TodayTasksList />
-            </PanelCard>
-          </div>
-          <div className="col-span-12 min-h-0 lg:col-span-5">
-            <PanelCard title="承認待ち一覧" href="/pc/approvals" hrefLabel="すべて見る">
-              <ApprovalQueueTable />
-            </PanelCard>
-          </div>
-          <div className="col-span-12 min-h-0 lg:col-span-4">
-            {canSeeMap ? (
+          {/* === 左列 col-span-3: 今日のやること(180px) + 現場別進捗(260px) === */}
+          <div className="col-span-12 flex flex-col gap-2 lg:col-span-3">
+            <div className="h-[180px] min-h-0">
               <PanelCard
-                title="配置マップ（稼働中の現場)"
-                href="/pc/dispatch-map"
-                hrefLabel="すべて見る"
+                title="今日のやること"
+                href="/pc/tasks"
+                hrefLabel="すべてのタスクを見る"
               >
-                <DispatchMapPreview sites={sites} />
+                <TodayTasksList />
               </PanelCard>
-            ) : (
-              <PanelCard title="クエスト・バッジ">
-                <QuestBadgeSummary />
-              </PanelCard>
+            </div>
+            {canSeeSiteProgress && (
+              <div className="h-[260px] min-h-0">
+                <PanelCard title="現場別進捗" href="/pc/projects" hrefLabel="すべて見る">
+                  <SiteProgressTable />
+                </PanelCard>
+              </div>
             )}
           </div>
 
-          {/* 下段: 現場別進捗 / クエスト・バッジ / 売上・原価・利益(畠中様指示で中央と右を入替) */}
-          {canSeeSiteProgress && (
-            <div className="col-span-12 min-h-0 lg:col-span-4">
-              <PanelCard title="現場別進捗" href="/pc/projects" hrefLabel="すべて見る">
-                <SiteProgressTable />
+          {/* === 中央列 col-span-5: 承認待ち一覧(180px) + クエスト・バッジ(260px) === */}
+          <div className="col-span-12 flex flex-col gap-2 lg:col-span-5">
+            <div className="h-[180px] min-h-0">
+              <PanelCard title="承認待ち一覧" href="/pc/approvals" hrefLabel="すべて見る">
+                <ApprovalQueueTable />
               </PanelCard>
             </div>
-          )}
-          {canSeeMap && (
-            <div className="col-span-12 min-h-0 lg:col-span-4">
-              <PanelCard title="クエスト・バッジ">
-                <QuestBadgeSummary />
-              </PanelCard>
+            {canSeeMap && (
+              <div className="h-[260px] min-h-0">
+                <PanelCard title="クエスト・バッジ">
+                  <QuestBadgeSummary />
+                </PanelCard>
+              </div>
+            )}
+          </div>
+
+          {/* === 右列 col-span-4: 配置マップ(240px、taller) + 売上原価利益(200px、shorter) ===
+              畠中様指示: 売上カードの余白を削り、マップを縦に大きく */}
+          <div className="col-span-12 flex flex-col gap-2 lg:col-span-4">
+            <div className="h-[240px] min-h-0">
+              {canSeeMap ? (
+                <PanelCard
+                  title="配置マップ（稼働中の現場)"
+                  href="/pc/dispatch-map"
+                  hrefLabel="すべて見る"
+                >
+                  <DispatchMapPreview sites={sites} />
+                </PanelCard>
+              ) : (
+                <PanelCard title="クエスト・バッジ">
+                  <QuestBadgeSummary />
+                </PanelCard>
+              )}
             </div>
-          )}
-          {canSeeRevenue && (
-            <div className="col-span-12 min-h-0 lg:col-span-4">
-              <PanelCard
-                title="売上・原価・利益(今期累計)"
-                href="/pc/reports/finance"
-                hrefLabel="詳細へ"
-              >
-                <RevenueCostProfitChart />
-              </PanelCard>
-            </div>
-          )}
+            {canSeeRevenue && (
+              <div className="h-[200px] min-h-0">
+                <PanelCard
+                  title="売上・原価・利益(今期累計)"
+                  href="/pc/reports/finance"
+                  hrefLabel="詳細へ"
+                >
+                  <RevenueCostProfitChart />
+                </PanelCard>
+              </div>
+            )}
+          </div>
         </section>
 
         <section
