@@ -4,6 +4,104 @@
 
 ---
 
+## S12 — REPORT3 入力 PC 画面 + 宮城県 mock 統一 + Google Maps iframe / 2026-05-12
+
+### コンテキスト
+S11 でダッシュボードが概ね完成。次画面の実装に進む。
+板澤様の指示:
+- 配置マップを実地図風に(SVG 抽象パターン → Google Maps iframe)
+- mock データを宮城県の配管現場に統一
+- REPORT3 入力 PC 版を参照画像準拠で新規作成
+- 進捗トラッキングを徹底(コンテキスト破綻防止)
+
+### このセッションで完了
+**配置マップ Google Maps iframe 化**(commit `90ab645`):
+- 自社 SVG → `<iframe src="https://maps.google.com/maps?q=...&output=embed">`
+- API キー不要、無料、リアル Google マップ表示
+- TODO P12-01-map: JS API + 5 色ピン実装は後フェーズ
+
+**宮城県 mock 統一**(commit `822c3fb`):
+- DispatchMapPreview FALLBACK_SITES: 仙台駅前 / 泉中央 / 石巻 / 多賀城 / 名取(lat/lng 含む)
+- SiteProgressTable: 5 現場名を宮城県化(工種は配管業のまま維持)
+- ApprovalQueueTable: 5 案件 projectName を宮城県化
+- iframe URL を仙台中心(38.27, 140.95)z=9 で宮城県全域ビュー
+
+**REPORT3 入力 PC 画面新規作成**(commit `2329f4b`):
+- `src/app/(authenticated)/pc/report3/new/page.tsx`(Server Component)
+- `Report3InputForm.tsx`(Client Component、663 行)
+- 5 ステップ Stepper(現場選択 → 作業内容 → 時間入力 → 写真添付 → 確認)
+- 2 カラム layout(form 9/12 + 右 widget 3/12)
+- 左フォーム: 基本情報 / 作業内容 / 時刻 / 安全/天候/メモ / 写真添付
+- 右 widget: 本日の配属現場 card + 入力 Tips + 反映先 chips(日報/原価/工事概況/XP)
+- 下端アクションバー: 戻る / 一時保存 / 下書き保存 / 送信して反映
+- 配管業向け WORK_CATEGORIES / PROJECTS mock
+- サイドバー nav の「REPORT3入力」 /sp/ → /pc/ に変更
+
+### 次セッション着手内容
+**P12-02 案件管理画面**(参照画像: 参照データ/案件管理.png)
+- 5 つの下流画面(見積/請求/原価/スケジュール/配置マップ)が参照する基盤
+- 宮城県 5 件 mock を直接活用
+- CRUD 基本パターン確立(他画面で再利用)
+
+### 関連コミット
+- `90ab645` 配置マップ Google Maps iframe
+- `822c3fb` 宮城県 mock 統一
+- `2329f4b` REPORT3 入力 PC 画面
+
+---
+
+## S7-S11 — ダッシュボード S6.5 → 完成形まで反復改善 / 2026-05-11
+
+### コンテキスト
+S6.5 で達成度 66% の徹底比較を実施。Q1=A(レイアウト/UI/UX のみ参照画像準拠、テキスト
+は配管業のまま維持)、Q2=X(並列 specialist で一気)を板澤様確定。
+
+### 主要マイルストーン
+
+**S6.6 修正セット A/B/C 一括適用**(commit `bfbceea`、3 specialist 並列):
+- A: 1 画面 fit + 12 カラム grid 統合
+- B: KPI 数値 28→34px、KPI #2 赤系化、Sidebar fallback 色補正
+- C: 承認待ち 5 列化、現場別進捗 7 列化、配置マップ 5 色ピン、クエスト充実
+
+**S6.7 ライトテーマ + コーポレート tone 全面書換え**(commit `04977c2`、3 specialist 並列):
+- サイドバー濃紺 → 白ベース、SidebarFooterWidget のチームレベル/安全度バー削除
+- KPI カード bg-white + 左 4px 縦アクセントバー
+- 状態 pill ネオン → パステル(bg-{color}-50 text-{color}-700)
+- セクションヘッダーの絵文字削除、Lucide アイコン化
+- 「よく使うリンク」ネイビーピル → 淡ブルーボックス + Lucide アイコン
+
+**S6.8 配管業 mock + 開発者メニュー条件表示 + 経過時間表記**(commit `db52ada`):
+- 配管業: 給排水/給湯設備/排水管/配管点検/改修工事
+- 開発者メニュー: `role==="system" && NODE_ENV!=="production"` ガード
+- 承認待ち: 申請日 → 経過時間(2時間前/4時間前/...)
+- KPI Mock fallback: DB 空時に 78%/18件/3件 をデモ値として表示
+
+**S9 counter-scaling 撤廃**(commit `feea7e0`):
+- Codex の `transform: scale(0.56)` + 178vh frame を撤廃
+- globals.css の `@media (min-width: 900px) and (max-width: 1400px)` block 200 行削除
+- !important 30+ 撤去、フォント・線がシャープに
+
+**S10-S11 viewport 585px fit + 段別高さ + col-span 再設計**(約 25 コミット):
+- 実 viewport 585px(1280×720 - chrome 135)を JS で発見
+- panel-grid items: 段別 grid-template-rows 設定(中段 180 / 下段 260)
+- col-span: 上段 3/5/4、下段 4/4/4(参照画像のサイズバランス再現)
+- 右列だけ map taller(240)+ 売上 shorter(200)で再配分(列単位 flex)
+- 承認待ち table 5列(text-[10] table-fixed colgroup)
+- 現場別進捗 7列 table(現場名/工種/進捗率/予定/遅延/安全/品質)
+- クエスト・バッジ 2 段構成(XP+Quest 上、Badges full-width 下)
+- 売上原価利益チャート: SVG fontSize 10→14、PAD.l 46→62(Y軸ラベル切れ修正)
+
+### 学び
+- Web 標準 CSS pixel(1280×720)を base に、150% 環境は OS の DPI 機構で自動対応
+- counter-scaling は脆い、責任ある responsive design が正攻法
+- Vercel Authentication を OFF にして外部 share 可能化(畠中様承認)
+- Codex との並行作業:衝突回避のためファイルスコープを明示
+
+### 関連監査レポート
+- `audit-reports/2026-05-11_S6.5_dashboard-comparison.md`(初期 specialist 比較)
+
+---
+
 ## S6 — Phase 11 共通基盤実装(4 specialist 並列、219k tokens)/ 2026-05-11
 
 ### コンテキスト

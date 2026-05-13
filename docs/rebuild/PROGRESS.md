@@ -8,55 +8,88 @@
 
 ## 🎯 現在のステータス
 
-- **進行中フェーズ**: 🔥 **Phase 11/12 着手中**(参照画像準拠への全面リワーク)
-- **完了タスク**: 37 / 約 138
-- **最終更新**: 2026-05-11
-- **最終セッション ID**: **S6.5(ダッシュボード徹底比較完了、達成度 66%)**
-- **最新デプロイ**: `f5f0990`(Vercel READY、密度修正版)
-- **廃止確定**: ~~Phase 3-C(マリオ風 STAGE マップ)~~ / ~~Phase 3-D(ボスHPモニター)~~
-- **保持確定**: Phase 3-E(幹部育成スキルツリー)
-- **既存ページ取扱い**: B 案 = 直接書換え(本番に随時反映)
+- **進行中フェーズ**: 🔥 **Phase 12(画面準拠化)着手中**
+- **完了タスク**: 39 / 約 138(ダッシュボード + REPORT3 入力 PC 版 完了)
+- **最終更新**: 2026-05-12
+- **最終セッション ID**: **S12(REPORT3 入力 PC 画面新規作成 + 宮城県 mock 統一)**
+- **最新デプロイ**: `2329f4b`(Vercel READY、REPORT3 入力画面公開済み)
+- **公開 URL**: `https://sakura-os-bice.vercel.app`(Vercel Auth 撤廃済み、外部 share 可)
 
-### ⚠️ 次セッション開始時に板澤様確認必須(2 件)
+### ✅ Phase 12 完了済(ダッシュボード関連 = 1 画面で約 40 コミット)
 
-**Q1: 業態整合性(モックデータ方針)** — 参照画像は建築業寄り、SAKURA OS は配管工事業向け
-- A: 参照画像通り(建築業) / B: 配管業に再キャスト(現状路線) / C: 実 DB データ駆動
+**S6.6-S6.8(修正セット A/B/C)**: ダッシュボード参照画像準拠化 / 配管業テキスト維持
+- 1 画面 fit(中段+下段統合 12 カラム grid)
+- KPI カード仕上げ(数値・色・余白)
+- 承認待ちカラム拡張 / 配置マップ 5 色ピン / クエストバッジ拡充
 
-**Q2: 修正の進め方**
-- X: 修正セット【A】【B】【C】を並列 specialist で一気に修正(私推奨)
-- Y: 1 セットずつ段階実装 / Z: 別優先
+**S7 ライトテーマ + コーポレート tone 全面書換え**: 3 specialist 並列
+- サイドバー濃紺 → 白ベース、ゲーミフィケーション要素圧縮
+- KPI カード left 4px 縦アクセントバー
+- 状態 pill パステル化
 
-### 次セッション着手内容(Q1/Q2 確定後)
+**S8 配管業 mock + 開発者メニュー条件表示 + 経過時間表記**
 
-**修正セット【A】1 画面 fit 達成**(Layout 重大差分 1-3、達成度 55%→改善)
-- page.tsx ルート: `overflow-hidden min-h-screen flex flex-col`
-- ヘッダー `flex-wrap` → `flex-nowrap`
-- 中段+下段を統合 12 カラム grid 再設計
-- 最下段 grid-cols-12: お知らせ col-span-4 / リンク col-span-8
-- mb-3 → mb-2、py-3 → py-2
+**S9 counter-scaling 撤廃**(Codex の 150% 対策を巻き戻し)
+- globals.css の `@media` 200 行(`!important` 30+)削除
+- 1280×720 CSS pixel を native 基準に再構築
+- `transform: scale(0.56)` 廃止でフォント・線シャープに
 
-**修正セット【B】KPI カード仕上げ**(Brand 重大差分 7-9、達成度 78%→改善)
-- KpiCard.tsx: 数値 28px → 34px、単位 15→16px
-- page.tsx: KPI #2 accent="p2" → "p1"(承認待ち赤系)
-- Sidebar.tsx L254/L354: fallback 古いオレンジ → `#E8516A`/`#F5A45A`
-- 背景色トークン統一(tailwind/globals 同期)
+**S10 viewport 585px 完全 fit + content 密度最適化**(約 20 コミットの試行錯誤)
+- 実 viewport が 585px(1280×720 - browser chrome 135px)であることを JS で発見
+- 段別 panel 高さ: 中段 180 / 下段 260
+- col-span 上段 3/5/4(今日のやること narrow、承認待ち wide、配置マップ medium)
+- 下段 4/4/4 等幅
+- 売上原価利益(右下)200px、配置マップ(右上)240px(余白を上に移動)
 
-**修正セット【C】中身のデータ準拠化**(Content 重大差分 4-6、達成度 65%→改善)
-- ApprovalQueueTable.tsx: 案件名カラム追加 + 5 行モック更新
-- SiteProgressTable.tsx: 「予定」「遅延」カラム追加(7 列化)
-- TodayTasksList.tsx: 4 行ラベル・件数を参照画像準拠
-- DispatchMapPreview.tsx: 現場ごと 5 色マッピング
-- QuestBadgeSummary.tsx: 期限 "2025/06/30"、「次のレベルまで N XP」追加
-- page.tsx: ヘッダーの「現在のロール:」ラベル削除
+**S11 各 panel 内 content 最適化**
+- 承認待ち / 現場別進捗: 7 列 table → card レイアウトと 5 列 table の折衷
+- クエスト・バッジ: 2 段構成(XP+Quest 上、Badges 下フル幅)
+- 売上原価利益チャート: SVG 月ラベル / Y軸ラベル切れ修正(fontSize 14 + PAD.l 62)
 
-### Specialist フル稼働実績(累計)
-- S4: 4 並列 230k / S5: 4 並列 172k / S6 前半: 4 並列 219k / S6 続編: 2 並列 ~140k
-- **S6.5: 4 並列 ~242k(徹底比較)**
-- 累計: **18 specialist 起動、約 1,003k tokens**
+**S12 配置マップ Google Maps iframe 化 + 宮城県統一**
+- 配置マップ:自社 SVG → `<iframe src="https://maps.google.com/maps?q=38.27,140.95&z=9...">`
+  (API キー不要、後で JS API + 5 色ピンに切替予定 P12-01-map)
+- mock データを宮城県の配管現場 5 件に統一(仙台駅前 / 泉中央 / 石巻 / 多賀城 / 名取)
+  + lat/lng 座標を保持(将来 JS API 移行用)
+- ダッシュボードの 承認待ち / 現場別進捗 も同じ宮城県名に統一
+
+**S12 REPORT3 入力 PC 版新規作成**
+- `/pc/report3/new/page.tsx` + `Report3InputForm.tsx`(663 行)
+- 5 ステップ Stepper + 2 カラム layout(form 9 / 右 widget 3)
+- 基本情報 + 作業内容 + 時刻 + 安全/天候/メモ + 写真添付
+- 右サイドバー: 本日の配属現場 card + Tips + 反映先 chips(日報/原価/工事概況/XP)
+- アクションバー: 戻る / 一時保存 / 下書き保存 / 送信して反映
+- 宮城県配管業向け mock データ(WORK_CATEGORIES、PROJECTS)
+- サイドバー nav の「REPORT3入力」を /sp/ → /pc/ に変更
+
+### 🎯 次セッション着手内容(板澤様確定の効率順)
+
+**実装ロードマップ Phase 1(基礎データの土台)**
+
+**P12-02 案件管理画面新規作成**(NEXT) ← **これから着手**
+- 参照画像: `参照データ/案件管理.png`
+- 5 つの下流画面(見積/請求/原価/スケジュール/配置マップ)が参照する基盤
+- 宮城県 5 件 mock を直接活用(既にダッシュボード / REPORT3 で統一済)
+- リスト + 詳細 + 編集の CRUD 基本パターン確立
+
+**Phase 2(単独実装可能・demo 価値高)**
+- P12-03 通知画面(list + filter、シンプル、サイドバー 🔔12 と連動)
+- P12-04 配置マップフルページ版(既存 DispatchMapPreview を拡張)
+- P12-05 スケジュール画面(案件 × カレンダー)
+
+**Phase 3(金額系)**
+- P12-06 見積書画面(Stepper 再利用)
+- P12-07 請求書画面(見積書から派生)
+- P12-08 原価管理(KpiCard / Chart 再利用)
+
+**Phase 4(Polish)**
+- P12-09 クエスト・バッジフルページ版
+- P12-10 車両・工具
+- P12-11 モバイル版 /sp/* 最適化
 
 ### 📑 関連監査レポート(必読)
 - `docs/rebuild/audit-reports/2026-05-11_S5_reference-data-audit.md`(参照画像 12 枚分析)
-- `docs/rebuild/audit-reports/2026-05-11_S6.5_dashboard-comparison.md` ← **S7 着手時に必読**
+- `docs/rebuild/audit-reports/2026-05-11_S6.5_dashboard-comparison.md`
 
 ---
 
