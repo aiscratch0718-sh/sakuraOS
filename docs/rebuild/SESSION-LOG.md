@@ -4,6 +4,59 @@
 
 ---
 
+## S13 — 案件管理画面 2-pane 新規作成 + 進捗保存ルール明文化 / 2026-05-12
+
+### コンテキスト
+S12 で REPORT3 入力 PC 画面と宮城県 mock 統一が完了。
+板澤様の指示:
+- 参照画像フォルダの効率順を分析して次の実装順を提案
+- 案件管理画面から着手(下流 5 画面の基盤)
+- **進捗保存ルール徹底**: 各タスク完了時に必ず PROGRESS.md / SESSION-LOG.md 更新、
+  各タスク着手前に必ずこれらを読み込む、ベストプラクティス事前宣言を毎回行う
+
+### 効率順分析(参照画像 11 枚)
+- Phase 1(基礎): 案件管理 = **最優先**(下流 5 画面が参照)
+- Phase 2(独立): 通知 → 配置マップ(フル)→ スケジュール
+- Phase 3(金額): 見積書 → 請求書 → 原価管理
+- Phase 4(Polish): クエスト・バッジ → 車両工具 → モバイル
+
+### このセッションで完了
+
+**P12-02 案件管理画面**(commit `51aec65`、3 ファイル、998 行):
+- `_data/mock-projects.ts`: 宮城県 15 件 mock + 型定義 + STATUS_META
+  - 既存ダッシュボードの 5 件(仙台駅前 / 泉中央 / 石巻 / 多賀城 / 名取)を継承
+  - 追加 10 件(古川 / 気仙沼 / 白石 / 登米 / 塩釜 / 富谷 / 岩沼 / 栗原 / 東松島 / 大和町)
+  - 各案件に code / customer / workType / progressPct / plannedPct / startedAt / dueAt /
+    contractYen / status / leader / crew / lat / lng / address を保持
+- `page.tsx`: Server Component(認証 + mock データ渡し、簡素な 4 行)
+- `ProjectsListClient.tsx`: 2-pane Client Component(全機能 1 ファイル集約)
+  - 上段 KPI 4 cards(進行中 / 完了予定 / 遅延 / 完了済)
+  - Filter bar(検索 + ステータス select + 工種 select + 並び替え select + 件数表示)
+  - 左 list table 8 列(コード/案件名/顧客/工種/進捗/着手/期日/金額/ステータス)
+    - Sortable headers(aria-sort、↑↓ 矢印)
+    - 選択行ハイライト(aria-selected、Enter/Space キー対応)
+    - ステータス pill 4 色(青/赤/黄/緑)+ dot + テキスト多重表現
+  - 右 detail panel 4 セクション(header / 進捗 / 案件情報 / クイックアクション)
+  - クイックアクション(REPORT3 入力 / 詳細 / 編集)
+
+**進捗保存ルールの明文化**:
+- PROGRESS.md「現在のステータス」に板澤様確定の運用ルールを 3 項目追記
+  1. 各タスク完了後:必ず PROGRESS.md / SESSION-LOG.md 更新 + コミット
+  2. 各タスク着手前:必ず PROGRESS.md / SESSION-LOG.md 読み込み
+  3. 各タスク着手前:ベストプラクティス事前宣言
+
+### 次セッション着手内容
+**P12-03 通知画面**(参照画像: 参照データ/通知.png)
+- list + filter のシンプル構造、低コスト
+- ダッシュボード 🔔12 + サイドバー badge を実機能化
+- 独立 work(他画面依存なし)
+
+### 関連コミット
+- `51aec65` P12-02 案件管理画面 2-pane 新規作成(998 行)
+- (次)PROGRESS.md / SESSION-LOG.md S13 セッション記録
+
+---
+
 ## S12 — REPORT3 入力 PC 画面 + 宮城県 mock 統一 + Google Maps iframe / 2026-05-12
 
 ### コンテキスト

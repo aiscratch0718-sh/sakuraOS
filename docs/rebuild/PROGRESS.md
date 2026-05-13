@@ -9,11 +9,15 @@
 ## 🎯 現在のステータス
 
 - **進行中フェーズ**: 🔥 **Phase 12(画面準拠化)着手中**
-- **完了タスク**: 39 / 約 138(ダッシュボード + REPORT3 入力 PC 版 完了)
+- **完了タスク**: 40 / 約 138(ダッシュボード + REPORT3 入力 PC + 案件管理 PC 完了)
 - **最終更新**: 2026-05-12
-- **最終セッション ID**: **S12(REPORT3 入力 PC 画面新規作成 + 宮城県 mock 統一)**
-- **最新デプロイ**: `2329f4b`(Vercel READY、REPORT3 入力画面公開済み)
+- **最終セッション ID**: **S13(案件管理画面 2-pane 新規作成 + 宮城県 15 件 mock)**
+- **最新デプロイ**: `51aec65`(Vercel deploy 中、案件管理画面公開予定)
 - **公開 URL**: `https://sakura-os-bice.vercel.app`(Vercel Auth 撤廃済み、外部 share 可)
+- **進捗保存ルール**(板澤様確定 2026-05-12):
+  - **各タスク完了後**:必ず PROGRESS.md / SESSION-LOG.md を更新してコミット
+  - **各タスク着手前**:必ず PROGRESS.md / SESSION-LOG.md を読み込む
+  - **各タスク着手前**:ベストプラクティスを事前宣言してから実装着手
 
 ### ✅ Phase 12 完了済(ダッシュボード関連 = 1 画面で約 40 コミット)
 
@@ -62,15 +66,31 @@
 - 宮城県配管業向け mock データ(WORK_CATEGORIES、PROJECTS)
 - サイドバー nav の「REPORT3入力」を /sp/ → /pc/ に変更
 
+### ✅ S13 で完了済(案件管理画面)
+
+**P12-02 案件管理画面**(commit `51aec65`、3 ファイル、998 行)
+- `src/app/(authenticated)/pc/projects/_data/mock-projects.ts`(15 件 mock)
+- `src/app/(authenticated)/pc/projects/page.tsx`(Server Component)
+- `src/app/(authenticated)/pc/projects/ProjectsListClient.tsx`(2-pane Client)
+- 構成:KPI 4 cards + Filter bar + 左 list 8 列 table + 右 detail panel
+- 宮城県 15 件 mock(既存 5 件 + 追加 10 件)、lat/lng 含むので将来 Google Maps JS API 連携可
+- ステータス pill 4 色(進行中/遅延/完了予定/完了済)、sortable / filterable
+
 ### 🎯 次セッション着手内容(板澤様確定の効率順)
 
-**実装ロードマップ Phase 1(基礎データの土台)**
+**実装ロードマップ Phase 2(単独実装可能・demo 価値高)**
 
-**P12-02 案件管理画面新規作成**(NEXT) ← **これから着手**
-- 参照画像: `参照データ/案件管理.png`
-- 5 つの下流画面(見積/請求/原価/スケジュール/配置マップ)が参照する基盤
-- 宮城県 5 件 mock を直接活用(既にダッシュボード / REPORT3 で統一済)
-- リスト + 詳細 + 編集の CRUD 基本パターン確立
+**P12-03 通知画面**(NEXT) ← **次に着手**
+- 参照画像: `参照データ/通知.png`
+- list + filter のシンプル構造、低コスト
+- ダッシュボードヘッダーの 🔔12 を実機能化
+- サイドバー badge 「通知 12」も実機能化
+- 他画面に依存しない独立 work、効率良し
+
+**続いて P12-04 配置マップ(フルページ)**
+- 参照画像: `参照データ/マップ.png`
+- ダッシュボードの DispatchMapPreview を拡大 + フィルタ追加
+- 既存の Google Maps iframe + 宮城県 15 件 lat/lng 活用
 
 **Phase 2(単独実装可能・demo 価値高)**
 - P12-03 通知画面(list + filter、シンプル、サイドバー 🔔12 と連動)
