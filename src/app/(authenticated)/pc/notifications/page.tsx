@@ -1,56 +1,27 @@
 import { requireSession } from "@/server/auth/session";
-import { createClient } from "@/lib/supabase/server";
-import { NotificationItem } from "../../_components/NotificationItem";
-import { MarkAllReadButton } from "../../_components/MarkAllReadButton";
+import { NotificationsClient } from "./NotificationsClient";
+import { MOCK_NOTIFICATIONS } from "./_data/mock-notifications";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * 通知画面(PC desktop 版)。
+ *
+ * 参照画像「通知.png」準拠の 2-pane layout:
+ *  - 上部 KPI 4 cards(未読 / 緊急 / 要対応 / 既読)
+ *  - Filter bar(検索 + カテゴリ tabs + 並び替え)
+ *  - 左 list(各通知:アイコン + タイトル + 詳細 + 経過時間 + 優先度 pill)
+ *  - 右 detail panel(選択通知の本文 + 関連 + クイックアクション)
+ *
+ * ダッシュボードヘッダー 🔔12 とサイドバー badge「通知 12」と連動:
+ *  - 未読件数 12 が一致するように mock を設計済
+ *
+ * TODO(P12-03-data): 実 DB から notifications を取得
+ * (現状は配管業向け 18 件 mock データ)。
+ */
 export default async function PcNotificationsPage() {
-  const session = await requireSession();
-  const supabase = await createClient();
+  await requireSession();
 
-  const { data: notifs } = await supabase
-    .from("notifications")
-    .select("id, category, title, body, link_url, read_at, created_at")
-    .eq("user_id", session.userId)
-    .order("created_at", { ascending: false })
-    .limit(100);
-
-  const unread = (notifs ?? []).filter((n) => !n.read_at).length;
-
-  return (
-    <div className="px-6 py-6 max-w-3xl mx-auto">
-      <div className="flex items-start justify-between mb-5">
-        <div>
-          <h1 className="text-xl font-extrabold text-navy">通知</h1>
-          <p className="text-[12px] text-ink-2 mt-0.5">
-            未読 {unread} 件 / 直近 100 件
-          </p>
-        </div>
-        <MarkAllReadButton disabled={unread === 0} />
-      </div>
-
-      {!notifs || notifs.length === 0 ? (
-        <div className="panel-pad text-[12px] text-ink-3 text-center py-8">
-          通知はまだありません。
-        </div>
-      ) : (
-        <ul className="space-y-2">
-          {notifs.map((n) => (
-            <li key={n.id}>
-              <NotificationItem
-                id={n.id}
-                category={n.category}
-                title={n.title}
-                body={n.body}
-                linkUrl={n.link_url}
-                readAt={n.read_at}
-                createdAt={n.created_at}
-              />
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
+  // 現状は mock データを直接渡す。将来 Supabase fetch に置換。
+  return <NotificationsClient notifications={MOCK_NOTIFICATIONS} />;
 }
