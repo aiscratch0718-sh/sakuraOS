@@ -107,6 +107,23 @@
 - 状態 pill 4 色多重表現(色 + ドット + テキスト)
 - 配置作業員アバター(イニシャル円形 + 役割 + リーダー badge)
 
+### 🕓 保留タスク(板澤様確認済 / 後回し)
+
+**P12-XX-google-maps-api 配置マップを Google Maps JS API に切替**
+- 状態:**法人カード到着待ち**(2026-05-14 板澤様確定)
+- 着手条件:
+  1. 板澤様が法人カードを受領
+  2. Google Cloud Console で API キー発行(15-20 分)
+  3. Vercel 環境変数 `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` に登録
+- 実装範囲:
+  - `npm install @vis.gl/react-google-maps`
+  - `MapView.tsx` 内部のみ書換(`MapContainer` → `<APIProvider><Map>`、
+    `TileLayer` 削除、`Marker` → `AdvancedMarkerElement`、`Popup` → `InfoWindow`)
+  - 呼び出し側(`DispatchMapClient.tsx`)は無変更
+- 工数:1-2 時間
+- コスト試算:社員 50 名 × 3 回/日 × 20 営業日 = 3,000 Map Loads/月
+  → 無料枠 28,500 Loads/月 の約 10%、月額 ¥0 で運用可能
+
 ### ✅ S17 で完了済(配置マップ Leaflet 化)
 
 **P12-04-map Leaflet+OpenStreetMap 化**(commit `44dc165`、5 ファイル、+267 行)
