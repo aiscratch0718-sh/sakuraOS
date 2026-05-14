@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Leaflet マーカー / コントロール用 base CSS(配置マップ画面で使用) */
+@import "leaflet/dist/leaflet.css";
+
 @layer base {
   /* === デザイントークン (デモ v4.0 由来 + 既存) ===
      CSS変数経由で動的テーマ切替、コンポーネント側からも参照可能 */

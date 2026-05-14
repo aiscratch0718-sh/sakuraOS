@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import {
   Search,
   Calendar,
@@ -19,18 +20,29 @@ import {
 } from "lucide-react";
 import type { ProjectRow, ProjectStatus } from "../projects/_data/mock-projects";
 import { STATUS_META } from "../projects/_data/mock-projects";
+import { PIN_COLOR_BY_STATUS } from "./_components/MapView";
 
 /* ============================================================
    設定 / 定数
    ============================================================ */
 
-/** マップピン色(状態に基づく) */
-const PIN_COLOR_BY_STATUS: Record<ProjectStatus, string> = {
-  active: "#2563eb", // 青(進行中)
-  delayed: "#ef4444", // 赤(遅延)
-  upcoming: "#f59e0b", // 橙(完了予定)
-  completed: "#10b981", // 緑(完了済)
-};
+/**
+ * Leaflet マップは window 依存のため SSR 不可。
+ * next/dynamic で ssr: false 指定して client-only にロードする。
+ * 将来 Google Maps JS API に切り替える場合も MapView.tsx の内部実装だけ変更すればよい。
+ */
+const MapView = dynamic(() => import("./_components/MapView"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-[460px] w-full items-center justify-center bg-slate-50 text-xs text-slate-500">
+      マップを読み込んでいます...
+    </div>
+  ),
+});
+
+/** 宮城県中心(初期表示用)— 仙台市 + 県内全域がカバーされる範囲 */
+const MIYAGI_CENTER = { lat: 38.45, lng: 141.0 };
+const MIYAGI_ZOOM = 8;
 
 const WORK_TYPES = [
   "給排水工事",
@@ -117,14 +129,6 @@ export function DispatchMapClient({ projects }: { projects: ProjectRow[] }) {
     );
   }, [filteredProjects, selectedId]);
 
-  // マップ iframe URL(選択案件があれば lat/lng & z=14、無ければ宮城県中心 & z=9)
-  const mapUrl = useMemo(() => {
-    if (selected) {
-      return `https://maps.google.com/maps?q=${selected.lat},${selected.lng}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
-    }
-    return `https://maps.google.com/maps?q=38.27,140.95&t=&z=9&ie=UTF8&iwloc=&output=embed`;
-  }, [selected]);
-
   // フィルタークリア
   const clearFilters = () => {
     setSearchQuery("");
@@ -199,7 +203,6 @@ export function DispatchMapClient({ projects }: { projects: ProjectRow[] }) {
 
         {/* === 中央 panel: マップ === */}
         <MapPanel
-          mapUrl={mapUrl}
           mapSearchQuery={mapSearchQuery}
           onMapSearchChange={setMapSearchQuery}
           viewMode={viewMode}
@@ -409,7 +412,6 @@ function FilterPanel({
    ============================================================ */
 
 function MapPanel({
-  mapUrl,
   mapSearchQuery,
   onMapSearchChange,
   viewMode,
@@ -418,7 +420,6 @@ function MapPanel({
   selectedId,
   onSelect,
 }: {
-  mapUrl: string;
   mapSearchQuery: string;
   onMapSearchChange: (v: string) => void;
   viewMode: "map" | "list";
@@ -491,12 +492,12 @@ function MapPanel({
       {/* マップ本体 or リスト */}
       {viewMode === "map" ? (
         <div className="relative flex-1 overflow-hidden">
-          <iframe
-            title="配置マップ(宮城県)"
-            src={mapUrl}
-            className="h-[460px] w-full border-0"
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
+          <MapView
+            projects={filteredProjects}
+            selectedId={selectedId}
+            onSelect={onSelect}
+            center={MIYAGI_CENTER}
+            zoom={MIYAGI_ZOOM}
           />
 
           {/* マップ上のピン凡例 (overlay 右上) */}
