@@ -9,10 +9,10 @@
 ## 🎯 現在のステータス
 
 - **進行中フェーズ**: 🔥 **Phase 12(画面準拠化)着手中**
-- **完了タスク**: 42 / 約 138(ダッシュボード + REPORT3 入力 PC + 案件管理 PC + 通知 PC + 配置マップ PC 完了)
+- **完了タスク**: 43 / 約 138(ダッシュボード + REPORT3 入力 PC + 案件管理 PC + 通知 PC + 配置マップ PC + スケジュール PC 完了)
 - **最終更新**: 2026-05-14
-- **最終セッション ID**: **S15(配置マップ 3-pane 新規作成 + 15 件 lat/lng 再利用 + ピン色凡例 + フィルター連動)**
-- **最新デプロイ**: `44a016d`(Vercel deploy 中、配置マップ公開予定)
+- **最終セッション ID**: **S16(スケジュール 3-pane 週ビュー新規作成 + 案件×7日カレンダー + 未配置者 + 印刷ボタン)**
+- **最新デプロイ**: `0ca20f8`(Vercel deploy 中、スケジュール公開予定)
 - **公開 URL**: `https://sakura-os-bice.vercel.app`(Vercel Auth 撤廃済み、外部 share 可)
 - **進捗保存ルール**(板澤様確定 2026-05-12):
   - **各タスク完了後**:必ず PROGRESS.md / SESSION-LOG.md を更新してコミット
@@ -107,14 +107,29 @@
 - 状態 pill 4 色多重表現(色 + ドット + テキスト)
 - 配置作業員アバター(イニシャル円形 + 役割 + リーダー badge)
 
+### ✅ S16 で完了済(スケジュール画面)
+
+**P12-05 スケジュール**(commit `0ca20f8`、2 ファイル、+762 行)
+- `src/app/(authenticated)/pc/schedules/page.tsx`(Server Component、ComingSoonPage 置換)
+- `src/app/(authenticated)/pc/schedules/SchedulesClient.tsx`(3-pane Client)
+- 構成:3-pane layout + 週ナビゲーター
+  - 左 panel(2 col): 検索 + 工種 + 状態 + 工種凡例 + チームコスト mini stats
+  - 中央 panel(7 col): 案件 × 週ビュー(8 列 table = 案件 + 7 日)
+    - thead に日付 + 曜日、本日青ハイライト、週末グレー
+    - セル: 工種色 chip + subType + 日付 + 人数(aria-label 付き)
+    - 工期外セルは空、土日は配置なし
+  - 右 panel(3 col): 当日 KPI 3 + 案件リスト + 未配置者 3 + 印刷 + 配置マップへ
+- MOCK_PROJECTS から週内に工期重なる案件のみ filter
+- generateMockAssignment(project, date): 工種別 subType pool + 決定的人数生成
+
 ### 🎯 次セッション着手内容(板澤様確定の効率順)
 
-**実装ロードマップ Phase 2 残り(単独実装可能・demo 価値高)**
+**Phase 2 完了 → Phase 3(金額系)に移行**
 
-**P12-05 スケジュール画面**(NEXT) ← **次に着手**
-- 参照画像: `参照データ/スケジュール.png`
-- 案件 × カレンダー、案件管理 mock を直接活用
-- 他画面に依存しない独立 work
+**P12-06 見積書画面**(NEXT) ← **次に着手**
+- 参照画像: `参照データ/見積書.png`
+- Stepper 再利用(REPORT3 入力で使用済)
+- MOCK_PROJECTS 連携で見積行生成
 
 **Phase 2(単独実装可能・demo 価値高)**
 - P12-03 通知画面(list + filter、シンプル、サイドバー 🔔12 と連動)

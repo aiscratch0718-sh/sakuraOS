@@ -4,6 +4,62 @@
 
 ---
 
+## S16 — スケジュール 3-pane 週ビュー新規作成 / 2026-05-14
+
+### コンテキスト
+S15 で配置マップが完了。Phase 2(独立実装可)の最後 P12-05 スケジュール画面に着手。
+進捗保存ルール遵守:着手前に PROGRESS.md / 参照画像 / 既存 schedules ルート読込、
+ベストプラクティス事前宣言(DRY / A11y / 色多重表現 / 責務分離)完了後に実装着手。
+
+### このセッションで完了
+
+**P12-05 スケジュール画面**(commit `0ca20f8`、2 ファイル、+762 行):
+- `page.tsx` — ComingSoonPage を実画面に置換、MOCK_PROJECTS を渡す簡素な構造
+- `SchedulesClient.tsx` — 3-pane layout(2 / 7 / 3)
+  - **ヘッダー**: パンくず + タイトル + 週ナビ(前週 / 期間表示 / 次週 / 今週ボタン)
+  - **左 panel(col-span-2)**:
+    - 検索 input(案件名 / 担当)
+    - 工種 select(6 種)
+    - 状態 checkbox group(完了済はデフォルト OFF)
+    - 工種凡例(6 色アクセント)
+    - チームコスト mini stats(入社 / 出勤 / 残業)
+  - **中央 panel(col-span-7)**:
+    - 8 列 table-fixed(案件名 180px + 7 日均等)
+    - thead sticky、本日青ハイライト、週末グレー背景
+    - 行ヘッダー: 工種ドット + 案件名 + 状態 pill + 工種 + リーダー + 計人数
+    - セル button: 工種色 chip + 作業 subType + 日付 + Users アイコン + 人数
+    - 工期外 / 土日はセル空表示
+    - フッターに 3 種の凡例 + 期間表示
+  - **右 panel(col-span-3)**:
+    - 本日のスケジュール(3 KPI + 案件リスト 4 件まで)
+    - 未配置者 3 名(イニシャル円形 + 理由)
+    - 「人員表を印刷」(window.print) + 「配置マップへ」リンク
+
+### 設計上の決定
+- **DRY**: MOCK_PROJECTS + STATUS_META を pc/projects から直接 import
+- **工種色マッピング**: WORK_TYPE_COLOR(6 種、bg / text / dot 3 段階)
+- **週内フィルタ**: startedAt <= weekEnd && dueAt >= weekStart で抽出
+- **モック配置生成**: project.id + date.getDate() で決定的レンダリング、土日除外
+- **色多重表現**: 状態 = color + dot + text、工種 = bg + text + dot
+- **A11y**: th scope=col/row、button aria-label に日付 + 案件 + 人数、role="progressbar" は不使用(セル button のみ)
+- **週ナビ**: 前週 / 次週 で 7 日シフト、今週ボタンで DEFAULT に戻す
+
+### 検証結果
+- TypeScript `npx tsc --noEmit` エラーなし
+- `npm run build` 成功(`/pc/schedules` 5.31 kB / First Load JS 113 kB)
+- 既存 ComingSoonPage 削除のみ、他画面影響なし
+
+### 次セッション着手内容
+**P12-06 見積書画面**(参照画像: 参照データ/見積書.png)
+- Phase 3(金額系)スタート
+- REPORT3 入力で使用した Stepper パターン再利用
+- MOCK_PROJECTS の contractYen 値からブレイクダウン生成
+
+### 関連コミット
+- `0ca20f8` P12-05 スケジュール 3-pane 週ビュー新規作成(+762 行)
+
+---
+
 ## S15 — 配置マップフルページ 3-pane 新規作成 / 2026-05-14
 
 ### コンテキスト
