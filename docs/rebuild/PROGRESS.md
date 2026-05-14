@@ -9,10 +9,10 @@
 ## 🎯 現在のステータス
 
 - **進行中フェーズ**: 🔥 **Phase 12(画面準拠化)着手中**
-- **完了タスク**: 40 / 約 138(ダッシュボード + REPORT3 入力 PC + 案件管理 PC 完了)
-- **最終更新**: 2026-05-12
-- **最終セッション ID**: **S13(案件管理画面 2-pane 新規作成 + 宮城県 15 件 mock)**
-- **最新デプロイ**: `51aec65`(Vercel deploy 中、案件管理画面公開予定)
+- **完了タスク**: 41 / 約 138(ダッシュボード + REPORT3 入力 PC + 案件管理 PC + 通知 PC 完了)
+- **最終更新**: 2026-05-14
+- **最終セッション ID**: **S14(通知画面 2-pane 新規作成 + 18 件 mock + サイドバー badge 12 件連動)**
+- **最新デプロイ**: `5a3fffa`(Vercel deploy 中、通知画面公開予定)
 - **公開 URL**: `https://sakura-os-bice.vercel.app`(Vercel Auth 撤廃済み、外部 share 可)
 - **進捗保存ルール**(板澤様確定 2026-05-12):
   - **各タスク完了後**:必ず PROGRESS.md / SESSION-LOG.md を更新してコミット
@@ -76,21 +76,34 @@
 - 宮城県 15 件 mock(既存 5 件 + 追加 10 件)、lat/lng 含むので将来 Google Maps JS API 連携可
 - ステータス pill 4 色(進行中/遅延/完了予定/完了済)、sortable / filterable
 
+### ✅ S14 で完了済(通知画面)
+
+**P12-03 通知画面**(commit `5a3fffa`、3 ファイル、864 行)
+- `src/app/(authenticated)/pc/notifications/_data/mock-notifications.ts`(18 件 mock)
+- `src/app/(authenticated)/pc/notifications/page.tsx`(Server Component)
+- `src/app/(authenticated)/pc/notifications/NotificationsClient.tsx`(2-pane Client)
+- 構成:KPI 4 cards(未読/緊急/要対応/既読)+ Filter(検索 + カテゴリ + 優先度 + 状態)
+  + 左 list(カテゴリアイコン + タイトル + 詳細 + 関連 + pill + 経過)+ 右 detail panel
+- 18 件 mock(配管業 + 宮城県現場向け):
+  - カテゴリ 6 種(report3 / approval / qualification / incident / project / system)
+  - 優先度 3 段階(urgent / warn / info)
+  - 状態 2 種(unread 12 件 / read 6 件)
+- 未読 12 件 = サイドバー badge / ダッシュボード 🔔12 と一致
+- 案件管理と同じ 2-pane パターン踏襲、コード資産再利用
+
 ### 🎯 次セッション着手内容(板澤様確定の効率順)
 
-**実装ロードマップ Phase 2(単独実装可能・demo 価値高)**
+**実装ロードマップ Phase 2 残り(単独実装可能・demo 価値高)**
 
-**P12-03 通知画面**(NEXT) ← **次に着手**
-- 参照画像: `参照データ/通知.png`
-- list + filter のシンプル構造、低コスト
-- ダッシュボードヘッダーの 🔔12 を実機能化
-- サイドバー badge 「通知 12」も実機能化
-- 他画面に依存しない独立 work、効率良し
-
-**続いて P12-04 配置マップ(フルページ)**
+**P12-04 配置マップ(フルページ)**(NEXT) ← **次に着手**
 - 参照画像: `参照データ/マップ.png`
 - ダッシュボードの DispatchMapPreview を拡大 + フィルタ追加
 - 既存の Google Maps iframe + 宮城県 15 件 lat/lng 活用
+- 他画面に依存しない独立 work
+
+**P12-05 スケジュール画面**
+- 参照画像: `参照データ/スケジュール.png`
+- 案件 × カレンダー、案件管理 mock を直接活用
 
 **Phase 2(単独実装可能・demo 価値高)**
 - P12-03 通知画面(list + filter、シンプル、サイドバー 🔔12 と連動)

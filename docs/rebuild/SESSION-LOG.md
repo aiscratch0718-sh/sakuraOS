@@ -4,6 +4,47 @@
 
 ---
 
+## S14 — 通知画面 2-pane 新規作成 / 2026-05-14
+
+### コンテキスト
+S13 で案件管理画面が完了。板澤様の指示で計画通り P12-03 通知画面に着手。
+進捗保存ルール(S13 で明文化)を遵守:着手前に PROGRESS.md / 参照画像読込、
+ベストプラクティス事前宣言、完了後即座に PROGRESS.md / SESSION-LOG.md 更新。
+
+### このセッションで完了
+
+**P12-03 通知画面**(commit `5a3fffa`、3 ファイル、864 行):
+- `_data/mock-notifications.ts`(18 件 mock + 型定義 + PRIORITY_META / CATEGORY_META)
+  - カテゴリ 6 種:report3 / approval / qualification / incident / project / system
+  - 優先度 3 段階:urgent(緊急)/ warn(要対応)/ info(情報)
+  - 状態 2 種:unread(未読 12 件、サイドバー badge と一致)/ read(既読 6 件)
+  - 配管業 + 宮城県現場向け(田中 一郎 / 仙台駅前ビル給排水改修 等の関連)
+- `page.tsx`(Server Component、4 行)
+- `NotificationsClient.tsx`(2-pane Client Component、全機能集約)
+  - 上段 KPI 4 cards(アイコン + 数値 + sub)
+  - Filter bar(検索 input + カテゴリ select + 優先度 select + 状態 select + 件数)
+  - 左 list:カテゴリ円形アイコン + タイトル + 詳細(truncate)+ 関連(truncate)
+    + 優先度 pill + 経過時間、未読は青ドット + 太字
+  - 右 detail panel 3 セクション(Header / 情報 / クイックアクション)
+
+### 設計上の決定
+- 案件管理画面の 2-pane パターンを直接踏襲(UX 一貫性 + コード資産再利用)
+- カテゴリアイコン:Lucide(ClipboardEdit / FileCheck / ShieldCheck / ShieldAlert / TrendingUp / Megaphone)
+- アイコン背景は CATEGORY_META.bg(色付き淡色背景)で視認性確保
+- 未読の多重表現:青ドット + 太字 +(pill 色)
+- 既存ヘッダーの 🔔 badge の数値を kpis.unread で再描画(現在は同じ 12 件)
+
+### 次セッション着手内容
+**P12-04 配置マップフルページ版**(参照画像: 参照データ/マップ.png)
+- ダッシュボードの DispatchMapPreview を拡大 + フィルタ追加
+- 既存の Google Maps iframe + 宮城県 15 件 lat/lng 活用
+- 案件管理 / 通知 と同じ 2-pane パターン or 専用 layout か検討
+
+### 関連コミット
+- `5a3fffa` P12-03 通知画面 2-pane 新規作成(864 行)
+
+---
+
 ## S13 — 案件管理画面 2-pane 新規作成 + 進捗保存ルール明文化 / 2026-05-12
 
 ### コンテキスト
