@@ -4,6 +4,68 @@
 
 ---
 
+## S15 — 配置マップフルページ 3-pane 新規作成 / 2026-05-14
+
+### コンテキスト
+S14 で通知画面が完了。Phase 2 計画通り P12-04 配置マップフルページ版に着手。
+進捗保存ルール遵守:着手前に PROGRESS.md / SESSION-LOG.md / 参照画像 / 既存資産読込、
+ベストプラクティス事前宣言(設計 / DRY / マルチテナント / A11y / 色多重表現 /
+パフォーマンス / 命名 / 責務分離)を完了してから実装着手。
+
+### このセッションで完了
+
+**P12-04 配置マップフルページ版**(commit `44a016d`、2 ファイル、+863 行):
+- `page.tsx`(Server Component)— ComingSoonPage を実画面に置換、`requireSession()` で auth、
+  `MOCK_PROJECTS` を渡す簡素な構造
+- `DispatchMapClient.tsx`(Client、3-pane)
+  - **左 panel(フィルター、col-span-3)**:
+    - クイック検索 input(案件名 / 顧客 / 工種 / コード)
+    - 対象日 date input(2026-05-14 デフォルト)
+    - エリア select(`MOCK_PROJECTS.address` から自動抽出した市町村)
+    - 工種 select(6 種)
+    - 状態 checkbox group(進行中 / 遅延 / 完了予定 / 完了済、色付ドット)
+    - チーム稼働状況 mini stats(出勤率 85% / 稼働中 92%)
+    - 「絞り込みをクリア」ボタン
+  - **中央 panel(マップ、col-span-6)**:
+    - 表示モード切替 tabs(地図 / リスト、`role="tablist"` + `aria-selected`)
+    - マップ上部検索(現場名 / 住所)
+    - Google Maps iframe(選択案件で lat/lng + z=14 切替、無ければ仙台中心 z=9)
+    - 右上 overlay 凡例(4 色)
+    - 下部に表示中の現場 chips(8 件まで + 残数表示、クリックでピン移動)
+    - リストモード: pill + 工種 + 住所 + 配置人数 + 選択ハイライト
+  - **右 panel(詳細、col-span-3)**:
+    - Header(アイコン + コード + 状態 pill + 案件名 + 工種)
+    - 配置作業員(crew 数から最大 5 名生成、アバター = イニシャル円形、リーダー badge)
+    - 案件情報(受注金額 / 工期 / 進捗 / リーダー / 住所)
+    - 進捗バー(0-100%、aria-valuenow / aria-valuemin / aria-valuemax)
+    - クイックアクション(「今日のレポートを見る」+「案件詳細へ」)
+
+### 設計上の決定
+- **DRY**: `MOCK_PROJECTS`(15 件 lat/lng 含む)を `pc/projects/_data` から直接 import
+- **STATUS_META 共有**: 4 色も pc/projects と同一(視覚的一貫性)
+- **PIN_COLOR_BY_STATUS** をローカル定義(青/赤/橙/緑、案件管理の pill 色と整合)
+- **iframe URL を選択案件で動的切替**: パフォーマンス・UX 両立
+- **配置作業員モック生成**: project.crew 数から最大 5 名、project.id hash で MEMBER_POOL
+  から選択(同じ案件でレンダリングし直しても安定)
+- **色多重表現**: 状態は color + dot + text、ピンは color + pill icon
+- **A11y**: aria-label / aria-selected / aria-current / role="tablist" / role="progressbar"
+
+### 検証結果
+- TypeScript `npx tsc --noEmit` エラーなし
+- `npm run build` 成功(`/pc/dispatch-map` 7.39 kB / First Load JS 113 kB)
+- 既存 ComingSoonPage 削除のみで他画面影響なし
+
+### 次セッション着手内容
+**P12-05 スケジュール画面**(参照画像: 参照データ/スケジュール.png)
+- 案件 × カレンダー
+- `MOCK_PROJECTS` を直接活用(startedAt / dueAt / crew / leader / status)
+- 月表示 / 週表示の切替
+
+### 関連コミット
+- `44a016d` P12-04 配置マップフルページ版 3-pane 新規作成(+863 行)
+
+---
+
 ## S14 — 通知画面 2-pane 新規作成 / 2026-05-14
 
 ### コンテキスト

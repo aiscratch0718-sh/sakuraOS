@@ -9,10 +9,10 @@
 ## 🎯 現在のステータス
 
 - **進行中フェーズ**: 🔥 **Phase 12(画面準拠化)着手中**
-- **完了タスク**: 41 / 約 138(ダッシュボード + REPORT3 入力 PC + 案件管理 PC + 通知 PC 完了)
+- **完了タスク**: 42 / 約 138(ダッシュボード + REPORT3 入力 PC + 案件管理 PC + 通知 PC + 配置マップ PC 完了)
 - **最終更新**: 2026-05-14
-- **最終セッション ID**: **S14(通知画面 2-pane 新規作成 + 18 件 mock + サイドバー badge 12 件連動)**
-- **最新デプロイ**: `5a3fffa`(Vercel deploy 中、通知画面公開予定)
+- **最終セッション ID**: **S15(配置マップ 3-pane 新規作成 + 15 件 lat/lng 再利用 + ピン色凡例 + フィルター連動)**
+- **最新デプロイ**: `44a016d`(Vercel deploy 中、配置マップ公開予定)
 - **公開 URL**: `https://sakura-os-bice.vercel.app`(Vercel Auth 撤廃済み、外部 share 可)
 - **進捗保存ルール**(板澤様確定 2026-05-12):
   - **各タスク完了後**:必ず PROGRESS.md / SESSION-LOG.md を更新してコミット
@@ -91,19 +91,30 @@
 - 未読 12 件 = サイドバー badge / ダッシュボード 🔔12 と一致
 - 案件管理と同じ 2-pane パターン踏襲、コード資産再利用
 
+### ✅ S15 で完了済(配置マップフルページ版)
+
+**P12-04 配置マップ**(commit `44a016d`、2 ファイル、+863 行)
+- `src/app/(authenticated)/pc/dispatch-map/page.tsx`(Server Component)
+  - ComingSoonPage を実画面に置換
+- `src/app/(authenticated)/pc/dispatch-map/DispatchMapClient.tsx`(3-pane Client)
+- 構成:3-pane layout(grid 12 col, 3 / 6 / 3)
+  - 左 panel(フィルター): 検索 + 日付 + エリア(自動抽出) + 工種 + 状態 checkbox + 稼働状況
+  - 中央 panel(マップ): 表示モード切替 + 検索 + Google Maps iframe + 凡例 + ピン chips
+  - 右 panel(詳細): Header + 配置作業員 + 案件情報 + 進捗バー + クイックアクション
+- MOCK_PROJECTS(15 件、lat/lng 含む)を pc/projects から直接 import 再利用(DRY)
+- STATUS_META(4 色)も共有
+- 選択案件があれば lat/lng + z=14、無ければ宮城県中心 z=9 で iframe URL を切替
+- 状態 pill 4 色多重表現(色 + ドット + テキスト)
+- 配置作業員アバター(イニシャル円形 + 役割 + リーダー badge)
+
 ### 🎯 次セッション着手内容(板澤様確定の効率順)
 
 **実装ロードマップ Phase 2 残り(単独実装可能・demo 価値高)**
 
-**P12-04 配置マップ(フルページ)**(NEXT) ← **次に着手**
-- 参照画像: `参照データ/マップ.png`
-- ダッシュボードの DispatchMapPreview を拡大 + フィルタ追加
-- 既存の Google Maps iframe + 宮城県 15 件 lat/lng 活用
-- 他画面に依存しない独立 work
-
-**P12-05 スケジュール画面**
+**P12-05 スケジュール画面**(NEXT) ← **次に着手**
 - 参照画像: `参照データ/スケジュール.png`
 - 案件 × カレンダー、案件管理 mock を直接活用
+- 他画面に依存しない独立 work
 
 **Phase 2(単独実装可能・demo 価値高)**
 - P12-03 通知画面(list + filter、シンプル、サイドバー 🔔12 と連動)
