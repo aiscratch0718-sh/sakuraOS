@@ -9,10 +9,10 @@
 ## 🎯 現在のステータス
 
 - **進行中フェーズ**: 🔥 **Phase 12(画面準拠化)着手中**
-- **完了タスク**: 43 / 約 138(ダッシュボード + REPORT3 入力 PC + 案件管理 PC + 通知 PC + 配置マップ PC + スケジュール PC 完了)
+- **完了タスク**: 44 / 約 138(配置マップを Leaflet + OSM 化、4 色ピン複数描画 + 抽象化)
 - **最終更新**: 2026-05-14
-- **最終セッション ID**: **S16(スケジュール 3-pane 週ビュー新規作成 + 案件×7日カレンダー + 未配置者 + 印刷ボタン)**
-- **最新デプロイ**: `0ca20f8`(Vercel deploy 中、スケジュール公開予定)
+- **最終セッション ID**: **S17(配置マップ Leaflet+OpenStreetMap 化 + MapView 抽象化レイヤー + 4 色ピン15件描画)**
+- **最新デプロイ**: `44dc165`(Vercel deploy 中、Leaflet 版配置マップ公開予定)
 - **公開 URL**: `https://sakura-os-bice.vercel.app`(Vercel Auth 撤廃済み、外部 share 可)
 - **進捗保存ルール**(板澤様確定 2026-05-12):
   - **各タスク完了後**:必ず PROGRESS.md / SESSION-LOG.md を更新してコミット
@@ -106,6 +106,25 @@
 - 選択案件があれば lat/lng + z=14、無ければ宮城県中心 z=9 で iframe URL を切替
 - 状態 pill 4 色多重表現(色 + ドット + テキスト)
 - 配置作業員アバター(イニシャル円形 + 役割 + リーダー badge)
+
+### ✅ S17 で完了済(配置マップ Leaflet 化)
+
+**P12-04-map Leaflet+OpenStreetMap 化**(commit `44dc165`、5 ファイル、+267 行)
+- 背景: 畠中様要望「宮城県全体ビューで複数ピン同時表示」
+- Google Maps iframe(`q=lat,lng` パラメータ仕様により 1 ピン制約)→ Leaflet に置換
+- 新規 `_components/MapView.tsx`(抽象コンポーネント、108 行)
+  - react-leaflet 5 + leaflet 1.9 + OpenStreetMap タイル
+  - 4 色 SVG しずく型ピン(active=青/delayed=赤/upcoming=橙/completed=緑)
+  - 選択時 1.3 倍ズーム + 強い影
+  - Popup(案件名 / 工種 / 状態 / 住所 / リーダー / 進捗)
+  - RecenterOnSelect: 選択変更でスムーズパン
+- DispatchMapClient.tsx:
+  - `next/dynamic({ ssr: false })` で MapView を client-only ロード
+  - 初期: MIYAGI_CENTER (38.45, 141.0) + zoom 8 で宮城県全域
+  - PIN_COLOR_BY_STATUS は MapView から import(DRY)
+- globals.css: `leaflet/dist/leaflet.css` import 追加
+- コスト: ¥0(BSD-2 / MIT / ODbL、API キー不要、商用利用可)
+- 将来 Google Maps JS API 移行: MapView.tsx 内部のみ書換でよい設計
 
 ### ✅ S16 で完了済(スケジュール画面)
 

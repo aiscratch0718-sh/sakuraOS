@@ -4,6 +4,83 @@
 
 ---
 
+## S17 — 配置マップ Leaflet+OpenStreetMap 化(複数ピン4色描画) / 2026-05-14
+
+### コンテキスト
+S16 でスケジュール画面が完了し Phase 2 完了。Phase 3 着手前に畠中様より要望:
+「マップを宮城県全体が映るくらい引いて表示させた場合、複数のピンが見えるようにしたい」
+
+### 現状制約と方針
+- 旧実装: `<iframe src="https://maps.google.com/maps?q=lat,lng&z=...">` 使用
+- 制約: `q=` パラメータが 1 座標のみ受付 → ピン 1 個しか描画不可
+- 3 案検討:
+  - A) Leaflet + OpenStreetMap(無料・API キー不要・15 件 4 色ピン可能)← 採用
+  - B) Google Maps JS API(品質高だがクレジットカード登録必須)
+  - C) Google My Maps iframe(手動更新でデータ連動不可)
+- 畠中様確認:無料 & 将来 Google Maps JS API へ移行可能か確認
+- 回答:抽象化レイヤー方式で MapView 1 ファイルだけ書き換えれば移行可能と説明、承諾
+
+### このセッションで完了
+
+**P12-04-map Leaflet 化**(commit `44dc165`、5 ファイル、+267 行):
+
+1. **パッケージ追加**:
+   - `leaflet` 1.9.4(BSD-2-Clause)
+   - `react-leaflet` 5.0.0(MIT)
+   - `@types/leaflet`(MIT)
+
+2. **新規 `_components/MapView.tsx`(抽象コンポーネント、108 行)**:
+   - export `MapViewProps`(projects / selectedId / onSelect / center / zoom)
+   - export `PIN_COLOR_BY_STATUS`(4 色:青/赤/橙/緑)
+   - `MapContainer` + `TileLayer`(OSM URL)+ `Marker` × N + `Popup`
+   - `createPinIcon`: SVG しずく型 + 中央白丸 + 白アウトライン、選択中 1.3 倍
+   - `RecenterOnSelect`: 選択変更時にスムーズパン(0.6s)
+   - Popup 内容: 案件名 / 工種 / 状態ドット+ラベル / 住所 / リーダー / 進捗
+   - キーボード Enter/Space で選択可能(eventHandlers.keypress)
+   - 「将来 Google Maps JS API に移行する場合、このファイルの内部実装だけ
+     書き換えれば呼び出し側は無変更で動作する」とコメントで明示
+
+3. **`DispatchMapClient.tsx` 更新**:
+   - `next/dynamic(() => import("./_components/MapView"), { ssr: false })`
+   - ローディング表示「マップを読み込んでいます...」(min-h 460px)
+   - 旧 mapUrl useMemo / iframe 描画削除
+   - 初期 center: `MIYAGI_CENTER = { lat: 38.45, lng: 141.0 }` + `zoom: 8`
+   - `PIN_COLOR_BY_STATUS` は MapView から import(重複定義削除)
+   - MapPanel の mapUrl prop 削除(API 縮小)
+
+4. **`globals.css` 更新**:
+   - `@import "leaflet/dist/leaflet.css";` 追加(@tailwind ディレクティブの直後)
+   - Leaflet マーカー / コントロール用 base CSS
+
+### 設計上の決定
+- **抽象化**: MapView は実装詳細を隠蔽、将来 Google Maps JS API への移行を意識
+- **SSR 対応**: Leaflet は window 依存 → `dynamic({ ssr: false })` で client-only
+- **DRY**: PIN_COLOR_BY_STATUS を MapView から export し DispatchMapClient で import
+- **A11y**: Marker に `alt` 属性(案件名 + 状態)、キーボードイベント対応
+- **多重表現**: Popup 内に色ドット + 状態ラベル + 住所 + 進捗を併記
+- **コスト**: 完全無料、API キー不要、社内業務ツール規模で OSM 公式タイル使用範囲内
+
+### 検証結果
+- TypeScript エラーなし
+- `npm run build` 成功(`/pc/dispatch-map` 53.7 kB / First Load JS 159 kB)
+  - 旧: 7.39 kB / 113 kB → 新: 53.7 kB / 159 kB(+46 kB が Leaflet)
+- 許容範囲内(画面別 200 KB 予算未満)
+
+### 将来移行パス(P12-XX-google-maps-api)
+1. 板澤様が Google Cloud で API キー発行
+2. `npm install @vis.gl/react-google-maps`
+3. `MapView.tsx` 内部実装を以下に書換:
+   - `MapContainer` → `<APIProvider><Map>`
+   - `TileLayer` 削除(Google デフォルト)
+   - `Marker` → `AdvancedMarkerElement`
+   - `Popup` → `InfoWindow`
+4. props (`MapViewProps`) は変更不要 → `DispatchMapClient.tsx` 無変更
+
+### 関連コミット
+- `44dc165` 配置マップ Leaflet + OpenStreetMap 化(抽象化レイヤー付き)
+
+---
+
 ## S16 — スケジュール 3-pane 週ビュー新規作成 / 2026-05-14
 
 ### コンテキスト
