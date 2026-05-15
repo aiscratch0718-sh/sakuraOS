@@ -4,6 +4,73 @@
 
 ---
 
+## S23 — モバイル版 /sp/home 縦長ハブ最適化 = Phase 12 完了 / 2026-05-14
+
+### コンテキスト
+S22 で P12-10 車両・工具が完了。Phase 4 最終タスクの P12-11 モバイル最適化に着手。
+既存 /sp/home/page.tsx は Supabase 連携(空表示状態)、参照画像「モバイル版.png」
+準拠の縦長ハブに mock-driven 全面置換。
+
+### このセッションで完了
+
+**P12-11 モバイル版 /sp/home 最適化**(commit `43dcb53`、2 ファイル、+556 行):
+
+1. **page.tsx 書換**(Server Component):
+   - Supabase fetch 削除 → MOCK_PROJECTS から本日の現場 1 件を抽出
+   - SpHomeClient に渡す
+
+2. **SpHomeClient.tsx 新規**(556 行):
+   - **ヘッダー**: アバター + ユーザー名 + 通知 bell(未読 3 件 badge)
+   - **本日の現場 card**(青グラデ):
+     - 案件名 + 工種 + 進捗バー(role=progressbar, aria-valuenow)
+     - メタ 4 項目: 住所 / 期日 / 監督 / 電話(tel:link)
+   - **大型 3 ボタン**(min-h 88px):
+     - 出勤(emerald active toggle)
+     - 退勤(rose)
+     - REPORT3 入力(blue、Link to /sp/report3/new)
+   - **今日のタスク card**:
+     - チェックリスト 4 件(min-h 44px、aria-pressed)
+     - 完了件数 aria-live=polite
+     - チェック / 未チェックの色差 + 取り消し線多重表現
+   - **REPORT3 クイック入力**: 開始 / 終了時刻 input + 詳細 CTA
+   - **本日の進捗統計**: REPORT3 / タスク / 進捗 % 3 stats
+   - **ゲーミフィケーション card**(violet グラデ):
+     - Lv. 12 円形バッジ + +120 XP 今日
+     - 次レベルまでバー(64%)
+     - 最近のバッジ アイコン 3 + すべて見る link
+   - **チームクエスト**: 進捗 72% + 期限
+   - **お知らせ card**: 3 件プレビュー(緊急 rose / 通常 blue)
+
+### 設計上の決定
+- **タッチ最適化**: WCAG 2.5.5 適合(全インタラクティブ min-h 44px)
+- **タップ feedback**: active:bg-* で押下感
+- **縦長一画面ハブ**: 親 layout の BottomNav と組み合わせて完結
+- **既存 SP ルート保持**: /sp/report3, /sp/notifications 等は touched せず
+- **JS budget 余裕**: 6.79 kB / 112 kB(SP report3 90 KB 予算内、その他 200 KB 内)
+
+### 検証結果
+- TypeScript エラーなし
+- `npm run build` 成功(`/sp/home` 6.79 kB / First Load JS 112 kB)
+
+### 🎉 Phase 12 完了
+11 画面、+9,691 行、15 機能セッション(S13-S23、ダッシュボード反復 S6.5-S12 含めず)
+全画面が MOCK_PROJECTS から DRY 再利用 + 抽象化レイヤー(MapView)で構築。
+本実装(Supabase 連携)は P12-XX-data タスクとして整理済み。
+
+### 次セッション着手内容
+**Phase 13: 本実装着手**(または板澤様確認待ち)
+- 候補:
+  1. Supabase 連携の段階的移行(MOCK → DB)
+  2. PWA install プロンプト + GPS 打刻実装
+  3. PDF 出力(react-pdf or PDFKit)
+  4. Money Forward webhook 統合
+  5. 法人カード到着後 → Google Maps JS API 切替
+
+### 関連コミット
+- `43dcb53` P12-11 モバイル版 /sp/home(+556 行)
+
+---
+
 ## S22 — 車両・工具統合管理画面 2-pane + GPS ミニマップ / 2026-05-14
 
 ### コンテキスト
