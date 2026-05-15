@@ -13,7 +13,7 @@
 |---|---|
 | **アプリ名** | SAKURA OS |
 | **クライアント** | さくら株式会社(配管工事業) |
-| **開発元** | 株式会社 AIscratch(板澤様 担当) |
+| **開発元** | 株式会社 AIscratch(畠中様 担当) |
 | **GitHub** | `aiscratch0718-sh/sakuraOS` |
 | **package.json name** | `sakura-os` |
 | **デプロイ先** | Vercel(Tokyo region / hnd1) |
@@ -157,7 +157,7 @@ A. **`📚`(テンプレ由来)系のファイルは `docs/_template-archive/` �
 ### Q. `.claude/` 配下の 49 エージェントは動いているの?
 A. **定義は揃っているが、現セッションでは未起動**。
 詳細は `docs/rebuild/PROGRESS.md` の Decisions Log。
-**Phase 3 から疑似 specialist 化を導入予定**(板澤様 確認済)。
+**Phase 3 から疑似 specialist 化を導入予定**(畠中様 確認済)。
 
 ### Q. 「Claude-Code-Game-Studios」というフォルダ名が以前あった気がする
 A. **2026-05-10 にリネーム済み**(`Claude-Code-Game-Studios` → `sakuraOSシステム開発用`)。

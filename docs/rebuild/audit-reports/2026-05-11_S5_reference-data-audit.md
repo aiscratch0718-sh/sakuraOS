@@ -1,7 +1,7 @@
 # 参照データ画像 12 枚 監査レポート(S5)
 
 > **日付**: 2026-05-11
-> **トリガー**: 板澤様より参照データ(12 PNG)を共有 — 「すべてのデザイン・システム構造を模倣せよ」
+> **トリガー**: 畠中様より参照データ(12 PNG)を共有 — 「すべてのデザイン・システム構造を模倣せよ」
 > **方法**: 並列で 4 specialist agent を起動して網羅分析
 
 ## 監査対象画像
@@ -360,7 +360,7 @@ CREATE FUNCTION get_dispatch_map(tenant_id, date, area, max_distance_km) -- Post
 - 全新規テーブルに `tenant_id NOT NULL + RLS policy tenant_isolation_<table>` を必須化
 - `attendance_punches` / `alcohol_checks` は法令証跡 → updated_at trigger + audit_log 必須連携
 - `vehicle_gps_pings`(連続トラッキング、月数十万行想定)は **0017 では見送り、0018 で時系列分割テーブルとして導入**
-- Phase 5 既存計画(`tasks` / `attendance_punches` / `work_assignments`)と重複 → 0017 で先行投入する方針(板澤様確認推奨)
+- Phase 5 既存計画(`tasks` / `attendance_punches` / `work_assignments`)と重複 → 0017 で先行投入する方針(畠中様確認推奨)
 
 ---
 

@@ -4,7 +4,7 @@
 |---|---|
 | **Status** | **Proposed**(設計のみ。実装着手は Phase 8 終盤、有料 API 系統合フェーズで行う) |
 | **Date** | 2026-05-10 |
-| **Decision Owner** | 板澤様(株式会社 AIscratch) |
+| **Decision Owner** | 畠中様(株式会社 AIscratch) |
 | **Affected Components** | `src/features/dashboard/sakura-shishimaru.ts`, 新規 `src/features/ai/`, `src/lib/anthropic/` |
 | **Supersedes** | — |
 | **Related** | ADR-0001 (REPORT3 atomic fanout) |
@@ -13,7 +13,7 @@
 
 ## Context(背景)
 
-板澤様より以下の確認:
+畠中様より以下の確認:
 
 1. **クライアント(秋元様)の IT リテラシー**: AI による個人評価 → **問題なし**
 2. **横展開の構想**: SAKURA OS を他建設会社へ展開 → **ぜひ差別化したい**
@@ -352,7 +352,7 @@ const AI_BUDGET = {
 
 ### 提示タイミング
 - **Phase 8 P8-09a 着手直前**(つまり全 110 タスクのほぼ最後)
-- 板澤様 → クライアント秋元様 への打ち合わせ材料として
+- 畠中様 → クライアント秋元様 への打ち合わせ材料として
 
 ---
 
