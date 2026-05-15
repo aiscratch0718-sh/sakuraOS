@@ -8,11 +8,11 @@
 
 ## 🎯 現在のステータス
 
-- **進行中フェーズ**: 🔥 **Phase 12(画面準拠化)/ Phase 3(金額系)進行中**
-- **完了タスク**: 46 / 約 138(請求書発行画面 + 入金管理 完了)
+- **進行中フェーズ**: 🔥 **Phase 12(画面準拠化)/ Phase 3(金額系)完了**
+- **完了タスク**: 47 / 約 138(Phase 3 完了:見積書 + 請求書 + 原価管理)
 - **最終更新**: 2026-05-14
-- **最終セッション ID**: **S19(請求書発行画面 2-pane + 入金管理 + 入金ステータスバー + 5段ステータス自動推論)**
-- **最新デプロイ**: `c634657`(Vercel deploy 中、請求書発行画面公開予定)
+- **最終セッション ID**: **S20(原価管理画面 KPI + Donut + 月次 SVG bar chart + 案件別 table + Top 5 ランキング)**
+- **最新デプロイ**: `a5803c2`(Vercel deploy 中、原価管理画面公開予定)
 - **公開 URL**: `https://sakura-os-bice.vercel.app`(Vercel Auth 撤廃済み、外部 share 可)
 - **進捗保存ルール**(板澤様確定 2026-05-12):
   - **各タスク完了後**:必ず PROGRESS.md / SESSION-LOG.md を更新してコミット
@@ -106,6 +106,20 @@
 - 選択案件があれば lat/lng + z=14、無ければ宮城県中心 z=9 で iframe URL を切替
 - 状態 pill 4 色多重表現(色 + ドット + テキスト)
 - 配置作業員アバター(イニシャル円形 + 役割 + リーダー badge)
+
+### ✅ S20 で完了済(原価管理画面 = Phase 3 完了)
+
+**P12-08 原価管理**(commit `a5803c2`、2 ファイル、+660 行)
+- `src/app/(authenticated)/pc/cost/page.tsx`(Server、ロール gated + mock 渡し)
+- `src/app/(authenticated)/pc/cost/CostManagementClient.tsx`(KPI + Chart + Table + Ranking)
+- 構成:
+  - KPI 4 cards(売上累計 / 利益率 + Donut SVG / 原価合計 / 利益額)
+  - 中央 9 col: 月次 売上・原価・利益 SVG bar chart + 案件別 table(6 列)
+  - 右 3 col: 利益率 Top 5 / 低利益案件警告 / 工種別 利益率 凡例
+- 純粋関数 `deriveCostMetrics(project)` 切り出し
+  - 売上 = contractYen × progressPct / 原価 = 売上 × 工種別原価率
+- 工種別原価率テーブル(6 種):配管点検 45% (最高利益) 〜 改修 70% (最低利益)
+- ロール gate: office/ceo/system のみ(売上情報は経営層限定)
 
 ### ✅ S19 で完了済(請求書発行画面)
 

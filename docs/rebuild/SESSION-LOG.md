@@ -4,6 +4,74 @@
 
 ---
 
+## S20 — 原価管理画面 KPI + Chart + Table + Ranking / 2026-05-14
+
+### コンテキスト
+S19 で請求書発行画面が完了。Phase 3 金額系の最後 P12-08 原価管理画面に着手。
+既存 `/pc/cost/page.tsx` は ComingSoonPage のみで実装空、置換対象。
+
+### このセッションで完了
+
+**P12-08 原価管理**(commit `a5803c2`、2 ファイル、+660 行):
+
+1. **page.tsx 書換**(Server Component):
+   - ComingSoonPage → 実画面 + CostManagementClient
+   - ロール gate (office/ceo/system) 維持(売上情報は経営層限定)
+
+2. **CostManagementClient.tsx 新規**(600 行超):
+   - **ヘッダー**: パンくず + タイトル + 期間 select + CSV エクスポート
+   - **KPI 4 cards**:
+     - 売上(累計)¥{total revenue}
+     - 利益率 + Donut SVG(累計利益併記、緑円グラフ)
+     - 原価合計 + 原価率
+     - 利益額 + 利益計上案件数
+   - **中央 9 col / 右 3 col layout**:
+     - 中央上段: 月次 SVG bar chart(3 系列 grouped、9 ヶ月、Y 軸 5 段)
+     - 中央下段: 案件別 table(6 列、利益率は色付きミニバー、tfoot 合計)
+     - 右サイドバー: Top 5 ランキング / 低利益案件警告 / 工種別利益率
+
+### 純粋関数の切り出し
+- `deriveCostMetrics(project) → CostMetrics`:
+  - 売上 = contractYen × (progressPct / 100)
+  - 原価 = 売上 × COST_RATE_BY_WORKTYPE[workType]
+  - 利益 = 売上 - 原価 / 利益率 = (利益 / 売上) × 100
+- `generateMonthlyData(projects, months) → MonthlyData[]`:
+  - 9 ヶ月にわたって決定的に変動分配
+  - 山なり曲線(中央月で多め)
+
+### 工種別原価率(6 種)
+- 給排水工事 62% / 給湯設備工事 58% / 排水管工事 65%
+- 配管点検工事 45%(最高利益)
+- 改修工事 70%(最低利益)
+- ガス配管工事 60%
+
+### 設計上の決定
+- **SVG bar chart 自前実装**: chart ライブラリ未追加(bundle 縮小、5.47 kB 維持)
+- **A11y**: chart に role="img" + aria-label に全月要約テキスト
+- **色多重表現**: 利益率は色 + 数値 + ランクアイコン(金/銀/銅)
+- **責務分離**: KpiCard / CardSection / MonthlyBarChart / MarginBar を独立 component
+
+### 検証結果
+- TypeScript エラーなし
+- `npm run build` 成功(`/pc/cost` 5.47 kB / First Load JS 108 kB)
+- 既存 ComingSoonPage 削除のみ、他画面影響なし
+
+### Phase 3 完了サマリー
+- S18: 見積書作成 (P12-06、+862 行)
+- S19: 請求書発行 + 入金管理 (P12-07、+1,164 行)
+- S20: 原価管理 (P12-08、+660 行)
+合計 +2,686 行、3 画面実装、すべて MOCK_PROJECTS から DRY 再利用
+
+### 次セッション着手内容
+**P12-09 クエスト・バッジフルページ版**(参照画像: 参照データ/クエストバッチ.png)
+- Phase 4 (Polish) スタート
+- ダッシュボードの QuestBadgeSummary を拡張、全実績一覧 + 進捗詳細
+
+### 関連コミット
+- `a5803c2` P12-08 原価管理画面 KPI + Chart + Table(+660 行)
+
+---
+
 ## S19 — 請求書発行画面 2-pane + 入金管理 / 2026-05-14
 
 ### コンテキスト
