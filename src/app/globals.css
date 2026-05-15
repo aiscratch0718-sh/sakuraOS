@@ -5,6 +5,13 @@
 /* Leaflet マーカー / コントロール用 base CSS(配置マップ画面で使用) */
 @import "leaflet/dist/leaflet.css";
 
+@layer components {
+  /* 見積書・スケジュール等の form 共通入力スタイル */
+  .form-input {
+    @apply w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-700 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500;
+  }
+}
+
 @layer base {
   /* === デザイントークン (デモ v4.0 由来 + 既存) ===
      CSS変数経由で動的テーマ切替、コンポーネント側からも参照可能 */

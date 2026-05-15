@@ -1,61 +1,34 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireSession } from "@/server/auth/session";
-import { createClient } from "@/lib/supabase/server";
-import { createEstimate } from "@/features/billing/actions/estimate";
-import { EstimateForm } from "../EstimateForm";
+import { EstimateBuilderClient } from "./EstimateBuilderClient";
+import { MOCK_PROJECTS } from "../../projects/_data/mock-projects";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * 見積書作成画面(PC desktop 版)。
+ *
+ * 参照画像「見積書.png」準拠の 2-pane layout:
+ *  - 上段: タブ(基本情報/明細/プレビュー/承認フロー)+ KPI 4 cards
+ *  - 左 panel: 顧客情報フォーム + 見積明細 table + 合計
+ *  - 右 panel: 御見積書プレビュー(リアルタイム反映)
+ *  - 下端アクションバー: 保存 / PDF / クラウドサイン送信 / 承認申請 等
+ *
+ * 案件管理 / 通知 / 配置マップ / スケジュール と同じ Server + Client パターン継承。
+ * mock データは pc/projects/_data/mock-projects.ts から DRY 再利用。
+ *
+ * 保持: 既存 EstimateForm.tsx(304 行、Supabase 連携、将来本実装時に使用)
+ *
+ * TODO(P12-06-data): 実 Supabase の customers / projects / estimates テーブル連携、
+ * Server Action での見積作成 + 承認ワークフロー連動、PDF 出力(react-pdf 等)、
+ * クラウドサイン API 連携。
+ * TODO(P12-06-decimal): 金額計算を decimal.js に置換(現状は Number で十分なデモ用)。
+ */
 export default async function NewEstimatePage() {
   const session = await requireSession();
   if (!["office", "ceo", "system"].includes(session.role)) {
     redirect("/pc/estimates");
   }
 
-  const supabase = await createClient();
-  const [{ data: customers }, { data: projects }, { data: stamps }] =
-    await Promise.all([
-      supabase
-        .from("customers")
-        .select("id, name")
-        .eq("is_active", true)
-        .order("name", { ascending: true }),
-      supabase
-        .from("projects")
-        .select("id, name")
-        .eq("status", "active")
-        .order("name", { ascending: true }),
-      supabase
-        .from("approval_stamps")
-        .select(
-          "stamp_key, display_name, role_name, image_path, is_company_stamp",
-        )
-        .eq("is_active", true)
-        .order("sort_order", { ascending: true }),
-    ]);
-
-  return (
-    <div className="px-6 py-6 max-w-4xl mx-auto">
-      <Link
-        href="/pc/estimates"
-        className="inline-block text-[12px] text-blue underline mb-3"
-      >
-        ← 見積一覧へ戻る
-      </Link>
-
-      <h1 className="text-xl font-extrabold text-navy mb-1">見積を新規作成</h1>
-      <p className="text-[12px] text-ink-2 mb-5">
-        明細を入力すると小計・消費税・合計が自動計算されます。
-      </p>
-
-      <EstimateForm
-        customers={customers ?? []}
-        projects={projects ?? []}
-        stamps={stamps ?? []}
-        action={createEstimate}
-        submitLabel="作成する"
-      />
-    </div>
-  );
+  return <EstimateBuilderClient projects={MOCK_PROJECTS} />;
 }
