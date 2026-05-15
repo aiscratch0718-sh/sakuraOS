@@ -4,6 +4,59 @@
 
 ---
 
+## S25 — デザイン統一第二弾:8 画面の <PageHeader> 統一 / 2026-05-16
+
+### コンテキスト
+S24 で共通プリミティブ(MetricCard / PageHeader / CardSection)を作成し、
+7 画面の KpiCard / CardSection 重複を削除済。S25 では残る独自ヘッダーを
+全画面 PageHeader に統一。畠中様より「3 を先に」確定で着手。
+
+### このセッションで完了
+**S25 PageHeader 統一**(commit `b19b55b`、8 ファイル、+242 / -303 = -61 行)
+
+【8 画面で <header className="..."> → <PageHeader>】
+1. fleet:アクション 2 ボタン(QR スキャン / 新規登録)
+2. gamification:アクションなし、Trophy 琥珀アイコン
+3. dispatch-map:件数表示 + クリアボタン
+4. schedules:週ナビゲーター(前週 / 期間 / 次週 / 今週)
+5. estimates/new:一時保存 + 承認申請
+6. invoices/new:ステータス pill(自動推論)+ 保存 + メール送信
+7. notifications:検索 + ヘルプ + 通知 bell(未読 badge)
+8. projects:検索 + ヘルプ + 通知 + 新規登録
+
+### 設計上の決定
+- **視覚的統一**: 旧 notifications/projects の sticky 大型ヘッダー
+  (text-[22px] font-black、px-6)を共通 PageHeader 形式(text-base
+  font-semibold、px-4)に揃える。視覚的に他画面と統一。
+- **パンくず階層**: 「SAKURA OS / 画面名」または「ホーム / 画面名」で統一。
+  /new ページは「[親一覧] / 新規作成」形。
+- **actions slot**: ステータス pill / ボタン / 検索アイコン等を自由配置。
+- **SP は別系統で温存**: モバイル `/sp/home` は独自ヘッダー(アバター + 挨拶
+  + 通知 bell)。PC 標準形と要件異なるため、将来 SpPageHeader 別作成検討。
+
+### 検証結果
+- TypeScript エラーなし
+- `npm run build` 成功(全画面サイズ若干削減)
+  - cost 5.26 / dispatch-map 51.5 / estimates/new 7.3 / fleet 6.69
+  - gamification 7.87 / invoices/new 9.01 / notifications 5.2
+  - projects 6.32 / schedules 6.73 kB
+
+### 累計削減効果(S24 + S25)
+- S24: -280 行(KpiCard / CardSection 共通化)
+- S25: -61 行(PageHeader 統一)
+- 合計 **-341 行**、再利用性 + 視覚一貫性大幅向上
+
+### 次セッション着手内容
+**畠中様確認待ち**:
+- 工事概況表(GAIKYO)mock-driven 実装(参照画像なし、MASTER-PLAN P6 参照)
+- 残デザイン Polish(動作確認後の細かな差異対応)
+- Phase 13 本実装(Supabase 連携)
+
+### 関連コミット
+- `b19b55b` refactor(ui) デザイン統一 S25 - 8 画面の <PageHeader> 統一
+
+---
+
 ## S24 — デザイン総点検:共通プリミティブ抽出 + 7 画面リファクタ / 2026-05-14
 
 ### コンテキスト
