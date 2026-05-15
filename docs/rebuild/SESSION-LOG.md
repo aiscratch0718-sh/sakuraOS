@@ -4,6 +4,80 @@
 
 ---
 
+## S24 — デザイン総点検:共通プリミティブ抽出 + 7 画面リファクタ / 2026-05-14
+
+### コンテキスト
+Phase 12 完了後、畠中様確定で「デザイン総点検と統一化」へ着手。Phase 12 で
+11 画面を別タイミングに実装したため、KpiCard / CardSection が各画面で local
+定義され重複していた状態を解消。
+
+### このセッションで完了
+
+**S24 デザイン統一第一弾**(commit `4650ee2`、12 ファイル、+463 / -416)
+
+**1. 監査レポート作成**
+- `docs/rebuild/audit-reports/2026-05-14_S24_design-unification-audit.md`
+- 系統 A(5 画面、洗練)/ 系統 B(2 画面、初期実装)の差異を整理
+- 統一化計画を文書化
+
+**2. 共通プリミティブ 3 ファイル新規(src/components/ui/)**
+- `MetricCard.tsx`: コンパクト KPI(88px)
+  - props: `{ label, value, subText?, icon: LucideIcon, accent, iconColor }`
+  - 既存 `KpiCard.tsx`(114px、ダッシュボード大型版、help/trend/href 付き)
+    とは別系統で共存。Phase 12 系統 A 互換。
+- `PageHeader.tsx`: 既存だったが index.ts 未 export → 追加
+  - props: `{ breadcrumbs?, icon?, iconColor?, title, subtitle?, actions? }`
+- `CardSection.tsx`: タイトル付きカード wrapper
+  - props: `{ title, icon?, iconColor?, headerRight?, sticky?, visible?, className?, children }`
+  - `visible` props は estimates の独自仕様を取り込み後方互換
+- `index.ts`: 3 件を export 追加
+
+**3. 系統 A 5 画面の重複削除 → 共通 import 化**
+- 対象:cost / estimates / fleet / gamification / invoices
+- `<KpiCard ...>` → `<MetricCard ...>` (signature 完全一致のため呼び出しはそのまま)
+- local `function KpiCard` / `function CardSection` 削除
+- `import { MetricCard, CardSection, PageHeader } from "@/components/ui"` 追加
+- cost のヘッダーを `<PageHeader>` 化(代表サンプル)
+
+**4. 系統 B 2 画面の書換 → 共通 import 化**
+- notifications:
+  - `<KpiCard icon={<ReactNode/>} accent="blue" value={number} unit="件" sub="..."/>` → 
+    `<MetricCard icon={Lucide} accent="border-l-blue-500" iconColor="text-blue-600" value="{n} 件" subText="..."/>`
+  - 4 件すべて変換
+- projects:
+  - 同様に 4 件変換、アイコンを Briefcase / CalendarClock / AlertTriangle / CheckCircle2 で追加
+
+### 設計上の決定
+- **MetricCard vs KpiCard の二段構え**: 既存ダッシュボード大型 KpiCard(114px、機能豊富)は触らず温存。Phase 12 系のコンパクト 88px は MetricCard に分離。
+- **CardSection に visible 取り込み**: estimates の独自仕様(タブ別表示)を共通プリミティブに集約。デフォルト true で他画面影響なし。
+- **PageHeader 全画面適用は段階的**: タブ / ステータス pill が絡む複雑なヘッダーは次セッションで(cost のみ先行適用)。
+- **アイコン未指定アクションスロット**: 通知 bell / 検索などはアクションスロットで自由配置。
+
+### 削減効果
+- 8 ファイル × 25 行 local KpiCard 削除 = **-200 行**
+- 4 ファイル × 20 行 local CardSection 削除 = **-80 行**
+- 合計 **約 -280 行**、再利用性 + 視覚統一向上
+
+### 検証結果
+- TypeScript エラーなし
+- `npm run build` 成功
+- 各画面のサイズ若干削減:
+  - cost: 5.47 → 5.26 kB
+  - fleet: 6.83 → 6.74 kB
+  - gamification: 8.12 → 7.96 kB
+  - 他類似削減
+
+### 次セッション着手内容(S25 デザイン統一第二弾)
+**残り画面の PageHeader 適用**(タブ / 複雑ヘッダーを持つ画面):
+- estimates / invoices(タブ + ステータス pill)
+- fleet / gamification / dispatch-map / schedules / notifications / projects / SP home
+- 統一トーン:全画面で同じパンくず階層 / タイトル / アクション slot
+
+### 関連コミット
+- `4650ee2` refactor(ui) デザイン統一 - 共通プリミティブ + 7 画面リファクタ(-280 行)
+
+---
+
 ## S23 — モバイル版 /sp/home 縦長ハブ最適化 = Phase 12 完了 / 2026-05-14
 
 ### コンテキスト
