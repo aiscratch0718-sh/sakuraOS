@@ -4,6 +4,73 @@
 
 ---
 
+## S26 — 工事概況表(設計図の核)mock-driven 新規作成 / 2026-05-16
+
+### コンテキスト
+S25 デザイン統一完了後、畠中様より「工事概況表は?」とのご指摘。
+Phase 12 で参照画像が無く未着手だった「設計図の核」画面に気づく。
+畠中様より参照画像「工事概況表」(2026-05-16 共有)をご用意いただき着手。
+
+### このセッションで完了
+
+**P6-04 工事概況表**(commit `3335c4b`、2 ファイル、+711 行):
+
+1. **page.tsx 書換**(Server Component):
+   - ComingSoonPage → 実画面 + GaikyoClient
+   - ロール gate(office/ceo/system)維持
+
+2. **GaikyoClient.tsx 新規**(650 行超):
+   - **ヘッダー**: PageHeader + 期間 select + CSV 出力 + 印刷
+   - **KPI 4 cards**:
+     - 売上(累計)
+     - 原価(累計) + 原価率
+     - 利益額 + 利益計上案件数
+     - 利益率 + Donut chart SVG(経常利益率)
+   - **中央 9 col**:
+     - 月別 SVG bar chart(直近 12 ヶ月、3 系列 grouped)
+     - 案件別 table(7 列、行クリック選択、ページネーション 8/page)
+   - **右 3 col サイドバー(sticky)**:
+     - 状態 pill + コード
+     - 大型 利益額 + 利益率
+     - 工期(進捗バー)
+     - 金額内訳(売上 / 原価 / 利益額 / 受注金額)
+     - 案件情報(リーダー / 工種 / 顧客 / 住所)
+     - 「工事概況を印刷」ボタン
+
+### 純粋関数の切り出し
+- `deriveCostMetrics(project)`: 原価管理画面と共通の数値
+  - 工種別原価率テーブル(配管点検 45% / 改修 70% など 6 種)
+- `generateMonthlyData(projects, months)`: 12 ヶ月の決定的変動分配
+
+### 再利用
+- MOCK_PROJECTS(15 件)を pc/projects から直接 import
+- STATUS_META(4 色)も共有
+- 共通プリミティブ MetricCard / CardSection / PageHeader を採用
+
+### MASTER-PLAN との関係
+本画面は P6-04 の mock-driven デモ版。本実装 P6-04-data では Supabase の
+construction_overview テーブルから集計データを取得、
+recalculate_construction_overview() RPC で再計算。
+
+### 検証結果
+- TypeScript エラーなし
+- `npm run build` 成功(`/pc/gaikyo` 5.19 kB / First Load JS 114 kB)
+
+### Phase 12 真の完了
+工事概況表が Phase 12 完了報告時に抜けていた件、本セッションで補完済み。
+これで サイドバー nav のすべてのリンク先が実画面(ComingSoonPage なし)。
+
+### 次セッション着手内容
+畠中様確認:
+- 残デザイン Polish
+- PDF 出力機能(見積書 / 請求書 / 工事概況表)
+- Phase 13 Supabase 本実装
+
+### 関連コミット
+- `3335c4b` feat(gaikyo) 工事概況表 mock-driven 新規作成(+711 行)
+
+---
+
 ## S25 — デザイン統一第二弾:8 画面の <PageHeader> 統一 / 2026-05-16
 
 ### コンテキスト
