@@ -1,60 +1,31 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireSession } from "@/server/auth/session";
-import { createClient } from "@/lib/supabase/server";
-import { createInvoice } from "@/features/billing/actions/invoice";
-import { InvoiceForm } from "../InvoiceForm";
+import { InvoiceBuilderClient } from "./InvoiceBuilderClient";
+import { MOCK_PROJECTS } from "../../projects/_data/mock-projects";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * 請求書発行画面(PC desktop 版)。
+ *
+ * 参照画像「請求書.png」準拠の 2-pane + 入金管理 layout:
+ *  - 上段: タブ(請求情報/明細入力/プレビュー/入金管理)+ KPI 4 cards
+ *  - 左 panel: 請求書情報フォーム + 明細入力 table + 合計
+ *  - 右 panel: 請求書プレビュー + 入金タイムライン + 入金アクション
+ *  - 下段: 入金ステータスバー(請求額 / 入金額 / 残高 + 5 段進行)
+ *
+ * 見積書(P12-06)と並行構造。MOCK_PROJECTS から DRY 再利用。
+ * 保持: 既存 InvoiceForm.tsx(308 行、Supabase 連携、将来本実装時に活用)
+ *
+ * TODO(P12-07-data): Supabase の invoices / payments テーブル連携、
+ * Server Action での請求書作成 + 入金登録、PDF 出力、メール送信。
+ * TODO(P12-07-decimal): 金額計算を decimal.js に置換(現状は Number で十分なデモ)。
+ */
 export default async function NewInvoicePage() {
   const session = await requireSession();
   if (!["office", "ceo", "system"].includes(session.role)) {
     redirect("/pc/invoices");
   }
 
-  const supabase = await createClient();
-  const [{ data: customers }, { data: projects }, { data: stamps }] =
-    await Promise.all([
-      supabase
-        .from("customers")
-        .select("id, name")
-        .eq("is_active", true)
-        .order("name", { ascending: true }),
-      supabase
-        .from("projects")
-        .select("id, name")
-        .order("name", { ascending: true }),
-      supabase
-        .from("approval_stamps")
-        .select(
-          "stamp_key, display_name, role_name, image_path, is_company_stamp",
-        )
-        .eq("is_active", true)
-        .order("sort_order", { ascending: true }),
-    ]);
-
-  return (
-    <div className="px-6 py-6 max-w-4xl mx-auto">
-      <Link
-        href="/pc/invoices"
-        className="inline-block text-[12px] text-blue underline mb-3"
-      >
-        ← 請求書一覧へ戻る
-      </Link>
-
-      <h1 className="text-xl font-extrabold text-navy mb-1">請求書を新規作成</h1>
-      <p className="text-[12px] text-ink-2 mb-5">
-        見積から自動変換した請求書も、ここから作成した請求書も同じ画面で管理できます。
-      </p>
-
-      <InvoiceForm
-        customers={customers ?? []}
-        projects={projects ?? []}
-        stamps={stamps ?? []}
-        action={createInvoice}
-        submitLabel="作成する"
-      />
-    </div>
-  );
+  return <InvoiceBuilderClient projects={MOCK_PROJECTS} />;
 }
