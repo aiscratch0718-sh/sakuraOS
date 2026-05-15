@@ -8,11 +8,11 @@
 
 ## 🎯 現在のステータス
 
-- **進行中フェーズ**: 🔥 **Phase 12(画面準拠化)着手中 / Phase 3(金額系)開始**
-- **完了タスク**: 45 / 約 138(見積書作成画面 2-pane プレビュー連動 完了)
+- **進行中フェーズ**: 🔥 **Phase 12(画面準拠化)/ Phase 3(金額系)進行中**
+- **完了タスク**: 46 / 約 138(請求書発行画面 + 入金管理 完了)
 - **最終更新**: 2026-05-14
-- **最終セッション ID**: **S18(見積書作成画面 2-pane + リアルタイムプレビュー + 工種別テンプレート明細生成 + 承認フロー)**
-- **最新デプロイ**: `d6cfe88`(Vercel deploy 中、見積書作成画面公開予定)
+- **最終セッション ID**: **S19(請求書発行画面 2-pane + 入金管理 + 入金ステータスバー + 5段ステータス自動推論)**
+- **最新デプロイ**: `c634657`(Vercel deploy 中、請求書発行画面公開予定)
 - **公開 URL**: `https://sakura-os-bice.vercel.app`(Vercel Auth 撤廃済み、外部 share 可)
 - **進捗保存ルール**(板澤様確定 2026-05-12):
   - **各タスク完了後**:必ず PROGRESS.md / SESSION-LOG.md を更新してコミット
@@ -106,6 +106,20 @@
 - 選択案件があれば lat/lng + z=14、無ければ宮城県中心 z=9 で iframe URL を切替
 - 状態 pill 4 色多重表現(色 + ドット + テキスト)
 - 配置作業員アバター(イニシャル円形 + 役割 + リーダー badge)
+
+### ✅ S19 で完了済(請求書発行画面)
+
+**P12-07 請求書発行**(commit `c634657`、2 ファイル、+1,164 行)
+- `src/app/(authenticated)/pc/invoices/new/page.tsx`(mock-driven Server)
+- `src/app/(authenticated)/pc/invoices/new/InvoiceBuilderClient.tsx`(2-pane Client)
+- 構成:タブ 4(請求情報/明細/プレビュー/入金管理)+ KPI 4 + 2-pane + 入金ステータスバー
+- 見積書と差別化:
+  - 請求書 No. INV-2026-XXX
+  - ステータス 5 種(draft/sent/partial/paid/overdue)+ 自動推論
+  - 入金履歴(amount + date + method + note + 削除)
+  - 入金率プログレスバー + 4 段進行表示
+  - 純粋関数 calculatePaymentSummary() 切り出し
+- 既存 InvoiceForm.tsx (308 行 Supabase) は保持
 
 ### ✅ S18 で完了済(見積書作成画面 = Phase 3 開始)
 

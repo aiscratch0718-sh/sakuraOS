@@ -4,6 +4,68 @@
 
 ---
 
+## S19 — 請求書発行画面 2-pane + 入金管理 / 2026-05-14
+
+### コンテキスト
+S18 で見積書作成画面が完了。Phase 3 継続で P12-07 請求書発行画面に着手。
+既存 InvoiceForm.tsx (308 行 Supabase 連携) は保持し、`/pc/invoices/new/` を
+mock-driven な参照画像準拠デモに置換。
+
+### このセッションで完了
+
+**P12-07 請求書発行**(commit `c634657`、2 ファイル、+1,164 行):
+
+1. **page.tsx 書換**(Server Component):
+   - 旧: Supabase の customers / projects / approval_stamps fetch
+   - 新: MOCK_PROJECTS を渡す簡素な構造、ロール gate 維持
+
+2. **InvoiceBuilderClient.tsx 新規**(1,100 行超):
+   - **ヘッダー**: パンくず + タイトル + 自動推論ステータス pill + 保存 / メール送信
+   - **タブ 4 枚**: 請求情報 / 明細入力 / プレビュー / 入金管理
+   - **KPI 4 cards**: 請求額 / 支払期日 / 入金済 / 残高
+   - **2-pane layout(col-span 7 / 5)**:
+     - 左 panel: 請求情報フォーム + 明細 table + 合計
+     - 右 panel: 請求書プレビュー + 入金タイムライン
+   - **入金管理タブ**: 入金履歴リスト + 「入金を登録」ボタン(残金 0 で disabled)
+   - **下段:入金ステータスバー(独立 section)**:
+     - 入金率プログレスバー(0-100%、aria-valuenow)
+     - 請求額 / 入金額 / 残高 の 3 カード(残高 0 で緑)
+     - 4 段進行表示(下書き → 送付済 → 一部入金 → 入金済)
+   - **下端 sticky アクションバー**: 戻る/下書き/PDF/印刷/メール送信
+
+### 見積書(P12-06)との差別化
+- 請求書番号 INV-2026-XXX 連番
+- ステータス 5 種(draft/sent/partial/paid/overdue)
+- 入金履歴(amount + date + method + note + 削除)
+- 入金率の自動計算 + ステータス自動推論
+  - `inferredStatus = useMemo(...)` で remaining / paidAmount から再評価
+- 振込先案内をプレビューに表示
+- 入金タイムライン(発行→受信→入金履歴、残金未入金行表示)
+
+### 設計上の決定
+- **純粋関数の切り出し**: `calculatePaymentSummary(grandTotal, payments)` を分離
+  - return { paidAmount, remaining, paidRatePct }
+  - テスト容易性を確保(将来 Vitest で単体テスト追加可能)
+- **ステータス自動推論**: 残高変化に応じて pill 色 + アイコン即更新
+- **A11y**: aria-valuenow(入金率) / aria-current="step"(進行ステップ)
+- **多重表現**: ステータス = 色 + アイコン + テキスト + 進行段階
+- **既存資産保持**: InvoiceForm.tsx (308 行) は触らず
+
+### 検証結果
+- TypeScript エラーなし
+- `npm run build` 成功(`/pc/invoices/new` 9.25 kB / First Load JS 115 kB)
+
+### 次セッション着手内容
+**P12-08 原価管理画面**(参照画像: 参照データ/原価管理.png)
+- KPI cards + Chart の組合せ
+- MOCK_PROJECTS の contractYen + progressPct から原価計算
+- 工種別 / 案件別の原価分析グラフ
+
+### 関連コミット
+- `c634657` P12-07 請求書発行画面 2-pane + 入金管理(+1,164 行)
+
+---
+
 ## S18 — 見積書作成画面 2-pane + リアルタイムプレビュー / 2026-05-14
 
 ### コンテキスト
