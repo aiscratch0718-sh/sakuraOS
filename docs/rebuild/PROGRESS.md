@@ -8,11 +8,11 @@
 
 ## 🎯 現在のステータス
 
-- **進行中フェーズ**: 🔥 **Phase 12(画面準拠化)着手中**
-- **完了タスク**: 44 / 約 138(配置マップを Leaflet + OSM 化、4 色ピン複数描画 + 抽象化)
+- **進行中フェーズ**: 🔥 **Phase 12(画面準拠化)着手中 / Phase 3(金額系)開始**
+- **完了タスク**: 45 / 約 138(見積書作成画面 2-pane プレビュー連動 完了)
 - **最終更新**: 2026-05-14
-- **最終セッション ID**: **S17(配置マップ Leaflet+OpenStreetMap 化 + MapView 抽象化レイヤー + 4 色ピン15件描画)**
-- **最新デプロイ**: `44dc165`(Vercel deploy 中、Leaflet 版配置マップ公開予定)
+- **最終セッション ID**: **S18(見積書作成画面 2-pane + リアルタイムプレビュー + 工種別テンプレート明細生成 + 承認フロー)**
+- **最新デプロイ**: `d6cfe88`(Vercel deploy 中、見積書作成画面公開予定)
 - **公開 URL**: `https://sakura-os-bice.vercel.app`(Vercel Auth 撤廃済み、外部 share 可)
 - **進捗保存ルール**(板澤様確定 2026-05-12):
   - **各タスク完了後**:必ず PROGRESS.md / SESSION-LOG.md を更新してコミット
@@ -106,6 +106,22 @@
 - 選択案件があれば lat/lng + z=14、無ければ宮城県中心 z=9 で iframe URL を切替
 - 状態 pill 4 色多重表現(色 + ドット + テキスト)
 - 配置作業員アバター(イニシャル円形 + 役割 + リーダー badge)
+
+### ✅ S18 で完了済(見積書作成画面 = Phase 3 開始)
+
+**P12-06 見積書作成**(commit `d6cfe88`、3 ファイル、+862 行)
+- `src/app/(authenticated)/pc/estimates/new/page.tsx`(Server、ロール gated + mock 渡し)
+- `src/app/(authenticated)/pc/estimates/new/EstimateBuilderClient.tsx`(2-pane Client、804 行)
+- `src/app/globals.css`(.form-input ユーティリティクラス追加)
+- 構成:
+  - タブ 4 枚(基本情報 / 明細 / プレビュー / 承認フロー、aria-selected)
+  - KPI 4 cards(進行中 / 受注済み / 失注 / 売上)
+  - 左 panel(7 col):基本情報フォーム + 見積明細 table(inline 編集可)+ 合計表示
+  - 右 panel(5 col、sticky):御見積書プレビュー(リアルタイム反映)
+  - 下端アクションバー(戻る/下書き保存/PDF/印刷/クラウドサイン/承認申請)
+- 工種別単価テーブル(6 種)+ 工種別明細テンプレート(案件選択で自動投入)
+- 既存 EstimateForm.tsx (304 行、Supabase 連携)は保持(将来本実装で活用)
+- TODO 明記:P12-06-data(DB 連携)/ P12-06-decimal(decimal.js 移行)
 
 ### 🕓 保留タスク(板澤様確認済 / 後回し)
 

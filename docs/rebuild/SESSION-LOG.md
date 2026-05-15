@@ -4,6 +4,82 @@
 
 ---
 
+## S18 — 見積書作成画面 2-pane + リアルタイムプレビュー / 2026-05-14
+
+### コンテキスト
+S17 で配置マップ Leaflet 化完了、Google Maps JS API は法人カード到着待ちで保留。
+Phase 2 完了 → Phase 3(金額系)スタート。最初に P12-06 見積書作成画面。
+
+### 既存実装との関係
+`/pc/estimates/` には既に Supabase 連携の EstimateForm.tsx (304 行)が存在。
+そのまま破棄せず、現時点では mock-driven な参照画像準拠デモを `new/` に作成、
+既存 EstimateForm.tsx は本実装用に保持。
+
+### このセッションで完了
+
+**P12-06 見積書作成画面**(commit `d6cfe88`、3 ファイル、+862 行):
+
+1. **page.tsx 書換**(Server Component):
+   - 旧: Supabase の customers / projects / approval_stamps fetch
+   - 新: MOCK_PROJECTS を渡す簡素な構造、ロール gate (office/ceo/system) 維持
+
+2. **EstimateBuilderClient.tsx 新規**(804 行):
+   - **ヘッダー**: パンくず + タイトル + 一時保存 + 承認申請ボタン
+   - **タブ 4 枚**(role="tablist" + aria-selected + aria-current):
+     - 基本情報 / 明細 / プレビュー / 承認フロー
+   - **KPI 4 cards**: 進行中 8 / 受注済み 24 / 失注 3 / 売上 ¥9,650,000
+   - **左 panel(col-span-7)**:
+     - 基本情報 card: 顧客名 / 案件 select / 担当者 / 件名 / 発行日 / 有効期限
+     - 見積明細 table(table-fixed colgroup):
+       - 項目 / 工種 / 数量 / 単位 / 単価 / 金額 / 操作
+       - 全 cell が inline 編集可(input / select)
+       - aria-label を各 input に付与(明細 N 項目 等)
+       - 行ごと削除ボタン(Trash2 アイコン)
+       - 「+ 明細追加」ボタン
+     - 合計セクション(小計 / 消費税 10% / 合計、aria-live=polite)
+     - 承認フロー(タブ切替時のみ表示):
+       申請者→現場主任→事務部→社長(現在ステージは ring-2 hilite)
+   - **右 panel(col-span-5、sticky top-3)**:
+     御見積書プレビュー(リアルタイム反映、左を編集すると右が即更新):
+     - タイトル「御 見 積 書」+ No.
+     - 宛先(顧客御中)/ 発行元(さくら株式会社、宮城県仙台市)
+     - 件名 / 御見積金額(税込)/ 明細 table / 小計・消費税・合計 / 備考
+   - **下端 sticky アクションバー**:
+     戻る / 下書き保存 / PDF出力 / 印刷(window.print)/ クラウドサイン送信 / 承認申請
+
+3. **globals.css 更新**:
+   - `@layer components` に `.form-input` ユーティリティクラス追加
+   - フォーム入力の共通スタイルを DRY 化
+
+### 設計上の決定
+- **DRY**: MOCK_PROJECTS を pc/projects から直接 import 再利用
+- **工種別単価テーブル**(6 種): 給排水 ¥12k / 給湯 ¥18k / 排水管 ¥14.5k /
+  点検 ¥8k / 改修 ¥22k / ガス ¥16.5k
+- **工種別明細テンプレート**: `generateMockItems(project)` で案件選択時に 3-4 行自動投入
+- **リアルタイムプレビュー**: useState + useMemo で合計計算、右パネルが React 状態に追従
+- **A11y**: tab/role/aria-selected/aria-current/aria-live(合計)/aria-label(各 input)
+- **既存資産保持**: EstimateForm.tsx (304 行 Supabase 連携)は触らず、将来本実装用に保持
+- **TODO 明記**:
+  - P12-06-data: Supabase 連携(customers / projects / estimates)+ createEstimate Server Action
+  - P12-06-decimal: 金額計算を decimal.js に置換(現状は Number で十分なデモ)
+  - PDF 出力: react-pdf 連携、クラウドサイン API 連携
+
+### 検証結果
+- TypeScript エラーなし
+- `npm run build` 成功(`/pc/estimates/new` 7.5 kB / First Load JS 113 kB)
+- 既存画面影響なし
+
+### 次セッション着手内容
+**P12-07 請求書画面**(参照画像: 参照データ/請求書.png)
+- 見積書 → 請求書 派生(MOCK_PROJECTS + 受注済みフラグから生成)
+- ステータス pill(下書き / 送付済 / 入金待ち / 入金済)
+- 一括 PDF 出力 / メール送信(モック)
+
+### 関連コミット
+- `d6cfe88` P12-06 見積書作成画面 2-pane + リアルタイムプレビュー(+862 行)
+
+---
+
 ## S17 — 配置マップ Leaflet+OpenStreetMap 化(複数ピン4色描画) / 2026-05-14
 
 ### コンテキスト
