@@ -4,6 +4,83 @@
 
 ---
 
+## S21 — クエスト・バッジ フルページ版 / 2026-05-14
+
+### コンテキスト
+S20 で Phase 3 完了(見積書/請求書/原価管理)。Phase 4(Polish)スタートで
+P12-09 クエスト・バッジ フルページ版に着手。既存 page.tsx (192 行 Supabase 連携)
+は mock データ不在で空表示状態だったため、参照画像準拠の有意義なデモに
+全面置換(本実装時に再度 Supabase 連携)。
+
+### このセッションで完了
+
+**P12-09 クエスト・バッジ**(commit `5d56ce1`、2 ファイル、+859 行):
+
+1. **page.tsx 書換**(Server Component):
+   - Supabase fetch(profiles + gamification_events + user_badges + badges)削除
+   - mock-driven、ロール gate(leader/office/ceo/system)維持
+   - session.displayName をユーザー名として渡す
+
+2. **GamificationClient.tsx 新規**(800 行超):
+   - **ヘッダー**: パンくず + Trophy アイコン + サブテキスト
+   - **KPI 4 cards**:
+     - 現在のレベル(Lv. 18 + 次まで XP)
+     - 累計 XP(128,450 + 今月 +8,250)
+     - クエスト達成率(進捗平均)
+     - 獲得バッジ(8 / 12 + 次の目標表示)
+   - **タブ 3 枚**(role=tablist + aria-selected + aria-current):
+     - 進行中クエスト / チームクエスト / バッジ一覧
+   - **中央 9 col**:
+     - FeaturedQuestCard(今月のチャレンジ、グラデーション背景、+5000 XP)
+       - 進捗 85%、`role=progressbar`、aria-valuenow=85
+       - 報酬を右側に大きく表示
+     - タブごとの content:
+       - personal: QuestCard × 4(REPORT3 連続/原価入力/ヒヤリハット/案件完遂)
+       - team: QuestCard × 3(チーム REPORT3/全現場進捗/ヒヤリハット 20件)
+       - badges: BadgeCard × 12(rarity 4 段、4 列 grid、未獲得は grayscale)
+   - **右サイドバー(col-span-3)**:
+     - プロフィール card(アバター イニシャル + Lv バー + 次レベルまで)
+     - 最近獲得したバッジ(降順 4 件、rarity 背景色)
+     - おすすめアクション(REPORT3 +50/ 原価 +30/ ヒヤリハット +100 XP)
+       + 「REPORT3 を入力」 CTA Link
+     - 今後の予定(締切 / リリース、rose/emerald で色分け)
+
+### 設計上の決定
+- **4 段 rarity システム**:
+  - COMMON #64748b(灰)/ RARE #2563eb(青)
+  - EPIC #d97706(琥珀)/ LEGENDARY #7c3aed(紫)
+  - 各 rarity = 色 + ラベル(COMMON 等)+ ring カラー で多重表現
+- **12 バッジ(配管業ドメイン)**:
+  - 業務系: REPORT3 マスター / 原価入力エキスパート / 安全管理士
+  - 職人系: 配管職人 / ガス配管マイスター / ハンマー職人
+  - リーダー系: ベテラン現場主任 / 現場リーダー
+  - 達成系: スピードランナー / チームプレイヤー / 1 万 XP 達成
+  - 未獲得: 品質の守護者 / ハンマー職人 / 現場リーダー(grayscale)
+- **未獲得バッジ表現**: grayscale + opacity 60 + ring なし + Clock アイコン
+- **責務分離**: KpiCard / FeaturedQuestCard / QuestCard / BadgeCard 独立
+- **「あと少し!」ヒント**: progress >= 80 で表示、emerald 色に切替
+
+### 既存 Supabase 連携の置換理由
+旧実装 (192 行) は profiles / gamification_events / user_badges / badges
+テーブルを Supabase から fetch していたが、これらのテーブルに mock データが
+無いため空表示になる。参照画像準拠の有意義な demo を優先し、テーブル連携は
+P12-09-data で本実装時に再度実装する方針。
+
+### 検証結果
+- TypeScript エラーなし
+- `npm run build` 成功(`/pc/gamification` 8.12 kB / First Load JS 114 kB)
+
+### 次セッション着手内容
+**P12-10 車両・工具管理画面**(参照画像: 参照データ/車両工具.png)
+- 車両一覧 + GPS 状態 + 整備履歴
+- 工具一覧 + QR コード / 貸出状況
+- メンテナンス予定タイムライン
+
+### 関連コミット
+- `5d56ce1` P12-09 クエスト・バッジ フルページ版(+859 行)
+
+---
+
 ## S20 — 原価管理画面 KPI + Chart + Table + Ranking / 2026-05-14
 
 ### コンテキスト

@@ -8,11 +8,11 @@
 
 ## 🎯 現在のステータス
 
-- **進行中フェーズ**: 🔥 **Phase 12(画面準拠化)/ Phase 3(金額系)完了**
-- **完了タスク**: 47 / 約 138(Phase 3 完了:見積書 + 請求書 + 原価管理)
+- **進行中フェーズ**: 🔥 **Phase 12(画面準拠化)/ Phase 4(Polish)着手中**
+- **完了タスク**: 48 / 約 138(Phase 3 完了 + Phase 4 P12-09 クエスト・バッジ完了)
 - **最終更新**: 2026-05-14
-- **最終セッション ID**: **S20(原価管理画面 KPI + Donut + 月次 SVG bar chart + 案件別 table + Top 5 ランキング)**
-- **最新デプロイ**: `a5803c2`(Vercel deploy 中、原価管理画面公開予定)
+- **最終セッション ID**: **S21(クエスト・バッジ フルページ版 + Featured Quest + 12 バッジ rarity 4 段)**
+- **最新デプロイ**: `5d56ce1`(Vercel deploy 中、クエスト・バッジ画面公開予定)
 - **公開 URL**: `https://sakura-os-bice.vercel.app`(Vercel Auth 撤廃済み、外部 share 可)
 - **進捗保存ルール**(板澤様確定 2026-05-12):
   - **各タスク完了後**:必ず PROGRESS.md / SESSION-LOG.md を更新してコミット
@@ -106,6 +106,19 @@
 - 選択案件があれば lat/lng + z=14、無ければ宮城県中心 z=9 で iframe URL を切替
 - 状態 pill 4 色多重表現(色 + ドット + テキスト)
 - 配置作業員アバター(イニシャル円形 + 役割 + リーダー badge)
+
+### ✅ S21 で完了済(クエスト・バッジ フルページ = Phase 4 開始)
+
+**P12-09 クエスト・バッジ**(commit `5d56ce1`、2 ファイル、+859 行)
+- `src/app/(authenticated)/pc/gamification/page.tsx`(Server、mock-driven 化)
+- `src/app/(authenticated)/pc/gamification/GamificationClient.tsx`(KPI + Tabs + Cards)
+- 構成:
+  - KPI 4 cards(Lv. 18 / 累計 128,450 XP / クエスト達成率 / バッジ 8/12)
+  - Featured Quest 大カード(今月のチャレンジ、85% 進捗、+5000 XP)
+  - タブ 3(個人クエスト 4件 / チームクエスト 3件 / バッジ 12種)
+  - 右サイドバー:プロフィール + 最近獲得 + おすすめ + 今後の予定
+- 4 段 rarity(COMMON/RARE/EPIC/LEGENDARY)+ 色 + アイコン + ラベル
+- 既存 Supabase 連携(profiles + gamification_events 等)は全面置換
 
 ### ✅ S20 で完了済(原価管理画面 = Phase 3 完了)
 
