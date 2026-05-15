@@ -15,7 +15,7 @@ import {
   ShieldCheck,
   TrendingUp,
 } from "lucide-react";
-import { MetricCard } from "@/components/ui";
+import { MetricCard, PageHeader } from "@/components/ui";
 import {
   CATEGORY_META,
   type NotificationCategory,
@@ -89,56 +89,48 @@ export function NotificationsClient({
 
   return (
     <div className="flex min-h-screen flex-1 flex-col bg-slate-50">
-      {/* ヘッダー */}
-      <header className="sticky top-0 z-20 border-b border-slate-200 bg-white">
-        <div className="flex items-center gap-1 px-6 pt-2 text-[12px] text-slate-500">
-          <Link href="/pc/home" className="hover:underline">
-            ホーム
-          </Link>
-          <span>›</span>
-          <span className="text-slate-700">通知</span>
-        </div>
-        <div className="flex items-center justify-between gap-4 px-6 pb-3 pt-1">
-          <div className="min-w-0">
-            <h1 className="text-[22px] font-black leading-tight text-slate-950">
-              通知
-            </h1>
-            <p className="mt-0.5 text-[12px] text-slate-600">
-              すべての通知・アラート・承認依頼をここで一括管理。
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              aria-label="検索"
-              className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-slate-100"
-            >
-              <Search className="h-5 w-5 text-slate-700" aria-hidden />
-            </button>
-            <button
-              type="button"
-              aria-label="ヘルプ"
-              className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-slate-100"
-            >
-              <CircleHelp className="h-5 w-5 text-slate-700" aria-hidden />
-            </button>
-            <button
-              type="button"
-              aria-label="通知"
-              className="relative flex h-8 w-8 items-center justify-center rounded-full hover:bg-slate-100"
-            >
-              <Bell className="h-5 w-5 text-slate-700" aria-hidden />
-              {kpis.unread > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 rounded-full bg-rose-600 px-1 py-0.5 text-[9px] font-bold leading-none text-white">
-                  {kpis.unread}
-                </span>
-              )}
-            </button>
-          </div>
-        </div>
-      </header>
+      <main className="flex flex-1 flex-col gap-3 px-4 py-3">
+        {/* ヘッダー */}
+        <PageHeader
+          breadcrumbs={[
+            { label: "ホーム", href: "/pc/home" },
+            { label: "通知" },
+          ]}
+          icon={Bell}
+          title="通知"
+          subtitle="すべての通知・アラート・承認依頼をここで一括管理。"
+          actions={
+            <>
+              <button
+                type="button"
+                aria-label="検索"
+                className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-slate-100"
+              >
+                <Search className="h-5 w-5 text-slate-700" aria-hidden />
+              </button>
+              <button
+                type="button"
+                aria-label="ヘルプ"
+                className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-slate-100"
+              >
+                <CircleHelp className="h-5 w-5 text-slate-700" aria-hidden />
+              </button>
+              <button
+                type="button"
+                aria-label="通知"
+                className="relative flex h-8 w-8 items-center justify-center rounded-full hover:bg-slate-100"
+              >
+                <Bell className="h-5 w-5 text-slate-700" aria-hidden />
+                {kpis.unread > 0 && (
+                  <span className="absolute -right-0.5 -top-0.5 rounded-full bg-rose-600 px-1 py-0.5 text-[9px] font-bold leading-none text-white">
+                    {kpis.unread}
+                  </span>
+                )}
+              </button>
+            </>
+          }
+        />
 
-      <main className="flex flex-1 flex-col gap-3 px-6 py-3">
         {/* 上段 KPI 4 cards */}
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
           <MetricCard

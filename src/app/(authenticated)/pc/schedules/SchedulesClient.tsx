@@ -15,6 +15,7 @@ import {
   AlertTriangle,
   ClipboardList,
 } from "lucide-react";
+import { PageHeader } from "@/components/ui";
 import type { ProjectRow, ProjectStatus } from "../projects/_data/mock-projects";
 import { STATUS_META } from "../projects/_data/mock-projects";
 
@@ -133,54 +134,44 @@ export function SchedulesClient({ projects }: { projects: ProjectRow[] }) {
   return (
     <div className="flex flex-col gap-3 px-4 py-3">
       {/* ヘッダー */}
-      <header className="flex items-center justify-between">
-        <div>
-          <nav className="text-[11px] text-slate-500" aria-label="パンくず">
-            <span>SAKURA OS</span>
-            <span className="mx-1">/</span>
-            <span className="font-medium text-slate-700">スケジュール</span>
-          </nav>
-          <h1 className="mt-0.5 flex items-center gap-2 text-base font-semibold text-slate-900">
-            <Calendar className="h-4 w-4 text-blue-600" />
-            スケジュール
-            <span className="text-xs font-normal text-slate-500">
-              人員 / 工程 / 案件のスケジュールを横断で管理できます
+      <PageHeader
+        breadcrumbs={[{ label: "SAKURA OS" }, { label: "スケジュール" }]}
+        icon={Calendar}
+        title="スケジュール"
+        subtitle="人員 / 工程 / 案件のスケジュールを横断で管理できます"
+        actions={
+          <>
+            <button
+              type="button"
+              onClick={() => moveWeek(-7)}
+              className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-slate-700 hover:bg-slate-50"
+              aria-label="前の週へ"
+            >
+              <ChevronLeft className="h-3 w-3" />
+              前週
+            </button>
+            <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-medium text-slate-700">
+              {formatYmd(weekDates[0]!)} 〜 {formatYmd(weekDates[6]!)}
             </span>
-          </h1>
-        </div>
-
-        {/* 週ナビゲーター */}
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => moveWeek(-7)}
-            className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-slate-700 hover:bg-slate-50"
-            aria-label="前の週へ"
-          >
-            <ChevronLeft className="h-3 w-3" />
-            前週
-          </button>
-          <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-medium text-slate-700">
-            {formatYmd(weekDates[0]!)} 〜 {formatYmd(weekDates[6]!)}
-          </span>
-          <button
-            type="button"
-            onClick={() => moveWeek(7)}
-            className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-slate-700 hover:bg-slate-50"
-            aria-label="次の週へ"
-          >
-            次週
-            <ChevronRight className="h-3 w-3" />
-          </button>
-          <button
-            type="button"
-            onClick={() => setWeekStart(DEFAULT_WEEK_START)}
-            className="rounded-md border border-blue-500 bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100"
-          >
-            今週
-          </button>
-        </div>
-      </header>
+            <button
+              type="button"
+              onClick={() => moveWeek(7)}
+              className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-slate-700 hover:bg-slate-50"
+              aria-label="次の週へ"
+            >
+              次週
+              <ChevronRight className="h-3 w-3" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setWeekStart(DEFAULT_WEEK_START)}
+              className="rounded-md border border-blue-500 bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100"
+            >
+              今週
+            </button>
+          </>
+        }
+      />
 
       {/* 3-pane layout */}
       <div className="grid grid-cols-12 gap-3">

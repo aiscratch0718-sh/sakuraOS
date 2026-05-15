@@ -227,47 +227,40 @@ export function InvoiceBuilderClient({ projects }: { projects: ProjectRow[] }) {
   return (
     <div className="flex flex-col gap-3 px-4 py-3">
       {/* ヘッダー */}
-      <header className="flex items-center justify-between">
-        <div>
-          <nav className="text-[11px] text-slate-500" aria-label="パンくず">
-            <Link href="/pc/invoices" className="hover:underline">
-              請求書一覧
-            </Link>
-            <span className="mx-1">/</span>
-            <span className="font-medium text-slate-700">新規発行</span>
-          </nav>
-          <h1 className="mt-0.5 flex items-center gap-2 text-base font-semibold text-slate-900">
-            <FileText className="h-4 w-4 text-blue-600" />
-            請求書発行
-            <span className="text-xs font-normal text-slate-500">
-              請求情報・明細・入金状況を一画面で管理できます
+      <PageHeader
+        breadcrumbs={[
+          { label: "請求書一覧", href: "/pc/invoices" },
+          { label: "新規発行" },
+        ]}
+        icon={FileText}
+        title="請求書発行"
+        subtitle="請求情報・明細・入金状況を一画面で管理できます"
+        actions={
+          <>
+            <span
+              className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium ${meta.pill}`}
+              aria-live="polite"
+            >
+              <StatusIcon className="h-3 w-3" />
+              {meta.label}
             </span>
-          </h1>
-        </div>
-        <div className="flex items-center gap-2">
-          <span
-            className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium ${meta.pill}`}
-            aria-live="polite"
-          >
-            <StatusIcon className="h-3 w-3" />
-            {meta.label}
-          </span>
-          <button
-            type="button"
-            className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
-          >
-            <Save className="h-3.5 w-3.5" />
-            保存
-          </button>
-          <button
-            type="button"
-            className="inline-flex items-center gap-1 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-blue-700"
-          >
-            <Mail className="h-3.5 w-3.5" />
-            メール送信
-          </button>
-        </div>
-      </header>
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+            >
+              <Save className="h-3.5 w-3.5" />
+              保存
+            </button>
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-blue-700"
+            >
+              <Mail className="h-3.5 w-3.5" />
+              メール送信
+            </button>
+          </>
+        }
+      />
 
       {/* タブ */}
       <div role="tablist" aria-label="請求書セクション切替" className="flex gap-1 border-b border-slate-200">

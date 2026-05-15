@@ -366,38 +366,30 @@ export function FleetClient() {
   return (
     <div className="flex flex-col gap-3 px-4 py-3">
       {/* ヘッダー */}
-      <header className="flex items-center justify-between">
-        <div>
-          <nav className="text-[11px] text-slate-500" aria-label="パンくず">
-            <span>SAKURA OS</span>
-            <span className="mx-1">/</span>
-            <span className="font-medium text-slate-700">車両・工具</span>
-          </nav>
-          <h1 className="mt-0.5 flex items-center gap-2 text-base font-semibold text-slate-900">
-            <Truck className="h-4 w-4 text-blue-600" />
-            車両・工具
-            <span className="text-xs font-normal text-slate-500">
-              車両 GPS 位置・工具貸出・整備履歴・警告を統合管理
-            </span>
-          </h1>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
-          >
-            <QrCode className="h-3.5 w-3.5" />
-            QR スキャン
-          </button>
-          <button
-            type="button"
-            className="inline-flex items-center gap-1 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-blue-700"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            新規登録
-          </button>
-        </div>
-      </header>
+      <PageHeader
+        breadcrumbs={[{ label: "SAKURA OS" }, { label: "車両・工具" }]}
+        icon={Truck}
+        title="車両・工具"
+        subtitle="車両 GPS 位置・工具貸出・整備履歴・警告を統合管理"
+        actions={
+          <>
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+            >
+              <QrCode className="h-3.5 w-3.5" />
+              QR スキャン
+            </button>
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-blue-700"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              新規登録
+            </button>
+          </>
+        }
+      />
 
       {/* KPI 4 cards */}
       <div className="grid grid-cols-4 gap-3">

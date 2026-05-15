@@ -18,6 +18,7 @@ import {
   FileText,
   TrendingUp,
 } from "lucide-react";
+import { PageHeader } from "@/components/ui";
 import type { ProjectRow, ProjectStatus } from "../projects/_data/mock-projects";
 import { STATUS_META } from "../projects/_data/mock-projects";
 import { PIN_COLOR_BY_STATUS } from "./_components/MapView";
@@ -149,35 +150,29 @@ export function DispatchMapClient({ projects }: { projects: ProjectRow[] }) {
   return (
     <div className="flex flex-col gap-3 px-4 py-3">
       {/* ヘッダー */}
-      <header className="flex items-center justify-between">
-        <div>
-          <nav className="text-[11px] text-slate-500" aria-label="パンくず">
-            <span>SAKURA OS</span>
-            <span className="mx-1">/</span>
-            <span className="font-medium text-slate-700">配置マップ</span>
-          </nav>
-          <h1 className="mt-0.5 flex items-center gap-2 text-base font-semibold text-slate-900">
-            <MapPin className="h-4 w-4 text-blue-600" />
-            配置マップ
-            <span className="text-xs font-normal text-slate-500">
-              現場の位置情報と当日配置人員をマップで確認できます
+      <PageHeader
+        breadcrumbs={[{ label: "SAKURA OS" }, { label: "配置マップ" }]}
+        icon={MapPin}
+        title="配置マップ"
+        subtitle="現場の位置情報と当日配置人員をマップで確認できます"
+        actions={
+          <>
+            <span className="text-xs text-slate-500">
+              絞込結果: {filteredProjects.length} 件
             </span>
-          </h1>
-        </div>
-        <div className="flex items-center gap-3 text-xs text-slate-500">
-          <span>絞込結果: {filteredProjects.length} 件</span>
-          {hasActiveFilters && (
-            <button
-              type="button"
-              onClick={clearFilters}
-              className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-slate-700 hover:bg-slate-50"
-            >
-              <X className="h-3 w-3" />
-              絞り込みをクリア
-            </button>
-          )}
-        </div>
-      </header>
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-slate-700 hover:bg-slate-50"
+              >
+                <X className="h-3 w-3" />
+                絞り込みをクリア
+              </button>
+            )}
+          </>
+        }
+      />
 
       {/* 3-pane layout(grid 12 col) */}
       <div className="grid grid-cols-12 gap-3">

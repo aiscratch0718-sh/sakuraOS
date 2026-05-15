@@ -136,40 +136,33 @@ export function EstimateBuilderClient({ projects }: { projects: ProjectRow[] }) 
   return (
     <div className="flex flex-col gap-3 px-4 py-3">
       {/* ヘッダー */}
-      <header className="flex items-center justify-between">
-        <div>
-          <nav className="text-[11px] text-slate-500" aria-label="パンくず">
-            <Link href="/pc/estimates" className="hover:underline">
-              見積一覧
-            </Link>
-            <span className="mx-1">/</span>
-            <span className="font-medium text-slate-700">新規作成</span>
-          </nav>
-          <h1 className="mt-0.5 flex items-center gap-2 text-base font-semibold text-slate-900">
-            <FileText className="h-4 w-4 text-blue-600" />
-            見積書作成
-            <span className="text-xs font-normal text-slate-500">
-              案件・顧客を選択し明細を入力すると、合計とプレビューが自動更新されます
-            </span>
-          </h1>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
-          >
-            <Save className="h-3.5 w-3.5" />
-            一時保存
-          </button>
-          <button
-            type="button"
-            className="inline-flex items-center gap-1 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-blue-700"
-          >
-            <Send className="h-3.5 w-3.5" />
-            承認申請
-          </button>
-        </div>
-      </header>
+      <PageHeader
+        breadcrumbs={[
+          { label: "見積一覧", href: "/pc/estimates" },
+          { label: "新規作成" },
+        ]}
+        icon={FileText}
+        title="見積書作成"
+        subtitle="案件・顧客を選択し明細を入力すると、合計とプレビューが自動更新されます"
+        actions={
+          <>
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+            >
+              <Save className="h-3.5 w-3.5" />
+              一時保存
+            </button>
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-blue-700"
+            >
+              <Send className="h-3.5 w-3.5" />
+              承認申請
+            </button>
+          </>
+        }
+      />
 
       {/* タブ */}
       <div role="tablist" aria-label="見積書セクション切替" className="flex gap-1 border-b border-slate-200">

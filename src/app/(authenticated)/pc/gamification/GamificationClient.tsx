@@ -364,22 +364,13 @@ export function GamificationClient({ userName }: { userName: string }) {
   return (
     <div className="flex flex-col gap-3 px-4 py-3">
       {/* ヘッダー */}
-      <header className="flex items-center justify-between">
-        <div>
-          <nav className="text-[11px] text-slate-500" aria-label="パンくず">
-            <span>SAKURA OS</span>
-            <span className="mx-1">/</span>
-            <span className="font-medium text-slate-700">クエスト・バッジ</span>
-          </nav>
-          <h1 className="mt-0.5 flex items-center gap-2 text-base font-semibold text-slate-900">
-            <Trophy className="h-4 w-4 text-amber-500" />
-            クエスト・バッジ
-            <span className="text-xs font-normal text-slate-500">
-              業務へのモチベーション、スキル成長、チーム連携を可視化します
-            </span>
-          </h1>
-        </div>
-      </header>
+      <PageHeader
+        breadcrumbs={[{ label: "SAKURA OS" }, { label: "クエスト・バッジ" }]}
+        icon={Trophy}
+        iconColor="text-amber-500"
+        title="クエスト・バッジ"
+        subtitle="業務へのモチベーション、スキル成長、チーム連携を可視化します"
+      />
 
       {/* KPI 4 cards */}
       <div className="grid grid-cols-4 gap-3">
