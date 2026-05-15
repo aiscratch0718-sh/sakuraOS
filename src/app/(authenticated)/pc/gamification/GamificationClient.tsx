@@ -26,6 +26,7 @@ import {
   Medal,
   ChevronRight,
 } from "lucide-react";
+import { MetricCard, CardSection, PageHeader } from "@/components/ui";
 
 /* ============================================================
    型 / 定数
@@ -382,7 +383,7 @@ export function GamificationClient({ userName }: { userName: string }) {
 
       {/* KPI 4 cards */}
       <div className="grid grid-cols-4 gap-3">
-        <KpiCard
+        <MetricCard
           label="現在のレベル"
           value={`Lv. ${stats.level}`}
           subText={`次まで ${xpToNextLevel.toLocaleString()} XP`}
@@ -390,7 +391,7 @@ export function GamificationClient({ userName }: { userName: string }) {
           accent="border-l-violet-500"
           iconColor="text-violet-600"
         />
-        <KpiCard
+        <MetricCard
           label="累計 XP"
           value={stats.totalXp.toLocaleString()}
           subText="今月 +8,250 XP"
@@ -398,7 +399,7 @@ export function GamificationClient({ userName }: { userName: string }) {
           accent="border-l-blue-500"
           iconColor="text-blue-600"
         />
-        <KpiCard
+        <MetricCard
           label="クエスト達成率"
           value={`${stats.questCompletionPct}%`}
           subText={`${MOCK_PERSONAL_QUESTS.length + MOCK_TEAM_QUESTS.length} 件進行中`}
@@ -406,7 +407,7 @@ export function GamificationClient({ userName }: { userName: string }) {
           accent="border-l-emerald-500"
           iconColor="text-emerald-600"
         />
-        <KpiCard
+        <MetricCard
           label="獲得バッジ"
           value={`${stats.earnedBadges} / ${stats.totalBadges}`}
           subText="次は 品質の守護者"
@@ -624,54 +625,7 @@ export function GamificationClient({ userName }: { userName: string }) {
    サブコンポーネント
    ============================================================ */
 
-function CardSection({
-  title,
-  icon: Icon,
-  children,
-}: {
-  title: string;
-  icon: typeof Target;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="rounded-lg border border-slate-200 bg-white p-3">
-      <div className="mb-2 flex items-center justify-between border-b border-slate-100 pb-2">
-        <h2 className="flex items-center gap-1.5 text-sm font-semibold text-slate-800">
-          <Icon className="h-3.5 w-3.5 text-blue-600" />
-          {title}
-        </h2>
-      </div>
-      {children}
-    </section>
-  );
-}
 
-function KpiCard({
-  label,
-  value,
-  subText,
-  icon: Icon,
-  accent,
-  iconColor,
-}: {
-  label: string;
-  value: string;
-  subText: string;
-  icon: typeof Target;
-  accent: string;
-  iconColor: string;
-}) {
-  return (
-    <div className={`flex h-[88px] flex-col rounded-lg border border-slate-200 bg-white p-3 border-l-4 ${accent}`}>
-      <div className="flex items-center justify-between">
-        <span className="text-[11px] font-medium text-slate-500">{label}</span>
-        <Icon className={`h-3.5 w-3.5 ${iconColor}`} />
-      </div>
-      <div className="mt-1 truncate text-lg font-bold leading-none text-slate-900">{value}</div>
-      <div className="mt-auto truncate text-[10px] text-slate-500">{subText}</div>
-    </div>
-  );
-}
 
 function FeaturedQuestCard({ quest }: { quest: Quest }) {
   return (

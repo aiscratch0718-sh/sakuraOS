@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   TrendingUp,
 } from "lucide-react";
+import { MetricCard } from "@/components/ui";
 import {
   CATEGORY_META,
   type NotificationCategory,
@@ -140,37 +141,37 @@ export function NotificationsClient({
       <main className="flex flex-1 flex-col gap-3 px-6 py-3">
         {/* 上段 KPI 4 cards */}
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
-          <KpiCard
-            icon={<Bell className="h-4 w-4" aria-hidden />}
-            accent="blue"
+          <MetricCard
+            icon={Bell}
+            accent="border-l-blue-500"
+            iconColor="text-blue-600"
             label="未読"
-            value={kpis.unread}
-            unit="件"
-            sub="新規通知"
+            value={`${kpis.unread} 件`}
+            subText="新規通知"
           />
-          <KpiCard
-            icon={<AlertCircle className="h-4 w-4" aria-hidden />}
-            accent="red"
+          <MetricCard
+            icon={AlertCircle}
+            accent="border-l-rose-500"
+            iconColor="text-rose-600"
             label="緊急"
-            value={kpis.urgent}
-            unit="件"
-            sub="即対応"
+            value={`${kpis.urgent} 件`}
+            subText="即対応"
           />
-          <KpiCard
-            icon={<ShieldAlert className="h-4 w-4" aria-hidden />}
-            accent="amber"
+          <MetricCard
+            icon={ShieldAlert}
+            accent="border-l-amber-500"
+            iconColor="text-amber-600"
             label="要対応"
-            value={kpis.warn}
-            unit="件"
-            sub="承認・期限"
+            value={`${kpis.warn} 件`}
+            subText="承認・期限"
           />
-          <KpiCard
-            icon={<CheckCircle2 className="h-4 w-4" aria-hidden />}
-            accent="emerald"
+          <MetricCard
+            icon={CheckCircle2}
+            accent="border-l-emerald-500"
+            iconColor="text-emerald-600"
             label="既読"
-            value={kpis.read}
-            unit="件"
-            sub="対応済"
+            value={`${kpis.read} 件`}
+            subText="対応済"
           />
         </div>
 
@@ -273,49 +274,6 @@ export function NotificationsClient({
   );
 }
 
-function KpiCard({
-  icon,
-  accent,
-  label,
-  value,
-  unit,
-  sub,
-}: {
-  icon: React.ReactNode;
-  accent: "blue" | "red" | "amber" | "emerald";
-  label: string;
-  value: number;
-  unit?: string;
-  sub?: string;
-}) {
-  const accentColor = {
-    blue: { title: "text-blue-700", border: "border-blue-300", iconBg: "bg-blue-50" },
-    red: { title: "text-red-700", border: "border-red-300", iconBg: "bg-red-50" },
-    amber: { title: "text-amber-600", border: "border-amber-300", iconBg: "bg-amber-50" },
-    emerald: { title: "text-emerald-700", border: "border-emerald-300", iconBg: "bg-emerald-50" },
-  }[accent];
-  return (
-    <div
-      className={`relative flex h-[100px] flex-col overflow-hidden rounded-lg border bg-white px-4 py-2.5 shadow-[0_1px_2px_rgba(15,23,42,0.04)] ${accentColor.border}`}
-    >
-      <div className="flex items-center gap-1.5">
-        <span
-          className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full ${accentColor.iconBg} ${accentColor.title}`}
-        >
-          {icon}
-        </span>
-        <div className={`text-[12px] font-bold ${accentColor.title}`}>{label}</div>
-      </div>
-      <div className="mt-1 text-[26px] font-black leading-none tracking-normal text-slate-950">
-        {value}
-        {unit && (
-          <span className="ml-0.5 text-[14px] font-extrabold">{unit}</span>
-        )}
-      </div>
-      {sub && <div className="mt-auto text-[10px] text-slate-500">{sub}</div>}
-    </div>
-  );
-}
 
 function FilterSelect({
   value,

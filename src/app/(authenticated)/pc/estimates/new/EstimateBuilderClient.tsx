@@ -20,6 +20,7 @@ import {
   XCircle,
   DollarSign,
 } from "lucide-react";
+import { MetricCard, CardSection, PageHeader } from "@/components/ui";
 import type { ProjectRow } from "../../projects/_data/mock-projects";
 
 /* ============================================================
@@ -198,7 +199,7 @@ export function EstimateBuilderClient({ projects }: { projects: ProjectRow[] }) 
 
       {/* KPI 4 cards */}
       <div className="grid grid-cols-4 gap-3">
-        <KpiCard
+        <MetricCard
           label="進行中"
           value="8"
           subText="承認待ち 3 件"
@@ -206,7 +207,7 @@ export function EstimateBuilderClient({ projects }: { projects: ProjectRow[] }) 
           accent="border-l-blue-500"
           iconColor="text-blue-600"
         />
-        <KpiCard
+        <MetricCard
           label="受注済み"
           value="24"
           subText="今月 +5"
@@ -214,7 +215,7 @@ export function EstimateBuilderClient({ projects }: { projects: ProjectRow[] }) 
           accent="border-l-emerald-500"
           iconColor="text-emerald-600"
         />
-        <KpiCard
+        <MetricCard
           label="失注"
           value="3"
           subText="勝率 88.9%"
@@ -222,7 +223,7 @@ export function EstimateBuilderClient({ projects }: { projects: ProjectRow[] }) 
           accent="border-l-rose-500"
           iconColor="text-rose-600"
         />
-        <KpiCard
+        <MetricCard
           label="売上(承認済)"
           value={`¥${(9_650_000).toLocaleString()}`}
           subText="今月分"
@@ -520,66 +521,7 @@ export function EstimateBuilderClient({ projects }: { projects: ProjectRow[] }) 
    サブコンポーネント
    ============================================================ */
 
-function KpiCard({
-  label,
-  value,
-  subText,
-  icon: Icon,
-  accent,
-  iconColor,
-}: {
-  label: string;
-  value: string;
-  subText: string;
-  icon: typeof FileText;
-  accent: string;
-  iconColor: string;
-}) {
-  return (
-    <div className={`flex h-[88px] flex-col rounded-lg border border-slate-200 bg-white p-3 border-l-4 ${accent}`}>
-      <div className="flex items-center justify-between">
-        <span className="text-[11px] font-medium text-slate-500">{label}</span>
-        <Icon className={`h-3.5 w-3.5 ${iconColor}`} />
-      </div>
-      <div className="mt-1 text-lg font-bold leading-none text-slate-900">{value}</div>
-      <div className="mt-auto text-[10px] text-slate-500">{subText}</div>
-    </div>
-  );
-}
 
-function CardSection({
-  title,
-  icon: Icon,
-  children,
-  headerRight,
-  visible,
-  sticky = false,
-}: {
-  title: string;
-  icon: typeof FileText;
-  children: React.ReactNode;
-  headerRight?: React.ReactNode;
-  visible: boolean;
-  sticky?: boolean;
-}) {
-  if (!visible) return null;
-  return (
-    <section
-      className={`rounded-lg border border-slate-200 bg-white p-3 ${
-        sticky ? "sticky top-3" : ""
-      }`}
-    >
-      <div className="mb-2 flex items-center justify-between border-b border-slate-100 pb-2">
-        <h2 className="flex items-center gap-1.5 text-sm font-semibold text-slate-800">
-          <Icon className="h-3.5 w-3.5 text-blue-600" />
-          {title}
-        </h2>
-        {headerRight}
-      </div>
-      {children}
-    </section>
-  );
-}
 
 function FormField({
   label,

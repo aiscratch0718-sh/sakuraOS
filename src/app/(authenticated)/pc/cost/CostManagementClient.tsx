@@ -12,6 +12,7 @@ import {
   AlertTriangle,
   Wrench,
 } from "lucide-react";
+import { MetricCard, CardSection, PageHeader } from "@/components/ui";
 import type { ProjectRow } from "../projects/_data/mock-projects";
 
 /* ============================================================
@@ -152,46 +153,38 @@ export function CostManagementClient({ projects }: { projects: ProjectRow[] }) {
   return (
     <div className="flex flex-col gap-3 px-4 py-3">
       {/* ヘッダー */}
-      <header className="flex items-center justify-between">
-        <div>
-          <nav className="text-[11px] text-slate-500" aria-label="パンくず">
-            <span>SAKURA OS</span>
-            <span className="mx-1">/</span>
-            <span className="font-medium text-slate-700">原価管理</span>
-          </nav>
-          <h1 className="mt-0.5 flex items-center gap-2 text-base font-semibold text-slate-900">
-            <Calculator className="h-4 w-4 text-blue-600" />
-            原価管理
-            <span className="text-xs font-normal text-slate-500">
-              現場別の売上・原価・利益を月次で集計します
-            </span>
-          </h1>
-        </div>
-        <div className="flex items-center gap-2">
-          <select
-            value={periodLabel}
-            onChange={(e) => setPeriodLabel(e.target.value)}
-            aria-label="集計期間"
-            className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          >
-            <option>2026/1 〜 2026/9</option>
-            <option>2026/Q1</option>
-            <option>2026/Q2</option>
-            <option>2026 年度</option>
-          </select>
-          <button
-            type="button"
-            className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
-          >
-            <Download className="h-3.5 w-3.5" />
-            CSV エクスポート
-          </button>
-        </div>
-      </header>
+      <PageHeader
+        breadcrumbs={[{ label: "SAKURA OS" }, { label: "原価管理" }]}
+        icon={Calculator}
+        title="原価管理"
+        subtitle="現場別の売上・原価・利益を月次で集計します"
+        actions={
+          <>
+            <select
+              value={periodLabel}
+              onChange={(e) => setPeriodLabel(e.target.value)}
+              aria-label="集計期間"
+              className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+              <option>2026/1 〜 2026/9</option>
+              <option>2026/Q1</option>
+              <option>2026/Q2</option>
+              <option>2026 年度</option>
+            </select>
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+            >
+              <Download className="h-3.5 w-3.5" />
+              CSV エクスポート
+            </button>
+          </>
+        }
+      />
 
       {/* KPI 4 cards */}
       <div className="grid grid-cols-4 gap-3">
-        <KpiCard
+        <MetricCard
           label="売上(累計)"
           value={`¥${totals.revenue.toLocaleString()}`}
           subText={periodLabel}
@@ -205,7 +198,7 @@ export function CostManagementClient({ projects }: { projects: ProjectRow[] }) {
           ratio={totals.marginPct / 100}
           subText={`累計利益 ¥${totals.profit.toLocaleString()}`}
         />
-        <KpiCard
+        <MetricCard
           label="原価合計"
           value={`¥${totals.cost.toLocaleString()}`}
           subText={`原価率 ${((totals.cost / Math.max(1, totals.revenue)) * 100).toFixed(1)}%`}
@@ -213,7 +206,7 @@ export function CostManagementClient({ projects }: { projects: ProjectRow[] }) {
           accent="border-l-amber-500"
           iconColor="text-amber-600"
         />
-        <KpiCard
+        <MetricCard
           label="利益額"
           value={`¥${totals.profit.toLocaleString()}`}
           subText={`${projectMetrics.filter((m) => m.profit > 0).length} 案件で利益計上`}
@@ -391,55 +384,6 @@ export function CostManagementClient({ projects }: { projects: ProjectRow[] }) {
 /* ============================================================
    サブコンポーネント
    ============================================================ */
-
-function CardSection({
-  title,
-  icon: Icon,
-  children,
-}: {
-  title: string;
-  icon: typeof Calculator;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="rounded-lg border border-slate-200 bg-white p-3">
-      <div className="mb-2 flex items-center justify-between border-b border-slate-100 pb-2">
-        <h2 className="flex items-center gap-1.5 text-sm font-semibold text-slate-800">
-          <Icon className="h-3.5 w-3.5 text-blue-600" />
-          {title}
-        </h2>
-      </div>
-      {children}
-    </section>
-  );
-}
-
-function KpiCard({
-  label,
-  value,
-  subText,
-  icon: Icon,
-  accent,
-  iconColor,
-}: {
-  label: string;
-  value: string;
-  subText: string;
-  icon: typeof Calculator;
-  accent: string;
-  iconColor: string;
-}) {
-  return (
-    <div className={`flex h-[88px] flex-col rounded-lg border border-slate-200 bg-white p-3 border-l-4 ${accent}`}>
-      <div className="flex items-center justify-between">
-        <span className="text-[11px] font-medium text-slate-500">{label}</span>
-        <Icon className={`h-3.5 w-3.5 ${iconColor}`} />
-      </div>
-      <div className="mt-1 truncate text-lg font-bold leading-none text-slate-900">{value}</div>
-      <div className="mt-auto truncate text-[10px] text-slate-500">{subText}</div>
-    </div>
-  );
-}
 
 /**
  * 利益率 KPI(円グラフ風 SVG donut 付き)

@@ -21,6 +21,7 @@ import {
   History,
   Activity,
 } from "lucide-react";
+import { MetricCard, CardSection, PageHeader } from "@/components/ui";
 
 /* ============================================================
    抽象 MapView 再利用(Leaflet)
@@ -400,7 +401,7 @@ export function FleetClient() {
 
       {/* KPI 4 cards */}
       <div className="grid grid-cols-4 gap-3">
-        <KpiCard
+        <MetricCard
           label="稼働中"
           value={`${stats.active} 台`}
           subText="現場に配置中"
@@ -408,7 +409,7 @@ export function FleetClient() {
           accent="border-l-emerald-500"
           iconColor="text-emerald-600"
         />
-        <KpiCard
+        <MetricCard
           label="整備中"
           value={`${stats.maintenance} 台`}
           subText="復帰予定確認中"
@@ -416,7 +417,7 @@ export function FleetClient() {
           accent="border-l-amber-500"
           iconColor="text-amber-600"
         />
-        <KpiCard
+        <MetricCard
           label="工具"
           value={`${stats.tools} 個`}
           subText="QR 管理"
@@ -424,7 +425,7 @@ export function FleetClient() {
           accent="border-l-blue-500"
           iconColor="text-blue-600"
         />
-        <KpiCard
+        <MetricCard
           label="警告"
           value={`${stats.warnings} 件`}
           subText="燃料・整備・異音"
@@ -608,32 +609,6 @@ export function FleetClient() {
    サブコンポーネント
    ============================================================ */
 
-function KpiCard({
-  label,
-  value,
-  subText,
-  icon: Icon,
-  accent,
-  iconColor,
-}: {
-  label: string;
-  value: string;
-  subText: string;
-  icon: typeof Truck;
-  accent: string;
-  iconColor: string;
-}) {
-  return (
-    <div className={`flex h-[88px] flex-col rounded-lg border border-slate-200 bg-white p-3 border-l-4 ${accent}`}>
-      <div className="flex items-center justify-between">
-        <span className="text-[11px] font-medium text-slate-500">{label}</span>
-        <Icon className={`h-3.5 w-3.5 ${iconColor}`} />
-      </div>
-      <div className="mt-1 truncate text-lg font-bold leading-none text-slate-900">{value}</div>
-      <div className="mt-auto truncate text-[10px] text-slate-500">{subText}</div>
-    </div>
-  );
-}
 
 function FleetDetailPanel({ asset }: { asset: Vehicle }) {
   const meta = STATUS_META[asset.status];

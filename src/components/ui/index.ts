@@ -1,5 +1,9 @@
 export { KpiCard } from "./KpiCard";
 export type { KpiAccent } from "./KpiCard";
+export { MetricCard } from "./MetricCard";
+export { PageHeader } from "./PageHeader";
+export type { Breadcrumb } from "./PageHeader";
+export { CardSection } from "./CardSection";
 export { AlertCard, AlertItem } from "./AlertCard";
 export type { AlertItemProps, AlertSeverity } from "./AlertCard";
 export { ProgressBar } from "./ProgressBar";

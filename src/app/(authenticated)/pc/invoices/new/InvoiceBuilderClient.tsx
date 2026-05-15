@@ -24,6 +24,7 @@ import {
   Calendar,
   TrendingUp,
 } from "lucide-react";
+import { MetricCard, CardSection, PageHeader } from "@/components/ui";
 import type { ProjectRow } from "../../projects/_data/mock-projects";
 
 /* ============================================================
@@ -296,7 +297,7 @@ export function InvoiceBuilderClient({ projects }: { projects: ProjectRow[] }) {
 
       {/* KPI 4 cards */}
       <div className="grid grid-cols-4 gap-3">
-        <KpiCard
+        <MetricCard
           label="請求額(税込)"
           value={`¥${grandTotal.toLocaleString()}`}
           subText={`No. ${invoiceNo}`}
@@ -304,7 +305,7 @@ export function InvoiceBuilderClient({ projects }: { projects: ProjectRow[] }) {
           accent="border-l-blue-500"
           iconColor="text-blue-600"
         />
-        <KpiCard
+        <MetricCard
           label="支払期日"
           value={dueDate}
           subText={`発行日 ${issueDate}`}
@@ -312,7 +313,7 @@ export function InvoiceBuilderClient({ projects }: { projects: ProjectRow[] }) {
           accent="border-l-amber-500"
           iconColor="text-amber-600"
         />
-        <KpiCard
+        <MetricCard
           label="入金済"
           value={`¥${paymentSummary.paidAmount.toLocaleString()}`}
           subText={`${paymentSummary.paidRatePct}%`}
@@ -320,7 +321,7 @@ export function InvoiceBuilderClient({ projects }: { projects: ProjectRow[] }) {
           accent="border-l-emerald-500"
           iconColor="text-emerald-600"
         />
-        <KpiCard
+        <MetricCard
           label="残高"
           value={`¥${paymentSummary.remaining.toLocaleString()}`}
           subText={paymentSummary.remaining <= 0 ? "完済" : "未入金"}
@@ -687,66 +688,7 @@ export function InvoiceBuilderClient({ projects }: { projects: ProjectRow[] }) {
    サブコンポーネント
    ============================================================ */
 
-function KpiCard({
-  label,
-  value,
-  subText,
-  icon: Icon,
-  accent,
-  iconColor,
-}: {
-  label: string;
-  value: string;
-  subText: string;
-  icon: typeof FileText;
-  accent: string;
-  iconColor: string;
-}) {
-  return (
-    <div className={`flex h-[88px] flex-col rounded-lg border border-slate-200 bg-white p-3 border-l-4 ${accent}`}>
-      <div className="flex items-center justify-between">
-        <span className="text-[11px] font-medium text-slate-500">{label}</span>
-        <Icon className={`h-3.5 w-3.5 ${iconColor}`} />
-      </div>
-      <div className="mt-1 text-lg font-bold leading-none text-slate-900 truncate">{value}</div>
-      <div className="mt-auto text-[10px] text-slate-500">{subText}</div>
-    </div>
-  );
-}
 
-function CardSection({
-  title,
-  icon: Icon,
-  children,
-  headerRight,
-  visible,
-  sticky = false,
-}: {
-  title: string;
-  icon: typeof FileText;
-  children: React.ReactNode;
-  headerRight?: React.ReactNode;
-  visible: boolean;
-  sticky?: boolean;
-}) {
-  if (!visible) return null;
-  return (
-    <section
-      className={`rounded-lg border border-slate-200 bg-white p-3 ${
-        sticky ? "sticky top-3" : ""
-      }`}
-    >
-      <div className="mb-2 flex items-center justify-between border-b border-slate-100 pb-2">
-        <h2 className="flex items-center gap-1.5 text-sm font-semibold text-slate-800">
-          <Icon className="h-3.5 w-3.5 text-blue-600" />
-          {title}
-        </h2>
-        {headerRight}
-      </div>
-      {children}
-    </section>
-  );
-}
 
 function FormField({
   label,

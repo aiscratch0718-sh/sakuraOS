@@ -3,8 +3,12 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
+  AlertTriangle,
   Bell,
+  Briefcase,
   Calendar,
+  CalendarClock,
+  CheckCircle2,
   CircleHelp,
   ClipboardEdit,
   HardHat,
@@ -14,6 +18,7 @@ import {
   Users,
   Wallet,
 } from "lucide-react";
+import { MetricCard } from "@/components/ui";
 import {
   type ProjectRow,
   type ProjectStatus,
@@ -160,33 +165,37 @@ export function ProjectsListClient({
       <main className="flex flex-1 flex-col gap-3 px-6 py-3">
         {/* 上部 KPI 4 cards */}
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
-          <KpiCard
-            accent="blue"
+          <MetricCard
+            icon={Briefcase}
+            accent="border-l-blue-500"
+            iconColor="text-blue-600"
             label="進行中の案件"
-            value={kpis.active.count}
-            unit="件"
-            sub={`¥${kpis.active.sumYen.toLocaleString("ja-JP")}`}
+            value={`${kpis.active.count} 件`}
+            subText={`¥${kpis.active.sumYen.toLocaleString("ja-JP")}`}
           />
-          <KpiCard
-            accent="amber"
+          <MetricCard
+            icon={CalendarClock}
+            accent="border-l-amber-500"
+            iconColor="text-amber-600"
             label="完了予定"
-            value={kpis.upcoming.count}
-            unit="件"
-            sub="今月着工予定"
+            value={`${kpis.upcoming.count} 件`}
+            subText="今月着工予定"
           />
-          <KpiCard
-            accent="red"
+          <MetricCard
+            icon={AlertTriangle}
+            accent="border-l-rose-500"
+            iconColor="text-rose-600"
             label="遅延"
-            value={kpis.delayed.count}
-            unit="件"
-            sub="要対応"
+            value={`${kpis.delayed.count} 件`}
+            subText="要対応"
           />
-          <KpiCard
-            accent="emerald"
+          <MetricCard
+            icon={CheckCircle2}
+            accent="border-l-emerald-500"
+            iconColor="text-emerald-600"
             label="完了済(今年)"
-            value={kpis.completed.count}
-            unit="件"
-            sub="累計実績"
+            value={`${kpis.completed.count} 件`}
+            subText="累計実績"
           />
         </div>
 
@@ -398,40 +407,6 @@ export function ProjectsListClient({
   );
 }
 
-function KpiCard({
-  accent,
-  label,
-  value,
-  unit,
-  sub,
-}: {
-  accent: "blue" | "amber" | "red" | "emerald";
-  label: string;
-  value: number | string;
-  unit?: string;
-  sub?: string;
-}) {
-  const accentColor = {
-    blue: { title: "text-blue-700", border: "border-blue-300" },
-    amber: { title: "text-amber-600", border: "border-amber-300" },
-    red: { title: "text-red-700", border: "border-red-300" },
-    emerald: { title: "text-emerald-700", border: "border-emerald-300" },
-  }[accent];
-  return (
-    <div
-      className={`relative flex h-[100px] flex-col overflow-hidden rounded-lg border bg-white px-4 py-2.5 shadow-[0_1px_2px_rgba(15,23,42,0.04)] ${accentColor.border}`}
-    >
-      <div className={`text-[12px] font-bold ${accentColor.title}`}>{label}</div>
-      <div className="mt-1 text-[26px] font-black leading-none tracking-normal text-slate-950">
-        {value}
-        {unit && (
-          <span className="ml-0.5 text-[14px] font-extrabold">{unit}</span>
-        )}
-      </div>
-      {sub && <div className="mt-auto text-[10px] text-slate-500">{sub}</div>}
-    </div>
-  );
-}
 
 function FilterSelect({
   value,
