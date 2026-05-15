@@ -8,11 +8,11 @@
 
 ## 🎯 現在のステータス
 
-- **進行中フェーズ**: 🔥 **Phase 12(画面準拠化)/ Phase 4(Polish)着手中**
-- **完了タスク**: 48 / 約 138(Phase 3 完了 + Phase 4 P12-09 クエスト・バッジ完了)
+- **進行中フェーズ**: 🔥 **Phase 12(画面準拠化)/ Phase 4(Polish)進行中**
+- **完了タスク**: 49 / 約 138(Phase 4: クエスト・バッジ + 車両・工具完了)
 - **最終更新**: 2026-05-14
-- **最終セッション ID**: **S21(クエスト・バッジ フルページ版 + Featured Quest + 12 バッジ rarity 4 段)**
-- **最新デプロイ**: `5d56ce1`(Vercel deploy 中、クエスト・バッジ画面公開予定)
+- **最終セッション ID**: **S22(車両・工具統合管理画面 2-pane + GPS ミニマップ + 9 件 mock)**
+- **最新デプロイ**: `8108e2c`(Vercel deploy 中、車両・工具画面公開予定)
 - **公開 URL**: `https://sakura-os-bice.vercel.app`(Vercel Auth 撤廃済み、外部 share 可)
 - **進捗保存ルール**(板澤様確定 2026-05-12):
   - **各タスク完了後**:必ず PROGRESS.md / SESSION-LOG.md を更新してコミット
@@ -106,6 +106,18 @@
 - 選択案件があれば lat/lng + z=14、無ければ宮城県中心 z=9 で iframe URL を切替
 - 状態 pill 4 色多重表現(色 + ドット + テキスト)
 - 配置作業員アバター(イニシャル円形 + 役割 + リーダー badge)
+
+### ✅ S22 で完了済(車両・工具統合管理画面)
+
+**P12-10 車両・工具**(commit `8108e2c`、2 ファイル、+836 行)
+- `src/app/(authenticated)/pc/fleet/page.tsx`(Server、ロール gated)
+- `src/app/(authenticated)/pc/fleet/FleetClient.tsx`(KPI + Tabs + 2-pane)
+- 構成:KPI 4 + タブ 3 + フィルタバー + 左 list table + 右 detail panel
+- 右 detail: ヘッダー + 配属案件 + 警告 + 工程予定 + 整備履歴 + GPS ミニマップ
+- GPS ミニマップは配置マップの `MapView`(Leaflet)を再利用(DRY、無料)
+- 9 件 mock(車両 6 + 工具 3、SAKURA 配管業向け)
+- 4 ステータス(active/maintenance/idle/warning)+ 色 + アイコン多重表現
+- 既存 /pc/vehicles, /pc/tools は温存、/pc/fleet を統合 dashboard 化
 
 ### ✅ S21 で完了済(クエスト・バッジ フルページ = Phase 4 開始)
 

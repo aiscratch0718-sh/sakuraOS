@@ -4,6 +4,85 @@
 
 ---
 
+## S22 — 車両・工具統合管理画面 2-pane + GPS ミニマップ / 2026-05-14
+
+### コンテキスト
+S21 で P12-09 クエスト・バッジが完了。Phase 4 継続で P12-10 車両・工具管理に着手。
+既存 /pc/fleet/page.tsx は ComingSoonPage(空)、置換対象。
+既存 /pc/vehicles, /pc/tools は個別管理用に温存、/pc/fleet を統合 dashboard 化。
+セッション中断後の再開タスク。
+
+### このセッションで完了
+
+**P12-10 車両・工具統合管理**(commit `8108e2c`、2 ファイル、+836 行):
+
+1. **page.tsx 書換**(Server Component):
+   - ComingSoonPage → 実画面 + FleetClient
+   - ロール gate(leader/office/ceo/system)維持
+
+2. **FleetClient.tsx 新規**(800 行超):
+   - **ヘッダー**: パンくず + Truck アイコン + サブテキスト + QR スキャン / 新規登録ボタン
+   - **KPI 4 cards**:
+     - 稼働中(車両 active 件数、緑)
+     - 整備中(maintenance 件数、橙)
+     - 工具(tool 件数、青)
+     - 警告(warning + warnings 配列 > 0、赤)
+   - **タブ 3 枚**(role=tablist): 車両・工具管理 / 工程確認 / 災害履歴
+   - **フィルタバー**: 検索 + 種別(vehicle/tool)+ ステータス(4 種)
+   - **2-pane(col-span 8 / 4)**:
+     - 左 panel: list table(6 列)
+       - 名称 + 種別アイコン色付き / 番号 / 所在地 / ステータス pill / 担当 / GPS
+       - 選択中の行は bg-blue-50、aria-current="true", aria-selected
+     - 右 panel: 5 セクション
+       - ヘッダー card(アイコン + 名称 + 番号 + ステータス pill)
+       - 配属案件 / 担当 / 所在地 / 走行距離 / 燃料残量(色変動)
+       - 警告 card(rose 背景、警告複数表示)
+       - 工程予定タイムライン
+       - 整備履歴
+       - GPS ミニマップ(180px、Leaflet 再利用)
+
+### 9 件 mock データ(SAKURA 配管業向け)
+**車両 6 台:**
+- ダンプトラック 1 号(active、仙台駅前現場、田中 一郎、燃料 72%)
+- ハイエース 2 号(active、石巻、燃料 45% 警告)
+- 高所作業車(maintenance、整備工場、ブーム点検中)
+- 軽トラック 3 号(active、多賀城、燃料 88%)
+- ローリー車(idle、本社車庫、燃料 95%)
+- クレーン車(warning、油圧異音 + 燃料 32% 二重警告)
+
+**工具 3 個:**
+- パイプレンチ ヘビーデューティー(active、仙台駅前貸出中)
+- ガス溶接機 #2(idle、本社倉庫)
+- 圧力試験ポンプ(maintenance、校正中)
+
+### 設計上の決定
+- **GPS ミニマップは MapView 再利用**: 配置マップ画面の Leaflet 抽象コンポーネントを
+  そのまま再利用。ProjectRow 型に車両情報を adapter で詰めて渡す。DRY 貫徹、無料維持
+- **ステータス 4 種**: active/maintenance/idle/warning すべて色 + アイコン + テキスト
+- **燃料残量の色変動**: < 40% rose / < 60% amber / >= 60% emerald
+- **警告の独立 card**: 警告がある時のみ rose-50 背景 card で目立たせる
+- **責務分離**: KpiCard / FleetDetailPanel / InfoRow 独立
+
+### 既存資産との関係
+- /pc/vehicles, /pc/tools: 既存個別管理画面、温存(本実装時の詳細管理用)
+- /pc/fleet: 統合 dashboard、サイドバー nav リンク先
+- ComingSoonPage 削除のみ、他画面影響なし
+
+### 検証結果
+- TypeScript エラーなし
+- `npm run build` 成功(`/pc/fleet` 6.83 kB / First Load JS 112 kB)
+
+### 次セッション着手内容
+**P12-11 モバイル版 /sp/* 最適化**(参照画像: 参照データ/モバイル版.png)
+- Phase 4 最終タスク
+- 既存 SP ルートのデザイン統一(現状 PC 設計に追従不十分)
+- タッチ最適化 / 一画面集中 / GPS・カメラ前提
+
+### 関連コミット
+- `8108e2c` P12-10 車両・工具統合管理(+836 行)
+
+---
+
 ## S21 — クエスト・バッジ フルページ版 / 2026-05-14
 
 ### コンテキスト
