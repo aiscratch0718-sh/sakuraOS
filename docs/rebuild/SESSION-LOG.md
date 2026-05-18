@@ -4,6 +4,72 @@
 
 ---
 
+## S28 — 印鑑実画像化 + 会社印デフォルト + 担当者印複数選択 / 2026-05-18
+
+### コンテキスト
+S27 で PDF 出力 + SVG 動的生成印鑑を実装。畠中様より「参照データに実印鑑画像を
+入れたので、会社印はデフォルト、担当者印はチェックを入れたら入るように」とのご要望。
+実印影画像 6 枚を public/stamps/ に配置し、UI を全面リワーク。
+
+### このセッションで完了
+
+**S28 印鑑実画像化**(commit `6bc6995`、10 ファイル、+334 / -462 = -128 行)
+
+1. **印鑑画像 6 枚を `public/stamps/` に登録**:
+   - company.jpg(さくら株式会社 角印)
+   - shacho.jpg(高橋・社長 丸印)
+   - senmu.jpg(専務 丸印)
+   - terasawa.jpg(寺澤 丸印)
+   - hayashi.jpg(林 丸印)
+   - shirai.png(白井 丸印)
+
+2. **hanko.ts 拡張**:
+   - 旧 StampMode(none/person/company/both)は互換性のため残置
+   - 新 StampConfig: `{ companyOn: boolean, personIds: string[] }`
+   - COMPANY_STAMP 単一定数 + PERSON_STAMPS 5 名
+   - DEFAULT_STAMP_CONFIG: companyOn=true, personIds=[]
+   - findPersonStamp(id) lookup helper
+
+3. **BillingPdf.tsx 全面リワーク**:
+   - 旧 HankoComposite + HankoCompositeRound + HankoCompositeSquare(170 行 SVG)を削除
+   - StampImage コンポーネント(react-pdf <Image>)で画像埋め込み
+   - baseOrigin prop で absolute URL 構築(SSR/CSR 両対応)
+   - 複数押印時は ±N deg ずらして扇形配置
+
+4. **見積書 / 請求書画面 UI 全面リワーク**:
+   - StampSelector:
+     - 会社印トグル(label + checkbox + img + 「押印」ラベル)
+     - 担当者印 chk リスト 5 名(checkbox + img + 名前 + 役職 + CheckCircle2)
+   - StampOverlay: プレビュー右上に画像 overlay(扇形配置)
+   - 旧 StampModeSelector / HankoPreview / HankoOverlay 削除(各 130 行)
+
+### ベストプラクティス遵守
+- ✅ DRY: STAMP_REGISTRY を hanko.ts に集約、両画面で共通 import
+- ✅ A11y: checkbox + aria-label、img alt、CheckCircle2 アイコン併用
+- ✅ 色多重表現: 色 + アイコン + 「押印」ラベル
+- ✅ 既存 mock データから完結、本実装時 Supabase Storage 連携 TODO 明記
+
+### 検証結果
+- TypeScript エラーなし
+- `npm run build` 成功:
+  - estimates/new: 9.85 → 9.17 kB(-0.68 kB、SVG 削除分)
+  - invoices/new: 11.4 → 10.8 kB(-0.6 kB、同上)
+
+### TODO 明記
+- P-PDF-stamp-upload: Supabase Storage 連携 + 印影アップロード UI
+- approval_stamps テーブル連携(役職別、有効期限管理)
+- self-hosted フォント(S27 から継続)
+
+### 次セッション着手内容
+1. Vercel build 完了 → Chrome 実画面動作確認
+2. self-hosted フォント化(PDF 生成 UX 改善)
+3. Supabase 連携の段階的移行(順位 2 位)
+
+### 関連コミット
+- `6bc6995` feat(pdf) 印鑑画像実画像化(会社印デフォルト + 担当者複数選択)
+
+---
+
 ## S27 — PDF 出力 + 印鑑捺印機能(見積書 / 請求書)/ 2026-05-18
 
 ### コンテキスト
