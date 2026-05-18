@@ -135,7 +135,7 @@ export function hankoToDataUrl(svg: string): string {
 }
 
 /* ============================================================
-   押印モード設定
+   押印モード設定(旧仕様、互換性のため残置)
    ============================================================ */
 
 export type StampMode = "none" | "person" | "company" | "both";
@@ -149,3 +149,94 @@ export const STAMP_MODE_META: Record<
   company: { label: "会社印", description: "角印のみ押印" },
   both: { label: "両方押印", description: "担当者印 + 会社印" },
 };
+
+/* ============================================================
+   実印影画像レジストリ(新仕様、2026-05-18)
+   ============================================================
+
+   public/stamps/ に配置された実際の印影画像を登録する。
+   会社印は常時利用可能、担当者印は複数選択(checkbox)。
+
+   TODO(P-PDF-stamp-upload): Supabase Storage 連携 + 印影アップロード UI、
+   approval_stamps テーブルから取得。
+*/
+
+export type CompanyStamp = {
+  id: "company";
+  label: string;
+  type: "square";
+  url: string;
+};
+
+export type PersonStamp = {
+  id: string;
+  /** 表示名 */
+  label: string;
+  /** 役職 */
+  role: string;
+  type: "round";
+  url: string;
+};
+
+export const COMPANY_STAMP: CompanyStamp = {
+  id: "company",
+  label: "さくら株式会社 角印",
+  type: "square",
+  url: "/stamps/company.jpg",
+};
+
+export const PERSON_STAMPS: PersonStamp[] = [
+  {
+    id: "shacho",
+    label: "高橋(社長)",
+    role: "代表取締役",
+    type: "round",
+    url: "/stamps/shacho.jpg",
+  },
+  {
+    id: "senmu",
+    label: "専務",
+    role: "専務取締役",
+    type: "round",
+    url: "/stamps/senmu.jpg",
+  },
+  {
+    id: "terasawa",
+    label: "寺澤",
+    role: "現場主任",
+    type: "round",
+    url: "/stamps/terasawa.jpg",
+  },
+  {
+    id: "hayashi",
+    label: "林",
+    role: "事務",
+    type: "round",
+    url: "/stamps/hayashi.jpg",
+  },
+  {
+    id: "shirai",
+    label: "白井",
+    role: "営業",
+    type: "round",
+    url: "/stamps/shirai.png",
+  },
+];
+
+/** 押印設定(新仕様)*/
+export type StampConfig = {
+  /** 会社印を押すか(デフォルト true) */
+  companyOn: boolean;
+  /** 押印する担当者 ID 配列(複数選択可) */
+  personIds: string[];
+};
+
+export const DEFAULT_STAMP_CONFIG: StampConfig = {
+  companyOn: true,
+  personIds: [],
+};
+
+/** id → PersonStamp の lookup */
+export function findPersonStamp(id: string): PersonStamp | undefined {
+  return PERSON_STAMPS.find((p) => p.id === id);
+}

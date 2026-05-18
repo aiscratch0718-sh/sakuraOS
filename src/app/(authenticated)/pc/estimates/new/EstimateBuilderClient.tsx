@@ -25,11 +25,11 @@ import {
 import { MetricCard, CardSection, PageHeader } from "@/components/ui";
 import type { ProjectRow } from "../../projects/_data/mock-projects";
 import {
-  generateHankoSvg,
-  hankoToDataUrl,
-  type StampMode,
-  STAMP_MODE_META,
-  type HankoConfig,
+  COMPANY_STAMP,
+  PERSON_STAMPS,
+  DEFAULT_STAMP_CONFIG,
+  findPersonStamp,
+  type StampConfig,
 } from "@/lib/pdf/hanko";
 import { downloadBillingPdf } from "@/lib/pdf/downloadBillingPdf";
 
@@ -85,30 +85,9 @@ export function EstimateBuilderClient({ projects }: { projects: ProjectRow[] }) 
     firstProject ? `${firstProject.name} 見積書` : "御見積書",
   );
 
-  // 押印モード + 印鑑設定
-  const [stampMode, setStampMode] = useState<StampMode>("none");
+  // 押印設定(会社印デフォルト ON、担当者印は複数選択可)
+  const [stampConfig, setStampConfig] = useState<StampConfig>(DEFAULT_STAMP_CONFIG);
   const [pdfBusy, setPdfBusy] = useState(false);
-
-  const personHanko: HankoConfig = {
-    name: contactPerson.split(" ")[0] || "担当",
-    type: "round",
-    size: 80,
-  };
-  const companyHanko: HankoConfig = {
-    name: "さくら",
-    type: "square",
-    size: 80,
-  };
-
-  // プレビュー用 SVG data URL
-  const personHankoUrl = useMemo(
-    () => hankoToDataUrl(generateHankoSvg(personHanko)),
-    [personHanko.name],
-  );
-  const companyHankoUrl = useMemo(
-    () => hankoToDataUrl(generateHankoSvg(companyHanko)),
-    [companyHanko.name],
-  );
 
   // PDF 出力
   const handlePdfDownload = async () => {
@@ -135,9 +114,8 @@ export function EstimateBuilderClient({ projects }: { projects: ProjectRow[] }) 
         tax,
         taxRate: TAX_RATE,
         grandTotal,
-        stampMode,
-        personHanko,
-        companyHanko,
+        stampConfig,
+        baseOrigin: typeof window !== "undefined" ? window.location.origin : "",
       });
     } catch (err) {
       console.error("PDF 出力に失敗しました", err);
@@ -514,17 +492,10 @@ export function EstimateBuilderClient({ projects }: { projects: ProjectRow[] }) 
           )}
         </section>
 
-        {/* === 右 panel: プレビュー + 押印モード === */}
+        {/* === 右 panel: プレビュー + 押印設定 === */}
         <aside className="col-span-5 flex flex-col gap-3">
-          {/* 押印モード設定 */}
-          <StampModeSelector
-            mode={stampMode}
-            onChange={setStampMode}
-            personHankoUrl={personHankoUrl}
-            companyHankoUrl={companyHankoUrl}
-            personName={personHanko.name}
-            companyName={companyHanko.name}
-          />
+          {/* 押印設定 */}
+          <StampSelector config={stampConfig} onChange={setStampConfig} />
 
           {/* プレビュー */}
           <CardSection title="御見積書プレビュー" icon={Eye} visible sticky>
@@ -538,9 +509,7 @@ export function EstimateBuilderClient({ projects }: { projects: ProjectRow[] }) 
               tax={tax}
               grandTotal={grandTotal}
               contactPerson={contactPerson}
-              stampMode={stampMode}
-              personHankoUrl={personHankoUrl}
-              companyHankoUrl={companyHankoUrl}
+              stampConfig={stampConfig}
             />
           </CardSection>
         </aside>
@@ -652,9 +621,7 @@ function EstimatePreview({
   tax,
   grandTotal,
   contactPerson,
-  stampMode,
-  personHankoUrl,
-  companyHankoUrl,
+  stampConfig,
 }: {
   customerName: string;
   title: string;
@@ -665,9 +632,7 @@ function EstimatePreview({
   tax: number;
   grandTotal: number;
   contactPerson: string;
-  stampMode: StampMode;
-  personHankoUrl: string;
-  companyHankoUrl: string;
+  stampConfig: StampConfig;
 }) {
   return (
     <div className="rounded-md border border-slate-200 bg-white p-4 text-[11px] text-slate-700 shadow-sm">
@@ -690,12 +655,8 @@ function EstimatePreview({
           <div className="text-slate-500">TEL: 022-XXX-XXXX</div>
           <div className="mt-0.5 text-slate-500">発行日: {issueDate}</div>
           <div className="text-slate-500">有効期限: {expiryDate}</div>
-          {/* 印鑑(押印モード反映) */}
-          <HankoOverlay
-            stampMode={stampMode}
-            personHankoUrl={personHankoUrl}
-            companyHankoUrl={companyHankoUrl}
-          />
+          {/* 印鑑(画像ベース、押印設定反映) */}
+          <StampOverlay config={stampConfig} />
         </div>
       </div>
 
@@ -873,134 +834,126 @@ function generateMockItems(project: ProjectRow | undefined): EstimateItem[] {
 }
 
 /* ============================================================
-   押印モード切替 + 印影プレビュー
+   押印設定 UI(共通)
    ============================================================ */
 
-function StampModeSelector({
-  mode,
+function StampSelector({
+  config,
   onChange,
-  personHankoUrl,
-  companyHankoUrl,
-  personName,
-  companyName,
 }: {
-  mode: StampMode;
-  onChange: (m: StampMode) => void;
-  personHankoUrl: string;
-  companyHankoUrl: string;
-  personName: string;
-  companyName: string;
+  config: StampConfig;
+  onChange: (c: StampConfig) => void;
 }) {
+  const toggleCompany = () => onChange({ ...config, companyOn: !config.companyOn });
+  const togglePerson = (id: string) => {
+    const has = config.personIds.includes(id);
+    onChange({
+      ...config,
+      personIds: has ? config.personIds.filter((x) => x !== id) : [...config.personIds, id],
+    });
+  };
+
   return (
     <section className="rounded-lg border border-slate-200 bg-white p-3">
       <div className="mb-2 flex items-center justify-between border-b border-slate-100 pb-2">
         <h2 className="flex items-center gap-1.5 text-sm font-semibold text-slate-800">
           <Stamp className="h-3.5 w-3.5 text-rose-600" />
-          押印モード
+          押印設定
         </h2>
-        <span className="text-[10px] text-slate-500">PDF 出力時に反映</span>
+        <span className="text-[10px] text-slate-500">プレビュー / PDF に反映</span>
       </div>
 
-      {/* モード選択 */}
-      <div role="radiogroup" aria-label="押印モード" className="grid grid-cols-2 gap-1.5">
-        {(Object.keys(STAMP_MODE_META) as StampMode[]).map((m) => {
-          const meta = STAMP_MODE_META[m];
-          const active = mode === m;
-          return (
-            <button
-              key={m}
-              type="button"
-              role="radio"
-              aria-checked={active}
-              onClick={() => onChange(m)}
-              className={`flex flex-col items-start gap-0.5 rounded-md border px-2 py-1.5 text-left transition-colors ${
-                active
-                  ? "border-rose-500 bg-rose-50 text-rose-900"
-                  : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-              }`}
-            >
-              <span className="text-[11px] font-semibold">{meta.label}</span>
-              <span className="text-[9px] leading-tight text-slate-500">{meta.description}</span>
-            </button>
-          );
-        })}
-      </div>
+      {/* 会社印トグル(デフォルト ON) */}
+      <label className="flex cursor-pointer items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 hover:bg-slate-100">
+        <input
+          type="checkbox"
+          checked={config.companyOn}
+          onChange={toggleCompany}
+          aria-label="会社印を押す"
+          className="h-3.5 w-3.5 rounded border-slate-300 text-rose-600 focus:ring-rose-500"
+        />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={COMPANY_STAMP.url} alt="" className="h-10 w-10 flex-shrink-0" />
+        <div className="min-w-0 flex-1">
+          <div className="text-[11px] font-semibold text-slate-800">会社印(角印)</div>
+          <div className="text-[9px] text-slate-500">{COMPANY_STAMP.label}</div>
+        </div>
+        {config.companyOn && (
+          <span className="rounded-full bg-rose-100 px-1.5 py-0.5 text-[9px] font-semibold text-rose-700">
+            押印
+          </span>
+        )}
+      </label>
 
-      {/* 印影プレビュー */}
-      <div className="mt-3 grid grid-cols-2 gap-2">
-        <HankoPreview label="担当者印(丸印)" name={personName} url={personHankoUrl} active={mode === "person" || mode === "both"} />
-        <HankoPreview label="会社印(角印)" name={companyName} url={companyHankoUrl} active={mode === "company" || mode === "both"} />
+      {/* 担当者印 chk リスト(複数選択可) */}
+      <div className="mt-3">
+        <div className="mb-1 text-[10px] font-medium text-slate-600">
+          担当者印(複数選択可)
+        </div>
+        <ul className="flex flex-col gap-1">
+          {PERSON_STAMPS.map((p) => {
+            const active = config.personIds.includes(p.id);
+            return (
+              <li key={p.id}>
+                <label className="flex cursor-pointer items-center gap-2 rounded-md border border-slate-200 bg-white px-2 py-1.5 hover:bg-slate-50">
+                  <input
+                    type="checkbox"
+                    checked={active}
+                    onChange={() => togglePerson(p.id)}
+                    aria-label={`${p.label} の印を押す`}
+                    className="h-3.5 w-3.5 rounded border-slate-300 text-rose-600 focus:ring-rose-500"
+                  />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={p.url} alt="" className="h-9 w-9 flex-shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[11px] font-semibold text-slate-800">{p.label}</div>
+                    <div className="text-[9px] text-slate-500">{p.role}</div>
+                  </div>
+                  {active && (
+                    <CheckCircle2 className="h-3.5 w-3.5 text-rose-600" aria-hidden />
+                  )}
+                </label>
+              </li>
+            );
+          })}
+        </ul>
       </div>
     </section>
   );
 }
 
-function HankoPreview({
-  label,
-  name,
-  url,
-  active,
-}: {
-  label: string;
-  name: string;
-  url: string;
-  active: boolean;
-}) {
-  return (
-    <div
-      className={`flex items-center gap-2 rounded-md border p-2 transition-opacity ${
-        active ? "border-rose-200 bg-rose-50/40" : "border-slate-200 bg-slate-50 opacity-50"
-      }`}
-    >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={url} alt={`${name} 印影`} className="h-12 w-12 flex-shrink-0" />
-      <div className="min-w-0 flex-1">
-        <div className="truncate text-[10px] font-semibold text-slate-700">{label}</div>
-        <div className="truncate text-[9px] text-slate-500">{name}</div>
-        {active && (
-          <div className="mt-0.5 inline-flex items-center gap-0.5 rounded-full bg-rose-100 px-1 py-0 text-[9px] font-medium text-rose-700">
-            <CheckCircle2 className="h-2.5 w-2.5" />
-            押印
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
+function StampOverlay({ config }: { config: StampConfig }) {
+  const persons = config.personIds
+    .map((id) => findPersonStamp(id))
+    .filter((s): s is NonNullable<typeof s> => Boolean(s));
+  if (!config.companyOn && persons.length === 0) return null;
 
-function HankoOverlay({
-  stampMode,
-  personHankoUrl,
-  companyHankoUrl,
-}: {
-  stampMode: StampMode;
-  personHankoUrl: string;
-  companyHankoUrl: string;
-}) {
-  if (stampMode === "none") return null;
   return (
     <div
       className="pointer-events-none absolute -top-2 right-2 flex items-center gap-1"
       aria-hidden
     >
-      {(stampMode === "company" || stampMode === "both") && (
+      {config.companyOn && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={companyHankoUrl}
+          src={COMPANY_STAMP.url}
           alt=""
           className="h-12 w-12"
           style={{ transform: "rotate(-6deg)" }}
         />
       )}
-      {(stampMode === "person" || stampMode === "both") && (
+      {persons.map((p, i) => (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={personHankoUrl}
+          key={p.id}
+          src={p.url}
           alt=""
           className="h-9 w-9"
-          style={{ transform: "rotate(4deg)" }}
+          style={{
+            transform: `rotate(${4 + (i - persons.length / 2) * 6}deg)`,
+          }}
         />
-      )}
+      ))}
     </div>
   );
 }

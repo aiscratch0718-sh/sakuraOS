@@ -6,12 +6,14 @@ import {
   Text,
   View,
   StyleSheet,
-  Svg,
-  Circle,
-  Rect,
+  Image,
 } from "@react-pdf/renderer";
 import { ensureJapaneseFonts } from "./fonts";
-import type { HankoConfig, StampMode } from "./hanko";
+import {
+  COMPANY_STAMP,
+  findPersonStamp,
+  type StampConfig,
+} from "./hanko";
 
 // フォント登録(モジュール load 時に 1 度だけ)
 ensureJapaneseFonts();
@@ -217,193 +219,48 @@ export type BillingPdfProps = {
   companyAddress?: string;
   companyTel?: string;
   bankAccount?: string; // 請求書用
-  /** 押印モード(none / person / company / both) */
-  stampMode: StampMode;
-  /** 担当者印 設定 */
-  personHanko?: HankoConfig;
-  /** 会社印 設定 */
-  companyHanko?: HankoConfig;
+  /** 押印設定(新仕様、会社印 + 担当者複数選択)*/
+  stampConfig: StampConfig;
+  /**
+   * PDF 内 <Image> は absolute URL が必要のため、呼び出し側で origin を渡す。
+   * 例:`window.location.origin`("https://sakura-os-bice.vercel.app")
+   */
+  baseOrigin: string;
 };
 
 /* ============================================================
-   印鑑(View + Svg + Text の合成レイアウト)
+   印鑑(画像ベース、react-pdf <Image>)
    ============================================================
 
-   react-pdf v4 では Svg 内で <Text> が使えないため、印鑑は SVG の枠線と
-   <Text> で書く文字を絶対配置でレイヤリングして表現する。
+   public/stamps/ の実印影画像を絶対 URL に変換して埋め込み。
+   会社印は -6deg、担当者印は +N deg(複数押印時にずらす)。
    ============================================================ */
 
-function HankoComposite({
-  config,
+function StampImage({
+  src,
+  size,
   rotation = 0,
+  baseOrigin,
 }: {
-  config: HankoConfig;
+  src: string;
+  size: number;
   rotation?: number;
+  baseOrigin: string;
 }) {
-  const { name, type, size = 60, color = "#c8102e" } = config;
-  if (type === "round") {
-    return <HankoCompositeRound name={name} size={size} color={color} rotation={rotation} />;
-  }
-  return <HankoCompositeSquare name={name} size={size} color={color} rotation={rotation} />;
-}
-
-function HankoCompositeRound({
-  name,
-  size,
-  color,
-  rotation,
-}: {
-  name: string;
-  size: number;
-  color: string;
-  rotation: number;
-}) {
-  const chars = name.slice(0, 4);
-  const fontSize =
-    chars.length === 1
-      ? size * 0.45
-      : chars.length === 2
-        ? size * 0.36
-        : size * 0.28;
-
+  // 相対 URL を absolute に変換(SSR/CSR/dev 全てで動作)
+  const absoluteSrc = src.startsWith("http") ? src : `${baseOrigin}${src}`;
   return (
-    <View
+    <Image
+      src={absoluteSrc}
       style={{
         width: size,
         height: size,
-        position: "relative",
         transform: `rotate(${rotation}deg)`,
       }}
-    >
-      {/* SVG 円形枠 */}
-      <Svg viewBox={`0 0 ${size} ${size}`} width={size} height={size} style={{ position: "absolute" }}>
-        <Circle
-          cx={size / 2}
-          cy={size / 2}
-          r={(size / 2) * 0.94}
-          stroke={color}
-          strokeWidth={size * 0.045}
-          fill="none"
-        />
-        <Circle
-          cx={size / 2}
-          cy={size / 2}
-          r={(size / 2) * 0.86}
-          stroke={color}
-          strokeWidth={size * 0.018}
-          fill="none"
-        />
-      </Svg>
-      {/* 文字レイヤー */}
-      {chars.length <= 2 ? (
-        <Text
-          style={{
-            position: "absolute",
-            top: size / 2 - fontSize * 0.6,
-            left: 0,
-            width: size,
-            textAlign: "center",
-            fontSize,
-            color,
-            fontWeight: 700,
-          }}
-        >
-          {chars}
-        </Text>
-      ) : (
-        <View style={{ position: "absolute", width: size, height: size, padding: size * 0.15 }}>
-          <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
-            <Text style={{ fontSize, color, fontWeight: 700 }}>{chars.charAt(1)}</Text>
-            <Text style={{ fontSize, color, fontWeight: 700 }}>{chars.charAt(0)}</Text>
-          </View>
-          <View style={{ flexDirection: "row", justifyContent: "space-around", marginTop: 2 }}>
-            <Text style={{ fontSize, color, fontWeight: 700 }}>{chars.charAt(3) || ""}</Text>
-            <Text style={{ fontSize, color, fontWeight: 700 }}>{chars.charAt(2)}</Text>
-          </View>
-        </View>
-      )}
-    </View>
+    />
   );
 }
 
-function HankoCompositeSquare({
-  name,
-  size,
-  color,
-  rotation,
-}: {
-  name: string;
-  size: number;
-  color: string;
-  rotation: number;
-}) {
-  const pad = size * 0.06;
-  const fontSize = name.length <= 3 ? size * 0.3 : name.length <= 5 ? size * 0.22 : size * 0.17;
-  const chars = name.slice(0, 8).split("");
-  const cols = chars.length > 6 ? 2 : 1;
-  // 縦方向に文字を並べる(各列)
-  const charsPerCol = Math.ceil(chars.length / cols);
-  const columns: string[][] = Array.from({ length: cols }, (_, c) =>
-    chars.slice(c * charsPerCol, (c + 1) * charsPerCol),
-  );
-  // 印鑑文化:右の列が先(右→左に読む)
-  columns.reverse();
-
-  return (
-    <View
-      style={{
-        width: size,
-        height: size,
-        position: "relative",
-        transform: `rotate(${rotation}deg)`,
-      }}
-    >
-      {/* SVG 角形枠 */}
-      <Svg viewBox={`0 0 ${size} ${size}`} width={size} height={size} style={{ position: "absolute" }}>
-        <Rect
-          x={pad}
-          y={pad}
-          width={size - pad * 2}
-          height={size - pad * 2}
-          stroke={color}
-          strokeWidth={size * 0.045}
-          fill="none"
-        />
-        <Rect
-          x={pad * 2.2}
-          y={pad * 2.2}
-          width={size - pad * 4.4}
-          height={size - pad * 4.4}
-          stroke={color}
-          strokeWidth={size * 0.015}
-          fill="none"
-        />
-      </Svg>
-      {/* 文字レイヤー(縦書き) */}
-      <View
-        style={{
-          position: "absolute",
-          top: pad * 2.5,
-          left: pad * 2.5,
-          right: pad * 2.5,
-          bottom: pad * 2.5,
-          flexDirection: "row",
-          justifyContent: "space-around",
-        }}
-      >
-        {columns.map((col, ci) => (
-          <View key={ci} style={{ flexDirection: "column", alignItems: "center" }}>
-            {col.map((ch, ri) => (
-              <Text key={ri} style={{ fontSize, color, fontWeight: 700, lineHeight: 1.05 }}>
-                {ch}
-              </Text>
-            ))}
-          </View>
-        ))}
-      </View>
-    </View>
-  );
-}
 
 /* ============================================================
    メイン PDF ドキュメント(見積書 / 請求書 共通)
@@ -427,10 +284,13 @@ export function BillingPdf(props: BillingPdfProps) {
     companyAddress = "宮城県仙台市青葉区〇〇〇〇",
     companyTel = "022-XXX-XXXX",
     bankAccount = "七十七銀行 仙台中央支店 普通 1234567 さくら株式会社",
-    stampMode,
-    personHanko,
-    companyHanko,
+    stampConfig,
+    baseOrigin,
   } = props;
+
+  const personStamps = stampConfig.personIds
+    .map((id) => findPersonStamp(id))
+    .filter((s): s is NonNullable<typeof s> => Boolean(s));
 
   const docLabel = docType === "estimate" ? "御見積書" : "請求書";
   const moneyLabel = docType === "estimate" ? "御見積金額" : "御請求金額";
@@ -478,7 +338,7 @@ export function BillingPdf(props: BillingPdfProps) {
                 {dateLabel2}: {expiryOrDueDate}
               </Text>
             </View>
-            {/* 印鑑配置(2 つまで横並び) */}
+            {/* 印鑑配置 — 会社印 + 担当者印(複数) */}
             <View
               style={{
                 flexDirection: "row",
@@ -488,12 +348,18 @@ export function BillingPdf(props: BillingPdfProps) {
                 justifyContent: "flex-end",
               }}
             >
-              {(stampMode === "company" || stampMode === "both") && companyHanko && (
-                <HankoComposite config={{ ...companyHanko, size: 56 }} rotation={-6} />
+              {stampConfig.companyOn && (
+                <StampImage src={COMPANY_STAMP.url} size={56} rotation={-6} baseOrigin={baseOrigin} />
               )}
-              {(stampMode === "person" || stampMode === "both") && personHanko && (
-                <HankoComposite config={{ ...personHanko, size: 44 }} rotation={4} />
-              )}
+              {personStamps.map((s, i) => (
+                <StampImage
+                  key={s.id}
+                  src={s.url}
+                  size={42}
+                  rotation={4 + (i - personStamps.length / 2) * 6}
+                  baseOrigin={baseOrigin}
+                />
+              ))}
             </View>
           </View>
         </View>
