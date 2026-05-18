@@ -23,7 +23,17 @@ import {
   Banknote,
   Calendar,
   TrendingUp,
+  Stamp,
+  Loader2,
 } from "lucide-react";
+import {
+  generateHankoSvg,
+  hankoToDataUrl,
+  type StampMode,
+  STAMP_MODE_META,
+  type HankoConfig,
+} from "@/lib/pdf/hanko";
+import { downloadBillingPdf } from "@/lib/pdf/downloadBillingPdf";
 import { MetricCard, CardSection, PageHeader } from "@/components/ui";
 import type { ProjectRow } from "../../projects/_data/mock-projects";
 
@@ -131,6 +141,22 @@ export function InvoiceBuilderClient({ projects }: { projects: ProjectRow[] }) {
   const [dueDate, setDueDate] = useState("2026-06-15");
   const [status, setStatus] = useState<InvoiceStatus>("sent");
 
+  // 押印モード + 印鑑(担当者名 = 仮、本実装で session.displayName 連携)
+  const [stampMode, setStampMode] = useState<StampMode>("none");
+  const [pdfBusy, setPdfBusy] = useState(false);
+
+  const personHanko: HankoConfig = { name: "山田", type: "round", size: 80 };
+  const companyHanko: HankoConfig = { name: "さくら", type: "square", size: 80 };
+
+  const personHankoUrl = useMemo(
+    () => hankoToDataUrl(generateHankoSvg(personHanko)),
+    [personHanko.name],
+  );
+  const companyHankoUrl = useMemo(
+    () => hankoToDataUrl(generateHankoSvg(companyHanko)),
+    [companyHanko.name],
+  );
+
   const selectedProject = useMemo(
     () => projects.find((p) => p.id === projectId) ?? firstProject,
     [projects, projectId, firstProject],
@@ -220,6 +246,42 @@ export function InvoiceBuilderClient({ projects }: { projects: ProjectRow[] }) {
 
   const removePayment = (id: string) =>
     setPayments((prev) => prev.filter((p) => p.id !== id));
+
+  // PDF 出力(請求書)
+  const handlePdfDownload = async () => {
+    if (pdfBusy) return;
+    setPdfBusy(true);
+    try {
+      await downloadBillingPdf({
+        docType: "invoice",
+        docNo: invoiceNo,
+        title,
+        customerName,
+        issueDate,
+        expiryOrDueDate: dueDate,
+        items: items.map((it) => ({
+          id: it.id,
+          category: it.category,
+          description: it.description,
+          quantity: it.quantity,
+          unit: it.unit,
+          unitPrice: it.unitPrice,
+        })),
+        subtotal,
+        tax,
+        taxRate: TAX_RATE,
+        grandTotal,
+        stampMode,
+        personHanko,
+        companyHanko,
+      });
+    } catch (err) {
+      console.error("PDF 出力に失敗しました", err);
+      alert("PDF 出力に失敗しました。コンソールをご確認ください。");
+    } finally {
+      setPdfBusy(false);
+    }
+  };
 
   const meta = STATUS_META[inferredStatus];
   const StatusIcon = meta.icon;
@@ -599,6 +661,16 @@ export function InvoiceBuilderClient({ projects }: { projects: ProjectRow[] }) {
 
         {/* === 右 panel === */}
         <aside className="col-span-5 flex flex-col gap-3">
+          {/* 押印モード */}
+          <StampModeSelector
+            mode={stampMode}
+            onChange={setStampMode}
+            personHankoUrl={personHankoUrl}
+            companyHankoUrl={companyHankoUrl}
+            personName={personHanko.name}
+            companyName={companyHanko.name}
+          />
+
           {/* プレビュー */}
           <CardSection title="請求書プレビュー" icon={Eye} visible sticky={false}>
             <InvoicePreview
@@ -611,6 +683,9 @@ export function InvoiceBuilderClient({ projects }: { projects: ProjectRow[] }) {
               subtotal={subtotal}
               tax={tax}
               grandTotal={grandTotal}
+              stampMode={stampMode}
+              personHankoUrl={personHankoUrl}
+              companyHankoUrl={companyHankoUrl}
             />
           </CardSection>
 
@@ -651,10 +726,17 @@ export function InvoiceBuilderClient({ projects }: { projects: ProjectRow[] }) {
           </button>
           <button
             type="button"
-            className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+            onClick={handlePdfDownload}
+            disabled={pdfBusy}
+            aria-label="請求書を PDF で出力"
+            className="inline-flex items-center gap-1 rounded-md border border-blue-500 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <Download className="h-3.5 w-3.5" />
-            PDF 出力
+            {pdfBusy ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Download className="h-3.5 w-3.5" />
+            )}
+            {pdfBusy ? "生成中..." : "PDF 出力"}
           </button>
           <button
             type="button"
@@ -726,6 +808,9 @@ function InvoicePreview({
   subtotal,
   tax,
   grandTotal,
+  stampMode,
+  personHankoUrl,
+  companyHankoUrl,
 }: {
   invoiceNo: string;
   customerName: string;
@@ -736,6 +821,9 @@ function InvoicePreview({
   subtotal: number;
   tax: number;
   grandTotal: number;
+  stampMode: StampMode;
+  personHankoUrl: string;
+  companyHankoUrl: string;
 }) {
   return (
     <div className="rounded-md border border-slate-200 bg-white p-4 text-[11px] text-slate-700 shadow-sm">
@@ -749,12 +837,17 @@ function InvoicePreview({
           <div className="font-semibold text-slate-800">宛先</div>
           <div className="mt-0.5 text-slate-700">{customerName} 御中</div>
         </div>
-        <div className="text-right">
+        <div className="relative text-right">
           <div className="font-semibold text-slate-800">さくら株式会社</div>
           <div className="mt-0.5 text-slate-500">宮城県仙台市青葉区〇〇〇〇</div>
           <div className="text-slate-500">TEL: 022-XXX-XXXX</div>
           <div className="mt-0.5 text-slate-500">発行日: {issueDate}</div>
           <div className="text-slate-500">支払期日: {dueDate}</div>
+          <HankoOverlay
+            stampMode={stampMode}
+            personHankoUrl={personHankoUrl}
+            companyHankoUrl={companyHankoUrl}
+          />
         </div>
       </div>
 
@@ -1077,4 +1170,135 @@ function generateMockItems(project: ProjectRow | undefined): InvoiceItem[] {
         ? Math.floor(unitPrice * 0.6)
         : unitPrice,
   }));
+}
+
+/* ============================================================
+   押印モード切替 + 印影プレビュー(見積書と同型 / 共通化候補)
+   ============================================================ */
+
+function StampModeSelector({
+  mode,
+  onChange,
+  personHankoUrl,
+  companyHankoUrl,
+  personName,
+  companyName,
+}: {
+  mode: StampMode;
+  onChange: (m: StampMode) => void;
+  personHankoUrl: string;
+  companyHankoUrl: string;
+  personName: string;
+  companyName: string;
+}) {
+  return (
+    <section className="rounded-lg border border-slate-200 bg-white p-3">
+      <div className="mb-2 flex items-center justify-between border-b border-slate-100 pb-2">
+        <h2 className="flex items-center gap-1.5 text-sm font-semibold text-slate-800">
+          <Stamp className="h-3.5 w-3.5 text-rose-600" />
+          押印モード
+        </h2>
+        <span className="text-[10px] text-slate-500">PDF 出力時に反映</span>
+      </div>
+
+      <div role="radiogroup" aria-label="押印モード" className="grid grid-cols-2 gap-1.5">
+        {(Object.keys(STAMP_MODE_META) as StampMode[]).map((m) => {
+          const meta = STAMP_MODE_META[m];
+          const active = mode === m;
+          return (
+            <button
+              key={m}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              onClick={() => onChange(m)}
+              className={`flex flex-col items-start gap-0.5 rounded-md border px-2 py-1.5 text-left transition-colors ${
+                active
+                  ? "border-rose-500 bg-rose-50 text-rose-900"
+                  : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+              }`}
+            >
+              <span className="text-[11px] font-semibold">{meta.label}</span>
+              <span className="text-[9px] leading-tight text-slate-500">{meta.description}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        <HankoPreview label="担当者印(丸印)" name={personName} url={personHankoUrl} active={mode === "person" || mode === "both"} />
+        <HankoPreview label="会社印(角印)" name={companyName} url={companyHankoUrl} active={mode === "company" || mode === "both"} />
+      </div>
+    </section>
+  );
+}
+
+function HankoPreview({
+  label,
+  name,
+  url,
+  active,
+}: {
+  label: string;
+  name: string;
+  url: string;
+  active: boolean;
+}) {
+  return (
+    <div
+      className={`flex items-center gap-2 rounded-md border p-2 transition-opacity ${
+        active ? "border-rose-200 bg-rose-50/40" : "border-slate-200 bg-slate-50 opacity-50"
+      }`}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={url} alt={`${name} 印影`} className="h-12 w-12 flex-shrink-0" />
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-[10px] font-semibold text-slate-700">{label}</div>
+        <div className="truncate text-[9px] text-slate-500">{name}</div>
+        {active && (
+          <div className="mt-0.5 inline-flex items-center gap-0.5 rounded-full bg-rose-100 px-1 py-0 text-[9px] font-medium text-rose-700">
+            <CheckCircle2 className="h-2.5 w-2.5" />
+            押印
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function HankoOverlay({
+  stampMode,
+  personHankoUrl,
+  companyHankoUrl,
+}: {
+  stampMode: StampMode;
+  personHankoUrl: string;
+  companyHankoUrl: string;
+}) {
+  if (stampMode === "none") return null;
+  return (
+    <div
+      className="pointer-events-none absolute -top-2 right-2 flex items-center gap-1"
+      aria-hidden
+    >
+      {(stampMode === "company" || stampMode === "both") && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={companyHankoUrl}
+          alt=""
+          className="h-12 w-12"
+          style={{ transform: "rotate(-6deg)" }}
+        />
+      )}
+      {(stampMode === "person" || stampMode === "both") && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={personHankoUrl}
+          alt=""
+          className="h-9 w-9"
+          style={{ transform: "rotate(4deg)" }}
+        />
+      )}
+    </div>
+  );
 }

@@ -19,9 +19,19 @@ import {
   TrendingUp,
   XCircle,
   DollarSign,
+  Stamp,
+  Loader2,
 } from "lucide-react";
 import { MetricCard, CardSection, PageHeader } from "@/components/ui";
 import type { ProjectRow } from "../../projects/_data/mock-projects";
+import {
+  generateHankoSvg,
+  hankoToDataUrl,
+  type StampMode,
+  STAMP_MODE_META,
+  type HankoConfig,
+} from "@/lib/pdf/hanko";
+import { downloadBillingPdf } from "@/lib/pdf/downloadBillingPdf";
 
 /* ============================================================
    定数 / 型
@@ -74,6 +84,68 @@ export function EstimateBuilderClient({ projects }: { projects: ProjectRow[] }) 
   const [title, setTitle] = useState(
     firstProject ? `${firstProject.name} 見積書` : "御見積書",
   );
+
+  // 押印モード + 印鑑設定
+  const [stampMode, setStampMode] = useState<StampMode>("none");
+  const [pdfBusy, setPdfBusy] = useState(false);
+
+  const personHanko: HankoConfig = {
+    name: contactPerson.split(" ")[0] || "担当",
+    type: "round",
+    size: 80,
+  };
+  const companyHanko: HankoConfig = {
+    name: "さくら",
+    type: "square",
+    size: 80,
+  };
+
+  // プレビュー用 SVG data URL
+  const personHankoUrl = useMemo(
+    () => hankoToDataUrl(generateHankoSvg(personHanko)),
+    [personHanko.name],
+  );
+  const companyHankoUrl = useMemo(
+    () => hankoToDataUrl(generateHankoSvg(companyHanko)),
+    [companyHanko.name],
+  );
+
+  // PDF 出力
+  const handlePdfDownload = async () => {
+    if (pdfBusy) return;
+    setPdfBusy(true);
+    try {
+      await downloadBillingPdf({
+        docType: "estimate",
+        docNo: `EST-2026-${String(Date.now()).slice(-5)}`,
+        title,
+        customerName,
+        contactPerson,
+        issueDate,
+        expiryOrDueDate: expiryDate,
+        items: items.map((it) => ({
+          id: it.id,
+          category: it.category,
+          description: it.description,
+          quantity: it.quantity,
+          unit: it.unit,
+          unitPrice: it.unitPrice,
+        })),
+        subtotal,
+        tax,
+        taxRate: TAX_RATE,
+        grandTotal,
+        stampMode,
+        personHanko,
+        companyHanko,
+      });
+    } catch (err) {
+      console.error("PDF 出力に失敗しました", err);
+      alert("PDF 出力に失敗しました。コンソールをご確認ください。");
+    } finally {
+      setPdfBusy(false);
+    }
+  };
 
   // 選択中の案件
   const selectedProject = useMemo(
@@ -442,8 +514,19 @@ export function EstimateBuilderClient({ projects }: { projects: ProjectRow[] }) 
           )}
         </section>
 
-        {/* === 右 panel: プレビュー === */}
-        <aside className="col-span-5">
+        {/* === 右 panel: プレビュー + 押印モード === */}
+        <aside className="col-span-5 flex flex-col gap-3">
+          {/* 押印モード設定 */}
+          <StampModeSelector
+            mode={stampMode}
+            onChange={setStampMode}
+            personHankoUrl={personHankoUrl}
+            companyHankoUrl={companyHankoUrl}
+            personName={personHanko.name}
+            companyName={companyHanko.name}
+          />
+
+          {/* プレビュー */}
           <CardSection title="御見積書プレビュー" icon={Eye} visible sticky>
             <EstimatePreview
               customerName={customerName}
@@ -455,6 +538,9 @@ export function EstimateBuilderClient({ projects }: { projects: ProjectRow[] }) 
               tax={tax}
               grandTotal={grandTotal}
               contactPerson={contactPerson}
+              stampMode={stampMode}
+              personHankoUrl={personHankoUrl}
+              companyHankoUrl={companyHankoUrl}
             />
           </CardSection>
         </aside>
@@ -478,10 +564,17 @@ export function EstimateBuilderClient({ projects }: { projects: ProjectRow[] }) 
           </button>
           <button
             type="button"
-            className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+            onClick={handlePdfDownload}
+            disabled={pdfBusy}
+            aria-label="見積書を PDF で出力"
+            className="inline-flex items-center gap-1 rounded-md border border-blue-500 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <Download className="h-3.5 w-3.5" />
-            PDF 出力
+            {pdfBusy ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Download className="h-3.5 w-3.5" />
+            )}
+            {pdfBusy ? "生成中..." : "PDF 出力"}
           </button>
           <button
             type="button"
@@ -559,6 +652,9 @@ function EstimatePreview({
   tax,
   grandTotal,
   contactPerson,
+  stampMode,
+  personHankoUrl,
+  companyHankoUrl,
 }: {
   customerName: string;
   title: string;
@@ -569,6 +665,9 @@ function EstimatePreview({
   tax: number;
   grandTotal: number;
   contactPerson: string;
+  stampMode: StampMode;
+  personHankoUrl: string;
+  companyHankoUrl: string;
 }) {
   return (
     <div className="rounded-md border border-slate-200 bg-white p-4 text-[11px] text-slate-700 shadow-sm">
@@ -585,12 +684,18 @@ function EstimatePreview({
           <div className="mt-0.5 text-slate-700">{customerName} 御中</div>
           <div className="text-slate-500">担当: {contactPerson} 様</div>
         </div>
-        <div className="text-right">
+        <div className="relative text-right">
           <div className="font-semibold text-slate-800">さくら株式会社</div>
           <div className="mt-0.5 text-slate-500">宮城県仙台市青葉区〇〇〇〇</div>
           <div className="text-slate-500">TEL: 022-XXX-XXXX</div>
           <div className="mt-0.5 text-slate-500">発行日: {issueDate}</div>
           <div className="text-slate-500">有効期限: {expiryDate}</div>
+          {/* 印鑑(押印モード反映) */}
+          <HankoOverlay
+            stampMode={stampMode}
+            personHankoUrl={personHankoUrl}
+            companyHankoUrl={companyHankoUrl}
+          />
         </div>
       </div>
 
@@ -765,4 +870,137 @@ function generateMockItems(project: ProjectRow | undefined): EstimateItem[] {
         ? Math.floor(unitPrice * 0.6)
         : unitPrice,
   }));
+}
+
+/* ============================================================
+   押印モード切替 + 印影プレビュー
+   ============================================================ */
+
+function StampModeSelector({
+  mode,
+  onChange,
+  personHankoUrl,
+  companyHankoUrl,
+  personName,
+  companyName,
+}: {
+  mode: StampMode;
+  onChange: (m: StampMode) => void;
+  personHankoUrl: string;
+  companyHankoUrl: string;
+  personName: string;
+  companyName: string;
+}) {
+  return (
+    <section className="rounded-lg border border-slate-200 bg-white p-3">
+      <div className="mb-2 flex items-center justify-between border-b border-slate-100 pb-2">
+        <h2 className="flex items-center gap-1.5 text-sm font-semibold text-slate-800">
+          <Stamp className="h-3.5 w-3.5 text-rose-600" />
+          押印モード
+        </h2>
+        <span className="text-[10px] text-slate-500">PDF 出力時に反映</span>
+      </div>
+
+      {/* モード選択 */}
+      <div role="radiogroup" aria-label="押印モード" className="grid grid-cols-2 gap-1.5">
+        {(Object.keys(STAMP_MODE_META) as StampMode[]).map((m) => {
+          const meta = STAMP_MODE_META[m];
+          const active = mode === m;
+          return (
+            <button
+              key={m}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              onClick={() => onChange(m)}
+              className={`flex flex-col items-start gap-0.5 rounded-md border px-2 py-1.5 text-left transition-colors ${
+                active
+                  ? "border-rose-500 bg-rose-50 text-rose-900"
+                  : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+              }`}
+            >
+              <span className="text-[11px] font-semibold">{meta.label}</span>
+              <span className="text-[9px] leading-tight text-slate-500">{meta.description}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* 印影プレビュー */}
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        <HankoPreview label="担当者印(丸印)" name={personName} url={personHankoUrl} active={mode === "person" || mode === "both"} />
+        <HankoPreview label="会社印(角印)" name={companyName} url={companyHankoUrl} active={mode === "company" || mode === "both"} />
+      </div>
+    </section>
+  );
+}
+
+function HankoPreview({
+  label,
+  name,
+  url,
+  active,
+}: {
+  label: string;
+  name: string;
+  url: string;
+  active: boolean;
+}) {
+  return (
+    <div
+      className={`flex items-center gap-2 rounded-md border p-2 transition-opacity ${
+        active ? "border-rose-200 bg-rose-50/40" : "border-slate-200 bg-slate-50 opacity-50"
+      }`}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={url} alt={`${name} 印影`} className="h-12 w-12 flex-shrink-0" />
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-[10px] font-semibold text-slate-700">{label}</div>
+        <div className="truncate text-[9px] text-slate-500">{name}</div>
+        {active && (
+          <div className="mt-0.5 inline-flex items-center gap-0.5 rounded-full bg-rose-100 px-1 py-0 text-[9px] font-medium text-rose-700">
+            <CheckCircle2 className="h-2.5 w-2.5" />
+            押印
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function HankoOverlay({
+  stampMode,
+  personHankoUrl,
+  companyHankoUrl,
+}: {
+  stampMode: StampMode;
+  personHankoUrl: string;
+  companyHankoUrl: string;
+}) {
+  if (stampMode === "none") return null;
+  return (
+    <div
+      className="pointer-events-none absolute -top-2 right-2 flex items-center gap-1"
+      aria-hidden
+    >
+      {(stampMode === "company" || stampMode === "both") && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={companyHankoUrl}
+          alt=""
+          className="h-12 w-12"
+          style={{ transform: "rotate(-6deg)" }}
+        />
+      )}
+      {(stampMode === "person" || stampMode === "both") && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={personHankoUrl}
+          alt=""
+          className="h-9 w-9"
+          style={{ transform: "rotate(4deg)" }}
+        />
+      )}
+    </div>
+  );
 }
