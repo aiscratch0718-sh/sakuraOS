@@ -4,6 +4,84 @@
 
 ---
 
+## S27 — PDF 出力 + 印鑑捺印機能(見積書 / 請求書)/ 2026-05-18
+
+### コンテキスト
+S26 工事概況表で Phase 12 + 設計図の核が完成。畠中様より「次は順位通り
+(PDF 出力)。見積書 / 請求書には印鑑捺印機能も必須」とのご指示。
+Phase 13(本実装フェーズ)スタート。
+
+### このセッションで完了
+
+**S27 PDF 出力 + 印鑑捺印**(commit `4e9ccbd`、8 ファイル、+1,638 行):
+
+1. **新規共通ライブラリ群** `src/lib/pdf/`:
+   - `hanko.ts`(204 行):印鑑 SVG 動的生成
+     - 丸印(担当者印):二重円 + 名前(1-4 文字、字数別配置)
+     - 角印(会社印):二重正方形 + 名前(縦書き、最大 8 文字、2 列対応)
+     - 朱肉色 #c8102e(伝統的な赤)
+     - 純粋関数 `generateHankoSvg(config)` + `hankoToDataUrl(svg)`
+     - `StampMode` 型(none / person / company / both)+ STAMP_MODE_META
+   - `fonts.ts`(28 行):Noto Sans JP CDN 経由フォント登録(idempotent)
+   - `BillingPdf.tsx`(620 行):見積書 / 請求書共通 PDF コンポーネント
+     - @react-pdf/renderer 4.5.1 採用(MIT 無料)
+     - HankoComposite で SVG 枠線 + Text レイヤリング(react-pdf v4 で
+       Svg 内 Text 不可のため絶対配置)
+     - 会社印 -6deg 傾き / 担当者印 +4deg 傾き(重ね順序: 会社印が下、
+       担当者印が上)
+   - `downloadBillingPdf.tsx`(40 行):クライアント側 Blob 生成
+     - 動的 import(@react-pdf/renderer は client-only)
+     - ファイル名 <type>_<no>_<date>.pdf 自動生成
+
+2. **見積書 / 請求書画面の接続**:
+   - **押印モード state**(both 画面同じ構造):
+     - `stampMode: StampMode`(初期 "none")
+     - `pdfBusy: boolean`(loading state)
+     - `personHanko / companyHanko: HankoConfig`(useMemo cache の data URL)
+   - **StampModeSelector**(両画面、共通実装):
+     - 4 モード radiogroup(role=radio + aria-checked)
+     - 印影プレビュー 2 件(担当者印 / 会社印、active 時は色多重表現)
+   - **HankoOverlay**:プレビューパネル右上に印影画像、傾き付き
+   - **PDF ボタン active 化**:
+     - handlePdfDownload(async、try/catch/finally)
+     - loading 中は Loader2 アニメーション
+     - aria-label 完備
+
+3. **依存追加**:
+   - `@react-pdf/renderer` 4.5.1(MIT、無料)
+   - 日本語フォント Noto Sans JP(CDN、無料)
+
+### ベストプラクティス遵守
+- ✅ 純粋関数切り出し(generateHankoSvg / hankoToDataUrl)
+- ✅ A11y: role=radiogroup / aria-checked / aria-label / loading state
+- ✅ 色多重表現:押印モード = 色 + テキスト + チェックアイコン
+- ✅ 動的 import で PDF lib 遅延ロード(初期 JS bundle 軽量化)
+- ✅ 既存 mock データから完結、本実装時の Supabase 連携で置換容易
+- ✅ DRY: BillingPdf.tsx で見積書 / 請求書共通実装(docType prop で切替)
+
+### 検証結果
+- TypeScript エラーなし
+- `npm run build` 成功
+  - estimates/new: 7.3 → 9.85 kB(+2.55 kB、PDF lib lazy 込み)
+  - invoices/new: 9.01 → 11.4 kB(+2.39 kB、同上)
+- 初期表示時の bundle 増分は最小限、PDF 生成時のみ heavy lib ロード
+
+### TODO 明記
+- P-PDF-stamp-image: approval_stamps テーブルから実印影画像 (PNG) 取得
+  + アップロード UI(現状は SVG 動的生成のみ)
+- P-PDF-fonts: self-hosted フォントに切替(Vercel Edge での Google Fonts
+  取得遅延を回避)
+- P-PDF-cloudsign: Cloud Sign API 統合(押印 = 電子署名相当)
+
+### 次セッション着手内容
+推奨順位 2 位:**Supabase 連携の段階的移行**(projects → report3 → ...)
+または PWA + GPS 打刻、もしくは PDF 出力の細かな調整(畠中様レビュー後)
+
+### 関連コミット
+- `4e9ccbd` feat(pdf) 見積書 / 請求書 PDF 出力 + 印鑑捺印機能(+1,638 行)
+
+---
+
 ## S26 — 工事概況表(設計図の核)mock-driven 新規作成 / 2026-05-16
 
 ### コンテキスト
