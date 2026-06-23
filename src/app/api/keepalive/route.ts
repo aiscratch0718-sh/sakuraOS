@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
  * Supabase keep-alive endpoint.
  *
  * Why this exists:
- *   Supabase Free プランは 7 日間データベースへのアクセスがないと
+ *   Supabase Free プランは 7 日間 API リクエストがないと
  *   プロジェクトが自動的に INACTIVE(pause)になる。
  *   本エンドポイントを Vercel Cron から週 1 回叩くことで、
  *   開発が一時停止する期間でも自動 pause を回避する。
@@ -16,10 +16,14 @@ export const dynamic = "force-dynamic";
  * Trigger:
  *   `vercel.json` の crons 設定で毎週月曜 09:00 JST(00:00 UTC)に実行。
  *
+ * Why anon key (not service_role):
+ *   pause 防止の目的では「API リクエストが Supabase に届く」だけで十分。
+ *   RLS により未認証(anon)では tenants テーブルから 0 件返ってくるが、
+ *   リクエスト自体は Supabase 側で記録され、pause タイマーがリセットされる。
+ *   Service Role Key を本番に置かないことで最小権限の原則を維持。
+ *
  * Why no auth:
- *   このルートは tenants から id を 1 件 SELECT するだけ(副作用なし)。
- *   返却値は { ok, tenants, elapsedMs } の整数情報のみで、機密データを含まない。
- *   公開しても全体のセキュリティ水準は変わらない、と判断して認証を外した。
+ *   このルートは副作用ゼロ(SELECT のみ)。返却値は整数情報のみで機密データを含まない。
  *
  * Failure mode:
  *   Supabase が一時的に応答しなくても 200 を返し、cron 失敗扱いにせず
@@ -27,9 +31,9 @@ export const dynamic = "force-dynamic";
  */
 export async function GET() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  if (!supabaseUrl || !serviceRoleKey) {
+  if (!supabaseUrl || !anonKey) {
     console.error("[keepalive] Supabase env vars are not configured");
     return NextResponse.json(
       { ok: false, error: "Supabase env not configured" },
@@ -37,7 +41,7 @@ export async function GET() {
     );
   }
 
-  const supabase = createClient(supabaseUrl, serviceRoleKey, {
+  const supabase = createClient(supabaseUrl, anonKey, {
     auth: { persistSession: false, autoRefreshToken: false },
     global: {
       fetch: (input, init) =>
@@ -47,10 +51,10 @@ export async function GET() {
 
   const startedAt = Date.now();
   try {
-    const { data, error } = await supabase
+    // RLS で anon は 0 件返るが、リクエストは Supabase に届くので pause 防止になる
+    const { error } = await supabase
       .from("tenants")
-      .select("id")
-      .limit(1);
+      .select("id", { count: "exact", head: true });
 
     const elapsedMs = Date.now() - startedAt;
 
@@ -62,10 +66,9 @@ export async function GET() {
       );
     }
 
-    console.log("[keepalive] OK", { tenants: data?.length ?? 0, elapsedMs });
+    console.log("[keepalive] OK", { elapsedMs });
     return NextResponse.json({
       ok: true,
-      tenants: data?.length ?? 0,
       elapsedMs,
       timestamp: new Date().toISOString(),
     });
