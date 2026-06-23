@@ -8,12 +8,13 @@
 
 ## 🎯 現在のステータス
 
-- **進行中フェーズ**: 🎯 **Phase 13 進行:PDF 出力 + 印鑑捺印機能(実画像化完了)**
-- **完了タスク**: 55 / 約 138
-- **最終更新**: 2026-05-18
-- **最終セッション ID**: **S28(印鑑画像実画像化 + 会社印デフォルト ON + 担当者印 5 名 chk リスト)**
-- **最新デプロイ**: `6bc6995`(Vercel deploy 中、実画像押印公開予定)
+- **進行中フェーズ**: 🎯 **Phase 13 進行 / Ops 強化:Supabase keep-alive(Vercel Cron)稼働開始**
+- **完了タスク**: 56 / 約 138
+- **最終更新**: 2026-06-23
+- **最終セッション ID**: **S29(Vercel Cron + /api/keepalive で Supabase 自動 pause 防止)**
+- **最新デプロイ**: `e5facda`(本番疎通確認済 `{ok:true, elapsedMs:62}`)
 - **公開 URL**: `https://sakura-os-bice.vercel.app`(Vercel Auth 撤廃済み、外部 share 可)
+- **Cron 稼働状況**: 毎週月曜 09:00 JST に `/api/keepalive` 自動実行(次回 2026-06-29 月 09:00)
 - **進捗保存ルール**(畠中様確定 2026-05-12):
   - **各タスク完了後**:必ず PROGRESS.md / SESSION-LOG.md を更新してコミット
   - **各タスク着手前**:必ず PROGRESS.md / SESSION-LOG.md を読み込む

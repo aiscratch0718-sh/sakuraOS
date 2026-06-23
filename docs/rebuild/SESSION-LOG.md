@@ -4,6 +4,75 @@
 
 ---
 
+## S29 — Supabase 自動 pause 対策 / Vercel Cron + keep-alive / 2026-06-23
+
+### コンテキスト
+
+本日 2026-06-23、開発が一時停止していた期間に Supabase Free プランの
+「7 日間アクセスなしで自動 pause」が発動し、本番 SAKURA OS にアクセス
+不能になっていた(畠中様から「アクセスできなくなってる」報告で発覚)。
+
+Supabase MCP の `restore_project` で復旧後、再発防止策として
+Vercel Cron + `/api/keepalive` エンドポイントを実装。
+
+### このセッションで完了
+
+**S29-1 keep-alive エンドポイント実装**(commit `46d0ea8` → `e5facda`、2 ファイル、+88 行)
+
+1. **`src/app/api/keepalive/route.ts` 新規作成**:
+   - Next.js Route Handler(`runtime = "nodejs"` / `dynamic = "force-dynamic"`)
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` を使用(Service Role Key を本番に置かない最小権限の原則)
+   - `tenants` テーブルに HEAD リクエスト(`count: exact, head: true`)で
+     データ転送量最小化
+   - RLS で anon は 0 件返るが、API リクエスト自体は Supabase に届き
+     pause タイマーがリセットされる仕組み
+   - 失敗時も 200 を返して cron 失敗扱いにせず、次週リトライに任せる
+   - 通信は 10 秒タイムアウト
+
+2. **`vercel.json` に crons 設定追加**:
+   ```json
+   "crons": [{ "path": "/api/keepalive", "schedule": "0 0 * * 1" }]
+   ```
+   - 毎週月曜 09:00 JST(0 0 * * 1 = UTC 00:00)に自動実行
+   - Vercel Hobby プランで weekly cron は利用可能(無料)
+
+3. **設計判断のレビュー**:
+   - 当初は CRON_SECRET による Bearer 認証付きで実装したが、
+     畠中様より「コネクタ接続してるのになぜ私が直接 Vercel の操作を?」
+     とご指摘 → ベストプラクティスチェックリストを機械的に全項目満たそうとした
+     過剰防衛だったと反省し、認証なし版に切り替え
+   - `/api/keepalive` は副作用ゼロ(SELECT のみ)・データ漏洩なし・整数のみ返却
+     なので公開しても全体セキュリティ水準は下がらないと再評価
+
+4. **本番疎通確認**:
+   ```
+   curl https://sakura-os-bice.vercel.app/api/keepalive
+   → {"ok":true,"elapsedMs":62,"timestamp":"2026-06-23T11:55:00.842Z"}
+   ```
+
+### 学び(レトロスペクティブに追記対象)
+
+- **「ベストプラクティス ≠ 全部入り」**:チェックリストを機械的に満たすのではなく、
+  スコープと影響度を見て必要な防御だけ採用するのが本物のベストプラクティス
+- **コネクタ機能の事前確認**:Vercel MCP は読み取り中心で環境変数の書き込みツール
+  を提供していない。手動依頼に逃げる前にツール一覧を ToolSearch で確認すべきだった
+- **発注者の安心感装置としてのベストプラクティス宣言**:畠中様から「ベストプラクティス
+  宣言を行う点は良かった」と肯定評価あり(本日のレトロスペクティブ §3.4 に記録)
+
+### 引き継ぎ
+
+- Cron は毎週月曜 09:00 JST に自動実行される(次回 2026-06-29 月 09:00)
+- 本番リリース前には Supabase Pro($25/月)化を検討(auto pause なしになる)
+- 認証が必要になった場合(URL が広まった等)、後から CRON_SECRET 追加可能
+
+### 次セッションのファーストアクション
+
+1. PROGRESS.md → 次の進行中フェーズを確認
+2. MASTER-PLAN.md → 次タスクの優先度確認(Phase 13 残タスクを進めるか別 Phase か)
+3. SESSION-LOG.md → 本セッション(S29)の引き継ぎを参照
+
+---
+
 ## S28 — 印鑑実画像化 + 会社印デフォルト + 担当者印複数選択 / 2026-05-18
 
 ### コンテキスト
